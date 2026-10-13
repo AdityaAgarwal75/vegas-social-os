@@ -27,12 +27,12 @@ def plan(capabilities):
         required = ["source_read", "supabase_manage", "persistent_volume",
                     "https_route", "secret_write", "process_exec", "plugin_create", "provider_app_manage"]
     blockers = [{"capability": k, "action": "Connect a tool/service providing " + k,
-                 "user_work": "Service authorization only; agents perform technical setup"}
+                 "user_work": "Service authorization only; no terminal commands for connected-agent installs"}
                 for k in required if not c[k]]
     if mode == "managed_cloud" and not c["managed_app_host"]:
         blockers.append({"capability": "managed_app_host",
                          "action": "Connect persistent managed browser app hosting or switch to a VPS",
-                         "user_work": "Authorize deployment; paid resources need explicit approval"})
+                         "user_work": "Authorize deployment only; no terminal commands; paid resources need explicit approval"})
     creative_blockers = [k for k in ("native_images", "native_asset_transfer") if not c[k]]
     integration_blockers = [k for k in ("plugin_create", "provider_app_manage") if not c[k]]
     browser_runtime = ("user-owned VPS with Chrome and SQLite" if mode == "vps"
