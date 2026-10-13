@@ -8,7 +8,7 @@ const python=process.env.VSO_QA_PYTHON||'python';
 (async()=>{
  const ticket=execFileSync(python,['-c',"from vso.store import Store; import sys; s=Store(sys.argv[1]); s.put('account','qa-facebook',{'id':'qa-facebook','provider':'facebook','remote_id':'qa-only','name':'Browser test Page (simulated)','status':'connected'}); print(s.ticket('pair',{}))",root],{encoding:'utf8'}).trim();
  const browser=await chromium.launch({headless:true, ...(process.env.VSO_QA_CHROME?{executablePath:process.env.VSO_QA_CHROME,chromiumSandbox:true}:{})});
- const page=await browser.newPage({viewport:{width:1440,height:960}});
+ const page=await browser.newPage({viewport:{width:1440,height:960},reducedMotion:'reduce'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(base+'/pair?ticket='+ticket);await page.waitForSelector('#setup-steps .step',{state:'attached'});
  await page.locator('nav a[href="#setup"]').click();

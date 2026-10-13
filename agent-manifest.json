@@ -2,7 +2,7 @@
   "name": "vegas-social-os",
   "version": "0.4.0",
   "entrypoint": "BOOTSTRAP.md",
-  "agent_setup_script": "scripts/agent_bootstrap.py",
+  "agent_setup_script": "scripts/bootstrap-ubuntu.sh",
   "runtime": {
     "recommended": "independent-vps",
     "recommended_installer": "scripts/bootstrap-ubuntu.sh",
@@ -105,5 +105,6 @@
     "social_oauth_apps_requires_registration": true,
     "flow_generation_live_verified": false,
     "publishing_live_verified": false
-  }
+  },
+  "optional_managed_setup_script": "scripts/agent_bootstrap.py"
 }
