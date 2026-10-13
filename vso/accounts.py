@@ -20,7 +20,7 @@ class Accounts:
         if provider != "flow":
             app = "google" if provider in ("youtube", "drive") else provider
             if not self.config.public(app)["configured"]:
-                raise ValueError("Configure your " + app + " developer app in Connections first")
+                raise ValueError("Your setup agent must configure the " + app + " connection service in advanced workspace settings once")
         ticket = self.store.ticket("connect", {"provider": provider, "label": label})
         return {"url": self.base + "/connect?ticket=" + ticket, "expires_in": 600,
                 "instructions": "Open this private one-use link in your browser. Never paste passwords into chat."}
@@ -35,7 +35,9 @@ class Accounts:
             self.store.put("account", ident, body)
             return {"flow": body}
         state = self.store.ticket("oauth-state", data)
-        callback = self.base + "/callback/" + provider
+        callback = self.config.callback(provider)
+        if callback != self.base + '/callback/' + provider:
+            state = 'vso_' + provider + '_' + state
         app = self.config.get("google" if provider in ("youtube", "drive") else provider)
         if provider in ("youtube", "drive"):
             scope = "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly" if provider == "youtube" else "https://www.googleapis.com/auth/drive.file"
@@ -56,13 +58,17 @@ class Accounts:
         return {"redirect": "https://www.instagram.com/oauth/authorize?" + urllib.parse.urlencode(params)}
 
     def callback(self, provider, state, code):
+        if state.startswith('vso_'):
+            prefix = 'vso_' + provider + '_'
+            if not state.startswith(prefix): raise ValueError('OAuth provider mismatch')
+            state = state[len(prefix):]
         data = self.store.consume(state, "oauth-state")
         if data["provider"] != provider:
             raise ValueError("OAuth provider mismatch")
         if not code or len(code) > 8192:
             raise ValueError("Authorization failed or cancelled")
         ident = uuid.uuid4().hex
-        callback = self.base + "/callback/" + provider
+        callback = self.config.callback(provider)
         app = self.config.get("google" if provider in ("youtube", "drive") else provider)
         form = {"client_id": app["client_id"],
                 "client_secret": app["client_secret"], "code": code,

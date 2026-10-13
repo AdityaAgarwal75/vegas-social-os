@@ -30,7 +30,7 @@ class HTTPServer(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VegasSocialOS/0.4"
+    server_version = "VegasSocialOS/0.5"
 
     @property
     def engine(self): return self.server.engine
@@ -142,7 +142,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def get(self):
         path, q = self.parse()
-        if path == "/health": return self.send({"ok": True, "version": "0.4.0"})
+        if path == "/health": return self.send({"ok": True, "version": "0.5.0"})
         if path in ("/", "/onboarding", "/dashboard", "/app.js", "/style.css", "/flow-login.js"):
             file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
@@ -193,8 +193,8 @@ class Handler(BaseHTTPRequestHandler):
             import mimetypes
             return self.send(file.read_bytes(), content_type=mimetypes.guess_type(file.name)[0] or "application/octet-stream")
         if path.startswith("/callback/"):
-            a = self.engine.accounts.callback(path.rsplit("/", 1)[1], q.get("state", ""), q.get("code", ""))
-            return self.page("Account connected", "<p>" + html.escape(a["name"]) + ' is connected to this installation.</p><p><a href="/dashboard#accounts">Return to Connections</a></p>')
+            self.engine.accounts.callback(path.rsplit("/", 1)[1], q.get("state", ""), q.get("code", ""))
+            return self.redirect(self.base + '/dashboard#accounts')
         if path in ("/.well-known/oauth-protected-resource", "/.well-known/oauth-protected-resource/mcp"):
             return self.send({"resource": self.base + "/mcp", "authorization_servers": [self.base], "scopes_supported": ["social:manage"]})
         if path == "/.well-known/oauth-authorization-server":
@@ -257,7 +257,11 @@ class Handler(BaseHTTPRequestHandler):
             return self.send({"error": "WebSocket upgrade required"}, 400)
         key = self.headers.get("Sec-WebSocket-Key", "")
         if not re.fullmatch(r"[A-Za-z0-9+/]{22}==", key): raise ValueError("Invalid WebSocket key")
-        port = websocket_port(self.store.root, session["account_id"])
+        a = self.store.get("account", session["account_id"])
+        if a.get("service_alias"):
+            from .flow_service import websocket_port as service_port
+            port = service_port(self.engine, session["account_id"])
+        else: port = websocket_port(self.store.root, session["account_id"])
         upstream = socket.create_connection(("127.0.0.1", port), timeout=5)
         try:
             request = (f"GET / HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"

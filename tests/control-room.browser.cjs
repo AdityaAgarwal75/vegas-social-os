@@ -11,26 +11,29 @@ const python=process.env.VSO_QA_PYTHON||'python';
  const page=await browser.newPage({viewport:{width:1440,height:960},reducedMotion:'reduce'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(base+'/pair?ticket='+ticket);await page.waitForSelector('#setup-steps .step',{state:'attached'});
- await page.locator('nav a[href="#setup"]').click();
+ await page.locator('a.settings-link').click();
  await page.locator('#profile-form [name="name"]').fill('Independent operator');
  await page.locator('#profile-form [name="brand"]').fill('My own studio');
  await page.locator('#profile-form [name="goals"]').fill('Original furniture content for local buyers');
  await page.locator('#profile-form button').click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Profile saved'));
  await page.locator('nav a[href="#accounts"]').click();
+ assert.equal(await page.locator('#accounts input[type="password"]').count(),0);
+ await page.locator('#provider-cards button').filter({hasText:'Connect YouTube'}).click();await page.locator('#connect-dialog').waitFor({state:'visible'});assert((await page.locator('#dialog-content').textContent()).includes('setup agent'));await page.locator('#dialog-close').click();
+ await page.locator('a.settings-link').click();await page.locator('#show-advanced').click();
  await page.locator('details[data-provider="google"] summary').click();
  await page.locator('details[data-provider="google"] [name="client_id"]').fill('qa-client');
  await page.locator('details[data-provider="google"] [name="client_secret"]').fill('qa-private-secret');
  await page.locator('details[data-provider="google"] form button').click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('App settings saved'));
  assert.equal(await page.locator('details[data-provider="google"] [name="client_secret"]').inputValue(),'');
  const snapshot=await page.request.get(base+'/api/state');assert(!(await snapshot.text()).includes('qa-private-secret'));
- await page.locator('nav a[href="#channels"]').click();
+ await page.evaluate(()=>location.hash='channels');
  await page.locator('#channel-form [name="name"]').fill('Furniture stories');await page.locator('#channel-form [name="niche"]').fill('Small apartments');
  await page.locator('#destinations input[value="qa-facebook"]').check();await page.locator('#channel-form button').click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Channel brief saved'));
  await page.locator('nav a[href="#media"]').click();
  const image=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD3sAAAAASUVORK5CYII=','base64');
  await page.locator('#upload-form input').setInputFiles({name:'qa.png',mimeType:'image/png',buffer:image});
  await page.locator('#upload-form button').click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Actual files imported'));
- await page.locator('nav a[href="#composer"]').click();
+ await page.evaluate(()=>location.hash='composer');
  await page.locator('#post-account').selectOption('qa-facebook');await page.locator('#composer-form [name="caption"]').fill('A reviewed test draft. Do not publish.');
  await page.locator('#composer-form [name="visibility"]').selectOption('public');await page.locator('#post-assets input').first().check();
  await page.locator('#composer-form button').click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Release prepared'));
@@ -39,12 +42,12 @@ const python=process.env.VSO_QA_PYTHON||'python';
  await page.locator('nav a[href="#automation"]').click();await page.locator('#schedule-channels input').first().check();await page.locator('#schedule-form [name="hour"]').fill('23');
  await page.locator('#schedule-form button').filter({hasText:'Enable daily briefs'}).click();await page.waitForFunction(()=>document.querySelector('#notice').textContent.includes('Daily briefs enabled'));
  await page.locator('#pause-briefs').click();await page.waitForFunction(()=>document.querySelector('#automation-status').textContent.includes('paused'));
- for(const id of ['home','setup','accounts','channels','productions','media','composer','publishing','automation','research']){
-  await page.locator('nav a[href="#'+id+'"]').click();await page.locator('#'+id).waitFor({state:'visible'});assert.equal(await page.locator('#'+id).isVisible(),true);
+ for(const id of ['home','setup','accounts','flow','channels','productions','media','composer','publishing','automation','research']){
+  await page.evaluate(id=>location.hash=id,id);await page.locator('#'+id).waitFor({state:'visible'});assert.equal(await page.locator('#'+id).isVisible(),true);
  }
- await page.locator('nav a[href="#home"]').click();await page.screenshot({path:'/tmp/vso-desktop-qa.png',fullPage:true});
- for(const width of [360,768,1440]){await page.setViewportSize({width,height:900});await page.locator('nav a[href="#composer"]').click();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Horizontal overflow at '+width);}
- await page.setViewportSize({width:360,height:900});await page.locator('nav a[href="#home"]').click();await page.screenshot({path:'/tmp/vso-mobile-qa.png',fullPage:true});
+ await page.evaluate(()=>location.hash='home');await page.screenshot({path:'/tmp/vso-desktop-qa.png',fullPage:true});
+ for(const width of [360,768,1440]){await page.setViewportSize({width,height:900});for(const id of ['home','accounts','flow','composer','setup']){await page.evaluate(id=>location.hash=id,id);await page.locator('#'+id).waitFor({state:'visible'});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Horizontal overflow at '+width+' on '+id);}}
+ await page.setViewportSize({width:360,height:900});await page.evaluate(()=>location.hash='home');await page.screenshot({path:'/tmp/vso-mobile-qa.png',fullPage:true});
  assert.deepEqual(errors,[]);
- await browser.close();console.log('Browser QA passed: profile, encrypted app settings, brief, asset import, exact draft/cancel, scheduler, 10 routes, and 360/768/1440 layouts. No provider calls or publishing.');
+ await browser.close();console.log('Browser QA passed: profile, encrypted app settings, brief, asset import, exact draft/cancel, scheduler, 11 routes, consent buttons, advanced-only credentials, visible Flow Studio, and 360/768/1440 layouts. No provider calls or publishing.');
 })().catch(e=>{console.error(e);process.exit(1);});

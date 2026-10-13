@@ -51,6 +51,15 @@ def registry(engine):
         from urllib.parse import urlsplit, parse_qs
         account = engine.accounts.authorize(parse_qs(urlsplit(link["url"]).query)["ticket"][0])["flow"]
         return account
+    def flow_services_sync():
+        from .flow_service import sync
+        return sync(engine)
+    def flow_image_request(account_id, prompt, model, aspect_ratio, max_credits, request_id):
+        from .flow_service import image_request
+        return image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, request_id)
+    def flow_image_poll(job_id):
+        from .flow_service import image_poll
+        return image_poll(engine, job_id)
     def connection_setup(): return engine.accounts.config.status()
     def post_prepare(account_id, asset_ids, title, caption, visibility, options, request_id):
         from .publishing import prepare
@@ -94,7 +103,7 @@ def registry(engine):
     methods = {f.__name__: f for f in (account_start, account_list, account_disconnect, channel_list,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
-              flow_account_add, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
+              flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
               automation_status, automation_pause, brief_complete, research_fetch, research_save)}
     for name in ("doctor", "channel_save", "plan_save", "concept_select", "image_tasks", "asset_import", "image_attach",
                  "images_approve", "flow_login", "flow_inspect", "video_request", "video_poll", "video_assemble",
@@ -104,6 +113,9 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    "flow_services_sync": "Discover only administrator-configured local Flow services without copying browser sessions or exposing secrets.",
+    "flow_image_request": "Generate one expressly requested diagnostic/standalone Flow image with exact account/model/credit cap and stable request ID. Not a substitute for native campaign keyframes.",
+    "flow_image_poll": "Retrieve the original existing image job and import its verified downloaded bytes. Never resubmits.",
     "connection_setup": "Read provider setup steps, scopes and exact callback URLs. Never returns secrets.",
     "post_prepare": "Freeze an exact standalone photo/carousel/video/text release and optional cover/audience/scheduled time for review.",
     "post_execute": "Upload the exact approved composer release once. Never retries unknown outcomes.",
