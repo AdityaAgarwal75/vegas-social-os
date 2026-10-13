@@ -1,24 +1,35 @@
 {
   "name": "vegas-social-os",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "entrypoint": "BOOTSTRAP.md",
   "agent_setup_script": "scripts/agent_bootstrap.py",
   "runtime": {
-    "recipe": "deploy/render.yaml",
-    "container_recipe": "deploy/Dockerfile",
-    "requires": [
-      "managed cloud app service",
-      "private persistent cloud volume",
-      "HTTPS origin",
-      "graphical Chromium"
-    ],
+    "recommended": "independent-vps",
+    "recommended_installer": "scripts/bootstrap-ubuntu.sh",
+    "preinstalled_dependencies_installer": "scripts/install-vps.sh",
+    "setup_link": "scripts/new-setup-link.sh",
+    "optional_managed_recipe": "deploy/render.yaml",
+    "cloud_managed_not_required": true,
     "local_pc_required": false,
-    "user_managed_vps_required": false
+    "user_managed_vps_supported": true,
+    "requirements": [
+      "x86_64 Ubuntu/Debian for automatic dependency installer",
+      "persistent server disk",
+      "HTTPS domain with 80/443 accessible",
+      "Chrome/Chromium",
+      "Node 22+",
+      "Python 3.11+",
+      "FFmpeg",
+      "Xvfb/noVNC"
+    ]
   },
   "database": {
-    "provider": "Supabase",
-    "schema": "supabase/agent-state.sql",
-    "mode": "authoritative encrypted installation state"
+    "provider": "SQLite",
+    "mode": "local authoritative private state",
+    "default": true,
+    "path": "/var/lib/vegas-social-os",
+    "optional_managed_provider": "Supabase",
+    "optional_managed_schema": "supabase/agent-state.sql"
   },
   "plugin": {
     "manifest": "plugin.json",
@@ -51,11 +62,10 @@
     "provider_app_manage",
     "host_scheduler",
     "managed_app_host",
-    "drive_write"
+    "drive_write",
+    "vps_manage"
   ],
   "secrets": [
-    "SUPABASE_URL",
-    "SUPABASE_SERVER_KEY",
     "VSO_INSTALLATION_ID",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
@@ -64,12 +74,29 @@
     "META_GRAPH_VERSION",
     "VSO_VAULT_KEY"
   ],
-  "user_commands_required": false,
-  "paid_provisioning": "requires user authorization",
-  "completion": "health + Supabase + persistent browser + plugin connection verified; account consent is separate",
+  "user_commands_required": "only if no connected remote setup agent is available",
+  "paid_provisioning": "no required additional paid SaaS; user's VPS/network/provider credits may cost",
+  "completion": "VPS health + isolated browser + persistent SQLite + account-specific login verified; live Flow generation/publishing is separate",
   "media": {
     "archive": "Google Drive when explicitly authorized",
     "working_storage": "private managed-cloud volume",
     "existing_host_connection": "verify write/upload capabilities; backend uses separate OAuth consent"
+  },
+  "optional_secrets": [
+    "SUPABASE_URL",
+    "SUPABASE_SERVER_KEY",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "INSTAGRAM_CLIENT_ID",
+    "INSTAGRAM_CLIENT_SECRET",
+    "META_GRAPH_VERSION"
+  ],
+  "community": {
+    "installation_scope": "single operator per independent instance",
+    "multi_tenant_saas": false,
+    "maintainer_credentials_included": false,
+    "provider_login_requires_user_consent": true,
+    "social_oauth_apps_requires_registration": true,
+    "flow_generation_live_verified": false
   }
 }
