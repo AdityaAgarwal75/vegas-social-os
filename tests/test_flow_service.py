@@ -69,3 +69,32 @@ class OAuthRoutingTests(unittest.TestCase):
                 result=e.accounts.callback('youtube',q['state'][0],'code')
             self.assertEqual(request.call_args_list[0].kwargs['form']['redirect_uri'],q['redirect_uri'][0]);self.assertEqual(result['remote_id'],'owner-channel')
             self.assertNotIn('private-refresh',json.dumps(result))
+
+class BrowserHandshakeTests(unittest.TestCase):
+    def test_proxy_does_not_invent_unrequested_subprotocol(self):
+        import socket,threading,time,hashlib
+        from vso.server import HTTPServer
+        for offer in ('','binary'):
+            with self.subTest(offer=offer),tempfile.TemporaryDirectory() as root:
+                store=Store(root);engine=Engine(store,'http://127.0.0.1')
+                aid='a'*32;store.put('account',aid,{'id':aid,'provider':'flow','service_alias':'test','label':'Owner'})
+                cookie='private-browser-cookie';store.put('flow-session',store.digest(cookie),{'account_id':aid,'expires':time.time()+60})
+                upstream=socket.socket();upstream.bind(('127.0.0.1',0));upstream.listen();upstream.settimeout(5);observed=[]
+                def backend():
+                    conn,_=upstream.accept()
+                    with conn:
+                        data=b''
+                        while b'\r\n\r\n' not in data:data+=conn.recv(4096)
+                        observed.append(data)
+                        key='dGhlIHNhbXBsZSBub25jZQ==';accept=base64.b64encode(hashlib.sha1((key+'258EAFA5-E914-47DA-95CA-C5AB0DC85B11').encode()).digest()).decode()
+                        protocol='Sec-WebSocket-Protocol: binary\r\n' if b'Sec-WebSocket-Protocol: binary' in data else ''
+                        conn.sendall(('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: '+accept+'\r\n'+protocol+'\r\n').encode())
+                thread=threading.Thread(target=backend);thread.start();server=HTTPServer(('127.0.0.1',0),engine);runner=threading.Thread(target=server.serve_forever,daemon=True);runner.start()
+                try:
+                    with patch('vso.flow_service.websocket_port',return_value=upstream.getsockname()[1]),socket.create_connection(('127.0.0.1',server.server_port),timeout=5) as client:
+                        protocol='Sec-WebSocket-Protocol: '+offer+'\r\n' if offer else ''
+                        client.sendall((f'GET /flow/socket/{aid} HTTP/1.1\r\nHost: 127.0.0.1\r\nCookie: vso_flow={cookie}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\nSec-WebSocket-Version: 13\r\n'+protocol+'\r\n').encode());response=client.recv(4096)
+                        self.assertTrue(response.startswith(b'HTTP/1.1 101'))
+                        self.assertEqual(b'Sec-WebSocket-Protocol' in response,bool(offer))
+                    thread.join(5);self.assertEqual(b'Sec-WebSocket-Protocol' in observed[0],bool(offer))
+                finally:server.shutdown();server.server_close();runner.join(5);upstream.close();thread.join(5)
