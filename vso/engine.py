@@ -19,7 +19,7 @@ class Engine:
         self.accounts = Accounts(store, base)
 
     def doctor(self):
-        return {"version": "0.2.0-alpha", "image_provider": "chatgpt-native-only",
+        return {"version": "0.3.0-alpha", "image_provider": "chatgpt-native-only",
                 "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
                 "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
