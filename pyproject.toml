@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vegas-social-os"
-version = "0.2.0"
+version = "0.3.0"
 description = "Self-hosted social content orchestration for ChatGPT and Codex"
 requires-python = ">=3.11"
 dependencies = ["cryptography==50.0.2"]
