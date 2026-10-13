@@ -13,9 +13,39 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python -m pip install -r requirements.txt
+      - run: python -m pip install -r requirements.txt cfn-lint==1.57.2
       - run: python -m unittest discover -s tests -v
       - run: node --test tests/flow.test.mjs
+      - run: cfn-lint deploy/aws/instance.json
       - run: python -m compileall -q vso scripts
       - run: node --check web/app.js
       - run: bash -n scripts/install-vps.sh scripts/bootstrap-ubuntu.sh scripts/new-setup-link.sh
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r requirements.txt
+      - run: npm install --no-package-lock --no-save playwright@1.63.0
+      - run: npx playwright install --with-deps chromium
+      - name: Start disposable local dashboard
+        run: |
+          VSO_PUBLIC_URL=http://127.0.0.1:8898 VSO_DATA_DIR=/tmp/vso-control-qa python -m vso serve --port 8898 > /tmp/vso-qa-server.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8898/health >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: node tests/control-room.browser.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: control-room-browser-qa
+          path: |
+            /tmp/vso-desktop-qa.png
+            /tmp/vso-mobile-qa.png

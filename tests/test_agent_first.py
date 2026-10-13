@@ -107,6 +107,7 @@ class ScopedFlowLoginTests(unittest.TestCase):
             base=f'http://127.0.0.1:{server.server_port}'
             engine.base=base
             thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+            store.put('account','a'*32,{'id':'a'*32,'provider':'flow','status':'login_required'})
             token=store.ticket('flow-browser',{'account_id':'a'*32})
             opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
             try:

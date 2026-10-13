@@ -1,0 +1,417 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Independent Vegas Social OS Ubuntu x86_64 instance. Review regional costs before creating. No maintainer credentials or social accounts.",
+  "Parameters": {
+    "UbuntuAmi": {
+      "Type": "AWS::EC2::Image::Id",
+      "Description": "Verified Canonical Ubuntu 24.04 amd64 AMI in this region; setup agent resolves it from AWS public SSM parameters."
+    },
+    "SourceCommit": {
+      "Type": "String",
+      "AllowedPattern": "^[a-f0-9]{40}$",
+      "Description": "Reviewed 40-character public repository commit to install; never execute an unpinned branch."
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Default": "t3.large",
+      "AllowedValues": [
+        "t3.medium",
+        "t3.large",
+        "m7i-flex.large"
+      ],
+      "Description": "4 GiB for one active browser, 8 GiB recommended for several saved accounts. Not a concurrency guarantee."
+    },
+    "RootVolumeGiB": {
+      "Type": "Number",
+      "Default": 40,
+      "MinValue": 30,
+      "MaxValue": 200
+    },
+    "CustomDomain": {
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "^$|^([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,63}$",
+      "Description": "Optional domain with DNS A record pointing to the Elastic IP; empty uses free sslip.io hostname."
+    }
+  },
+  "Conditions": {
+    "IsT3": {
+      "Fn::Or": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "InstanceType"
+            },
+            "t3.medium"
+          ]
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "InstanceType"
+            },
+            "t3.large"
+          ]
+        }
+      ]
+    },
+    "HasDomain": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "CustomDomain"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.83.0.0/16",
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true
+      }
+    },
+    "Gateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {}
+    },
+    "GatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "InternetGatewayId": {
+          "Ref": "Gateway"
+        }
+      }
+    },
+    "Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.83.1.0/24",
+        "MapPublicIpOnLaunch": true
+      }
+    },
+    "Routes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "InternetRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "Routes"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "Gateway"
+        }
+      },
+      "DependsOn": "GatewayAttachment"
+    },
+    "SubnetRoutes": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "Subnet"
+        },
+        "RouteTableId": {
+          "Ref": "Routes"
+        }
+      }
+    },
+    "WebSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "HTTPS dashboard and ACME only. No SSH, CDP, browser or database ingress.",
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "InstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+          }
+        ]
+      }
+    },
+    "InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "InstanceRole"
+          }
+        ]
+      }
+    },
+    "PublicAddress": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc"
+      },
+      "DependsOn": "GatewayAttachment"
+    },
+    "Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Ref": "UbuntuAmi"
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "IamInstanceProfile": {
+          "Ref": "InstanceProfile"
+        },
+        "SubnetId": {
+          "Ref": "Subnet"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "WebSecurityGroup"
+          }
+        ],
+        "MetadataOptions": {
+          "HttpTokens": "required",
+          "HttpEndpoint": "enabled",
+          "HttpPutResponseHopLimit": 1
+        },
+        "CreditSpecification": {
+          "Fn::If": [
+            "IsT3",
+            {
+              "CPUCredits": "standard"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "Encrypted": true,
+              "VolumeSize": {
+                "Ref": "RootVolumeGiB"
+              },
+              "VolumeType": "gp3",
+              "DeleteOnTermination": false
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Sub": "#!/bin/bash\nset -Eeuo pipefail\numask 077\nexport DEBIAN_FRONTEND=noninteractive\napt-get update -qq\napt-get install -y -qq git curl\n# No account secrets or setup tickets are written to cloud-init/console logs.\ninstall -d /opt/vso-source\ngit -C /opt/vso-source init -q\ngit -C /opt/vso-source remote add origin https://github.com/AdityaAgarwal75/vegas-social-os.git\ngit -C /opt/vso-source fetch --depth 1 origin ${SourceCommit}\ngit -C /opt/vso-source checkout --detach FETCH_HEAD\nDOMAIN='${CustomDomain}'\nif [ -z \"$DOMAIN\" ]; then\n DOMAIN=\"social.$(printf '%s' '${PublicAddress}' | tr . -).sslip.io\"\nfi\nbash /opt/vso-source/scripts/bootstrap-ubuntu.sh --domain \"$DOMAIN\"\n# Session Manager Agent is included in Canonical AWS images; fail if not present.\nif systemctl list-unit-files amazon-ssm-agent.service --no-legend | grep -q amazon; then\n systemctl enable --now amazon-ssm-agent\nelse\n systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service\nfi\ninstall -d /var/lib/vegas-social-os\nprintf 'ready\\n' > /var/lib/vegas-social-os/bootstrap-complete\nchown vegas-social:vegas-social /var/lib/vegas-social-os/bootstrap-complete\n"
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName}-social-os"
+            }
+          },
+          {
+            "Key": "Application",
+            "Value": "vegas-social-os"
+          }
+        ]
+      },
+      "DependsOn": [
+        "InternetRoute",
+        "SubnetRoutes"
+      ]
+    },
+    "AddressAssociation": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "PublicAddress",
+            "AllocationId"
+          ]
+        },
+        "InstanceId": {
+          "Ref": "Instance"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "InstanceId": {
+      "Value": {
+        "Ref": "Instance"
+      },
+      "Description": "Use this ID for scoped SSM commands and diagnostics."
+    },
+    "PublicIPv4": {
+      "Value": {
+        "Ref": "PublicAddress"
+      },
+      "Description": "Stable allocated Elastic IP; billed even while the instance is off."
+    },
+    "Hostname": {
+      "Value": {
+        "Fn::If": [
+          "HasDomain",
+          {
+            "Ref": "CustomDomain"
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "social.",
+                {
+                  "Fn::Join": [
+                    "-",
+                    {
+                      "Fn::Split": [
+                        ".",
+                        {
+                          "Ref": "PublicAddress"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                ".sslip.io"
+              ]
+            ]
+          }
+        ]
+      },
+      "Description": "Dashboard hostname; custom domains need an A record."
+    },
+    "DashboardURL": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::If": [
+                "HasDomain",
+                {
+                  "Ref": "CustomDomain"
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "social.",
+                      {
+                        "Fn::Join": [
+                          "-",
+                          {
+                            "Fn::Split": [
+                              ".",
+                              {
+                                "Ref": "PublicAddress"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      ".sslip.io"
+                    ]
+                  ]
+                }
+              ]
+            },
+            "/dashboard"
+          ]
+        ]
+      },
+      "Description": "Check HTTPS health before returning a private pairing link."
+    },
+    "MCPEndpoint": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::If": [
+                "HasDomain",
+                {
+                  "Ref": "CustomDomain"
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "social.",
+                      {
+                        "Fn::Join": [
+                          "-",
+                          {
+                            "Fn::Split": [
+                              ".",
+                              {
+                                "Ref": "PublicAddress"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      ".sslip.io"
+                    ]
+                  ]
+                }
+              ]
+            },
+            "/mcp"
+          ]
+        ]
+      },
+      "Description": "Private owner-authenticated host connector endpoint."
+    }
+  }
+}

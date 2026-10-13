@@ -14,7 +14,7 @@ HOSTS = {"oauth2.googleapis.com", "www.googleapis.com", "accounts.google.com",
          "graph.instagram.com", "api.instagram.com", "graph.facebook.com"}
 
 
-def request(url, *, method="GET", token=None, form=None, payload=None, raw=None, headers=None, allowed_hosts=None):
+def request(url, *, method="GET", token=None, form=None, payload=None, raw=None, headers=None, allowed_hosts=None, allow_statuses=()):
     parts = urllib.parse.urlsplit(url)
     if parts.scheme != "https" or parts.hostname not in (allowed_hosts or HOSTS) or parts.username or parts.password:
         raise ValueError("Provider URL is not on the HTTPS allowlist")
@@ -36,6 +36,10 @@ def request(url, *, method="GET", token=None, form=None, payload=None, raw=None,
                 raise ValueError("Provider response exceeds limit")
             return (json.loads(body) if body else {}), dict(r.headers)
     except urllib.error.HTTPError as e:
+        if e.code in allow_statuses:
+            body = e.read(4_000_001)
+            if len(body) > 4_000_000: raise ValueError("Provider response exceeds limit")
+            return (json.loads(body) if body else {}), {**dict(e.headers), ":status": str(e.code)}
         # Never echo response bodies, request URL, access tokens, or client secrets.
         raise ValueError(f"Provider rejected request (HTTP {e.code}); check permissions and account status") from None
     except (urllib.error.URLError, TimeoutError):

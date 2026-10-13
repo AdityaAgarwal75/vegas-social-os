@@ -1,8 +1,8 @@
 {
   "name": "vegas-social-os",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "entrypoint": "BOOTSTRAP.md",
-  "agent_setup_script": "scripts/agent_bootstrap.py",
+  "agent_setup_script": "scripts/bootstrap-ubuntu.sh",
   "runtime": {
     "recommended": "independent-vps",
     "recommended_installer": "scripts/bootstrap-ubuntu.sh",
@@ -13,7 +13,7 @@
     "local_pc_required": false,
     "user_managed_vps_supported": true,
     "requirements": [
-      "x86_64 Ubuntu/Debian for automatic dependency installer",
+      "Ubuntu 24.04 / Debian 12+ x86_64 (Python 3.11+)",
       "persistent server disk",
       "HTTPS domain with 80/443 accessible",
       "Chrome/Chromium",
@@ -21,7 +21,9 @@
       "Python 3.11+",
       "FFmpeg",
       "Xvfb/noVNC"
-    ]
+    ],
+    "aws_recipe": "deploy/aws/instance.json",
+    "aws_agent_guide": "docs/AWS-ONBOARDING.md"
   },
   "database": {
     "provider": "SQLite",
@@ -44,7 +46,8 @@
   "user_interface": {
     "onboarding": "/onboarding",
     "dashboard": "/dashboard",
-    "account_signin": "official OAuth or private isolated Flow browser"
+    "account_signin": "official OAuth or private isolated Flow browser",
+    "provider_configuration": "private dashboard /api/config, encrypted server-side"
   },
   "capabilities": [
     "source_read",
@@ -72,14 +75,17 @@
     "INSTAGRAM_CLIENT_ID",
     "INSTAGRAM_CLIENT_SECRET",
     "META_GRAPH_VERSION",
-    "VSO_VAULT_KEY"
+    "VSO_VAULT_KEY",
+    "FACEBOOK_CLIENT_ID",
+    "FACEBOOK_CLIENT_SECRET",
+    "FACEBOOK_CONFIG_ID (optional)"
   ],
   "user_commands_required": "only if no connected remote setup agent is available",
   "paid_provisioning": "no required additional paid SaaS; user's VPS/network/provider credits may cost",
   "completion": "VPS health + isolated browser + persistent SQLite + account-specific login verified; live Flow generation/publishing is separate",
   "media": {
     "archive": "Google Drive when explicitly authorized",
-    "working_storage": "private managed-cloud volume",
+    "working_storage": "private VPS /var/lib/vegas-social-os/media",
     "existing_host_connection": "verify write/upload capabilities; backend uses separate OAuth consent"
   },
   "optional_secrets": [
@@ -97,6 +103,8 @@
     "maintainer_credentials_included": false,
     "provider_login_requires_user_consent": true,
     "social_oauth_apps_requires_registration": true,
-    "flow_generation_live_verified": false
-  }
+    "flow_generation_live_verified": false,
+    "publishing_live_verified": false
+  },
+  "optional_managed_setup_script": "scripts/agent_bootstrap.py"
 }

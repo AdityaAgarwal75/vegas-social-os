@@ -16,7 +16,7 @@ def status(engine):
     doctor = engine.doctor()
     return {"profile": profile, "profile_complete": bool(profile),
             "account_count": len(accounts), "channels": len(engine.store.all("channel")),
-            "youtube_ready": doctor["youtube_oauth_configured"], "instagram_ready": doctor["instagram_oauth_configured"],
+            "youtube_ready": doctor["youtube_oauth_configured"], "instagram_ready": doctor["instagram_oauth_configured"], "facebook_ready": doctor["facebook_oauth_configured"],
             "flow_browser_mode": "remote" if __import__('os').getenv('VSO_REMOTE_BROWSER') == '1' else "local",
             "image_work": "ChatGPT only; never a dashboard image generator",
             "agent_message": "The setup agent configures infrastructure and provider apps. You sign in and approve content."}
