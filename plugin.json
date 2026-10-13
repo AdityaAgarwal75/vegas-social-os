@@ -1,15 +1,21 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "vegas-social-os",
-  "version": "0.2.0",
-  "description": "Agent-configured social content system: guided dashboard onboarding, native ChatGPT images, isolated Google Flow browser sessions and reviewed publishing. Alpha; live deployment verification required.",
-  "author": {"name": "Vegas Social OS contributors"},
-  "extensions": {"com.openai": {"interface": {
-    "displayName": "Vegas Social OS",
-    "shortDescription": "Your social content pipeline",
-    "longDescription": "Connect your own accounts, prepare two concepts per channel, create keyframes with ChatGPT native images, review Flow videos and approve exact publishing destinations.",
-    "developerName": "Vegas Social OS contributors",
-    "category": "Productivity",
-    "defaultPrompt": "Read the Vegas Social OS guide, check my setup and prepare two original concepts for each configured channel."
-  }}}
+  "version": "0.3.0",
+  "description": "Independent self-hosted VPS social content pipeline with optional ChatGPT MCP connection, isolated Google Flow browser login and reviewed publishing. Alpha; real Google generation pending.",
+  "author": {
+    "name": "Vegas Social OS contributors"
+  },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Vegas Social OS",
+        "shortDescription": "Your social content pipeline",
+        "longDescription": "Connect your own accounts, prepare two concepts per channel, create keyframes with ChatGPT native images, review Flow videos and approve exact publishing destinations.",
+        "developerName": "Vegas Social OS contributors",
+        "category": "Productivity",
+        "defaultPrompt": "Read the Vegas Social OS guide, check my setup and prepare two original concepts for each configured channel."
+      }
+    }
+  }
 }
