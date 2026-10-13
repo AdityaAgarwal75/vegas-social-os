@@ -18,3 +18,4 @@ jobs:
       - run: node --test tests/flow.test.mjs
       - run: python -m compileall -q vso scripts
       - run: node --check web/app.js
+      - run: bash -n scripts/install-vps.sh scripts/bootstrap-ubuntu.sh scripts/new-setup-link.sh
