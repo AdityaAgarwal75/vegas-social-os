@@ -1,6 +1,7 @@
 """Installation-owned provider apps. Secrets are encrypted and never returned."""
 import os
 import re
+import urllib.parse
 
 PROVIDERS = {
     "google": {"prefix": "GOOGLE", "callbacks": ["youtube", "drive"],
@@ -60,6 +61,15 @@ class Config:
         if not re.fullmatch(r"v\d+\.\d+", value): raise ValueError("Configure the supported Meta Graph version in Connections")
         return value
 
+    def callback(self, provider):
+        """Operator-only routing to an already registered, installation-owned URI."""
+        value = os.getenv('VSO_' + provider.upper() + '_REDIRECT_URI', '')
+        if not value: return self.base + '/callback/' + provider
+        parts = urllib.parse.urlsplit(value)
+        if parts.scheme != 'https' or not parts.hostname or parts.username or parts.password or parts.query or parts.fragment:
+            raise ValueError('Operator redirect URI must be an exact HTTPS callback without query or fragment')
+        return value
+
     def public(self, provider):
         values = self.get(provider)
         spec = PROVIDERS[provider]
@@ -67,7 +77,7 @@ class Config:
                      (provider == "google" or re.fullmatch(r"v\d+\.\d+", values["graph_version"])))
         return {"provider": provider, "configured": ready, "client_id": values["client_id"],
                 "secret_present": bool(values["client_secret"]), "graph_version": values["graph_version"],
-                "config_id": values["config_id"], "callbacks": [self.base + "/callback/" + p for p in spec["callbacks"]],
+                "config_id": values["config_id"], "callbacks": [self.callback(p) for p in spec["callbacks"]],
                 "privacy_url": self.base + "/privacy", "deletion_url": self.base + "/data-deletion",
                 **{k: spec[k] for k in ("console", "permissions", "steps")}}
 

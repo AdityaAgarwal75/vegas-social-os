@@ -25,3 +25,11 @@ Primary technical references:
 Google currently documents 50 daily Flow credits and non-subscriber peak-hour restrictions. This is dynamic account policy, not a product guarantee. The worker does not assume available balance from that allowance. Browser-session automation is unofficial; no CAPTCHA, security, safety, regional or quota bypass is included.
 
 Meta's current documentation was partially inaccessible without login. Instagram adapter behavior is an implementation candidate awaiting a live test, not claimed verified compatibility.
+
+## REA assessment — 0.5
+
+[REA](https://github.com/morluto/rea) 6.4.0 (MIT; inspected main commit `7e3a19863835215491b55fba7127a78bad6a7709`) was installed separately on the founder's VPS as a development tool. Static analysis ran as an unprivileged research user against source-only snapshots, without account tokens or browser profiles. No agent configuration, native binary engine or paid provider was installed.
+
+Two actual runs reconstructed the existing local Flow source (82 graph nodes / 99 edges) and a representative public Flow browser-MCP source (93 / 101). These are bounded static inventories: expanded relationships and semantic coverage were incomplete at the chosen resource limits. They do not prove runtime behavior or expose cloud-side source. The public reference had no LICENSE file or package license declaration at inspection; no source was copied or vendored. REA itself is not a production dependency.
+
+The useful design conclusion is to keep browser ownership, durable queues and exact-download correlation separate. Our original adapter uses the owner-authorized local service protocol; it does not extract cookies, replay private authentication traffic, bypass verification, or adopt stealth/evasion features from public projects. Instagram/Facebook/YouTube use official OAuth/API paths. REA cannot replace provider registration, consent, permissions or App Review. Examining every automation repository is an unbounded goal; source claims require selected, reproducible checks and a controlled live trial.

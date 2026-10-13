@@ -154,6 +154,11 @@ class Engine:
         account = self.store.get("account", account_id)
         if account["provider"] != "flow":
             raise ValueError("Select a Flow account")
+        if account.get("service_alias"):
+            from . import flow_service
+            if operation == "login": return flow_service.login(self, account_id)
+            if operation == "inspect": return flow_service.inspect(self, account_id)
+            raise ValueError("Use local-service image controls; video bridge support requires a reviewed implementation")
         worker = Path(__file__).resolve().parent.parent / "worker" / "flow.mjs"
         command = ["node", str(worker)]
         payload = {"operation": operation, "account_id": account_id, "data_dir": str(self.store.root), **kwargs}
@@ -177,7 +182,7 @@ class Engine:
     def flow_inspect(self, account_id):
         result = self.flow("inspect", account_id)
         a = self.store.get("account", account_id)
-        a["status"] = "workspace_ready" if result.get("workspace_ready") else "login_required"
+        a["status"] = "workspace_ready" if result.get("workspace_ready") else "verification_required" if result.get("blocked") else "login_required"
         a["credits"] = result.get("credits")
         self.store.put("account", account_id, a)
         return result
@@ -375,7 +380,7 @@ class Engine:
         return {**p, "provider_status": info.get("status_code")}
 
     def snapshot(self):
-        result = {kind: self.store.all(kind) for kind in ("channel", "account", "plan", "asset", "job", "publication")}
+        result = {kind: self.store.all(kind) for kind in ("channel", "account", "plan", "asset", "job", "publication", "image-job")}
         result["job"] = [self.public_job(j) for j in result["job"]]
         return result
 
