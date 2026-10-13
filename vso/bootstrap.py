@@ -9,7 +9,7 @@ CAPABILITIES = (
     "source_read", "repository_write", "supabase_manage", "persistent_runtime",
     "persistent_volume", "https_route", "secret_write", "process_exec",
     "plugin_create", "plugin_install", "native_images", "native_asset_transfer",
-    "provider_app_manage", "host_scheduler", "managed_app_host", "drive_write",
+    "provider_app_manage", "host_scheduler", "managed_app_host", "drive_write", "vps_manage",
 )
 
 
@@ -19,30 +19,45 @@ def plan(capabilities):
     if any(type(v) is not bool for v in capabilities.values()):
         raise ValueError("Capability flags must be verified booleans")
     c = {k: capabilities.get(k, False) for k in CAPABILITIES}
-    required = ["source_read", "supabase_manage", "persistent_volume",
-                "https_route", "secret_write", "process_exec", "plugin_create", "provider_app_manage"]
+    mode = "vps" if c["vps_manage"] else "managed_cloud"
+    if mode == "vps":
+        # One owner/installation; an existing VPS runs browser + state locally.
+        required = ["source_read", "vps_manage", "persistent_volume", "https_route", "process_exec"]
+    else:
+        required = ["source_read", "supabase_manage", "persistent_volume",
+                    "https_route", "secret_write", "process_exec", "plugin_create", "provider_app_manage"]
     blockers = [{"capability": k, "action": "Connect a tool/service providing " + k,
-                 "user_work": "Service authorization only; never terminal commands"} for k in required if not c[k]]
-    if not c["managed_app_host"]:
-        blockers.append({"capability": "managed_app_host", "action": "Connect a managed cloud app-hosting service; no local PC or user-managed VPS",
-                         "user_work": "Service authorization only; never terminal commands"})
+                 "user_work": "Service authorization only; agents perform technical setup"}
+                for k in required if not c[k]]
+    if mode == "managed_cloud" and not c["managed_app_host"]:
+        blockers.append({"capability": "managed_app_host",
+                         "action": "Connect persistent managed browser app hosting or switch to a VPS",
+                         "user_work": "Authorize deployment; paid resources need explicit approval"})
     creative_blockers = [k for k in ("native_images", "native_asset_transfer") if not c[k]]
+    integration_blockers = [k for k in ("plugin_create", "provider_app_manage") if not c[k]]
+    browser_runtime = ("user-owned VPS with Chrome and SQLite" if mode == "vps"
+                       else "managed cloud app with private volume and Supabase")
     return {
         "status": "ready_for_agent_setup" if not blockers else "connections_needed",
+        "mode": mode,
+        "integration_stage_blockers": integration_blockers,
         "capabilities": c,
-        "architecture": {"source": "GitHub", "state": "Supabase", "browser_runtime": "managed cloud application with private persistent volume",
+        "architecture": {"source": "GitHub", "state": "SQLite" if mode == "vps" else "Supabase",
+                         "browser_runtime": browser_runtime,
                          "images": "ChatGPT native only", "media_archive": "Google Drive when authorized",
-                         "interaction": "ChatGPT + onboarding dashboard", "local_pc_required": False, "user_managed_vps_required": False},
+                         "interaction": "ChatGPT + onboarding dashboard",
+                         "local_pc_required": False, "user_managed_vps_required": mode == "vps"},
         "blockers": blockers,
         "creative_stage_blockers": creative_blockers,
         "agent_actions": [
             "Read BOOTSTRAP.md and discover actual tool schemas",
             "Use an isolated checkout; create a private source mirror only if repository creation is available and useful",
-            "Select the authorized Supabase organization/project; create a dedicated project if authorized",
-            "Apply the supplied state schema and verify service-only RPC grants",
-            "Provision managed cloud app service, private volume, HTTPS route and isolated remote browsers; never user PC/VPS",
+            "Prefer scripts/install-vps.sh or scripts/bootstrap-ubuntu.sh when VPS access exists",
+            "Select a dedicated Supabase project ONLY for optional managed-cloud mode",
+            "For VPS mode, verify SQLite private storage and no cloud keys; optional cloud mode verifies its RPC",
+            "Provision an isolated VPS service or managed cloud app with HTTPS and private remote browser",
             "Inject project keys directly into the runtime secret store; never into chat or GitHub",
-            "Run agent_bootstrap.py on the persistent runtime and verify health, schema and browser dependencies",
+            "Run VPS installer for VPS mode; use agent_bootstrap.py only for managed-cloud mode",
             "Package one remote master plugin; create it with the host's plugin tool",
             "Present onboarding URL and plugin install/consent action",
             "Verify a harmless call after plugin connection; record verification receipt",
@@ -51,7 +66,7 @@ def plan(capabilities):
                          "Open onboarding link and enter profile/channel details", "Sign into accounts and finish provider consent/2FA",
                          "Accept plugin installation when the host requires it", "Approve concepts, images and releases"],
         "limits": {
-            "github_supabase_only": "Insufficient for persistent Chrome sessions",
+            "github_supabase_only": "Insufficient for persistent Chrome sessions; an existing VPS works",
             "plugin_install": "Host consent may remain even when plugin creation is available",
             "drive": "Existing ChatGPT Drive access must be verified for writes; it does not transfer backend tokens",
             "provider_apps": "Agent manages registration when tools permit; review/consent cannot be bypassed",
