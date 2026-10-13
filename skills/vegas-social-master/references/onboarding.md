@@ -8,6 +8,6 @@ Instagram: configure **Instagram API with Instagram Login**, professional accoun
 
 Flow: request/open the account link; the hosted runtime opens an isolated browser through the dashboard. Enter Google credentials/2FA directly there and open one Flow project. Each identity gets its own Chrome profile/display and a scoped short-lived browser session. The included noVNC/CDP runtime must be provisioned/tested by the setup agent. A temporary URL cannot turn Flow browser login into official OAuth access.
 
-MCP: the agent provisions HTTPS, runs the bootstrap script, creates the remote plugin and returns onboarding/installation UI. The user opens the link and accepts host/provider consent. The server implements registration, consent, PKCE and refresh; real ChatGPT connection still requires a live trial. Developer CLI commands are not end-user onboarding.
+MCP: a connected agent deploys an independent VPS using the VPS-first installer and HTTPS, then optionally packages the remote plugin pointed to that instance. When no connected agent exists, the operator may run the VPS bootstrap. The user opens the private link and accepts host/provider consent. The server implements registration, consent, PKCE and refresh; real ChatGPT connection still requires a live trial. Developer CLI commands are not end-user onboarding.
 
 Start a trial with one harmless account read, one explicitly capped generation, then one private YouTube upload. Never mass-test accounts or publish publicly just to check connectivity.
