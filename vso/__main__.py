@@ -51,9 +51,13 @@ def main():
     else:
         server = HTTPServer((args.host, args.port), engine)
         print("Vegas Social OS listening at " + base + "; data stays outside the repository", file=sys.stderr)
+        from .automation import start
+        stop = start(engine)
         try: server.serve_forever()
         except KeyboardInterrupt: pass
-        finally: server.server_close()
+        finally:
+            stop.set()
+            server.server_close()
 
 
 if __name__ == "__main__": main()

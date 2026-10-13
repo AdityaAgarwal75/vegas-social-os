@@ -15,4 +15,6 @@ Configure Google/Meta developer apps through permitted connected tools. If tools
 
 After the verified HTTPS endpoint works, create one remote master plugin through a supported host tool when available, using this particular owner's /mcp endpoint, and present installation consent UI. Verify real read-only plugin calls and save an evidence-based setup receipt. Archive creation alone is not installation or deployment.
 
-Return the clean dashboard URL and short-lived private onboarding link. Users connect accounts in the dashboard; all creative generation/approvals remain in ChatGPT. Missing host-native image bytes is a blocker, not a reason to shift manual uploads onto users. Do not promise an unattended morning pipeline without a real connected scheduler.
+Return the clean dashboard URL and short-lived private onboarding link. Users configure provider apps and connect accounts in the dashboard. Exact review controls also exist in the dashboard. Native creative reasoning/images require the connected host; scheduled approved releases run in the VPS scheduler. Missing host-native image bytes is a blocker, not a reason to shift manual uploads onto users. Do not promise an unattended morning pipeline without a real connected scheduler.
+
+For a new AWS account, use root docs/AWS-ONBOARDING.md and deploy/aws/instance.json. For provider registration/media support, use docs/PLATFORM-PERMISSIONS.md and the connection_setup tool. Never infer available AWS connector actions from the plugin name.

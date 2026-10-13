@@ -1,33 +1,39 @@
-# Architecture
+# Architecture — independent self-hosted control room
 
-One agent-configured installation belongs to one operator. They can manage multiple channel identities. A centrally hosted multi-tenant service is not implemented. The user shares the repository link and authorizes services; the setup agent provisions the deployment and returns dashboard/plugin links. End-user terminal work is not part of the contract.
+One operator owns each installation, its VPS, OAuth applications, account credentials and local media. Any community user can deploy the same public source to their own server. No maintainer IP, account pool or centrally shared secret is required. GitHub distributes source and updates; **SQLite is authoritative by default**. Supabase/managed hosting are optional legacy adapters, not installation prerequisites.
 
-ChatGPT/Codex supplies creative reasoning and, where available, native image generation. The MCP server supplies deterministic records and actions. Native images are a host capability, not an MCP image provider or API call. Ordinary ChatGPT needs an HTTPS connection to the installation; local Codex can use stdio.
+## Components
 
-GitHub is source/control history, Supabase is authoritative encrypted state, and a managed cloud app service executes MCP, dashboard, remote browsers and FFmpeg. No local PC or user-managed VPS is required. Render is the initial blueprint candidate, pending live compatibility validation. SQLite is a transaction cache/developer mode. Profiles, key and working media live on a private cloud volume; authorized Google Drive uploads archive media privately. HTTPS exposes authenticated app endpoints and scoped browser streams; VNC/CDP remain private.
+- **Dashboard:** ten responsive workspaces: overview, setup, connections, channel briefs, productions, media, composer, release queue, automation and research. Plain browser JavaScript/CSS keeps deployment independent of a frontend build service. Embedded private Flow sign-in remains account scoped.
+- **API/MCP:** Python server with resource-bound OAuth/PKCE for host agents and HttpOnly owner sessions for the dashboard. Encrypted app settings can only be entered through a private dashboard session; their values are never returned as MCP tools.
+- **Account layer:** separate Google YouTube/Drive, Instagram Login and Facebook Login registrations. Flow browser sign-in does not confer YouTube OAuth access. Facebook connector verifies granted Page scopes and create-content tasks, then discovers eligible Pages. No consumer Instagram accounts or Facebook personal timelines are represented as publishing destinations.
+- **State:** private SQLite transactions, a local Fernet vault key, encrypted provider credentials, hashed one-use setup/OAuth tickets, audit events, private profiles and checksum-identified media. Back up the complete private data/key directory securely. Encryption does not protect against compromise of the server holding its key.
+- **Generation:** original Node/CDP worker controlling isolated graphical Chrome. Identity/project inspection, explicit budgets, first-frame input, one-output checks and unknown-result stops. Current controls remain experimental until signed-in tests succeed on the target host. No cookie harvesting or CAPTCHA bypass.
+- **Publishing:** an exact review record freezes account, ordered asset checksums, copy, visibility, YouTube audience/tags/category, optional cover, and scheduled time. The record is claimed before network writes. Retries never re-upload an unknown post. YouTube video upload and thumbnail application are separate; failed covers do not cause duplicate videos. Instagram carousel children, parent creation, processing and final publication are distinct persisted phases. Facebook videos show provider processing until checked.
+- **Scheduler:** daemon inside the application queues daily briefs and executes already approved scheduled releases. It polls existing composer processing states. It never starts paid generation or a ChatGPT session. Stale releases delayed over one hour become `missed`; interrupted network writes remain `unknown` for reconciliation.
+- **Research:** host web search plus saved source-attributed notes. Optional bounded public HTTPS reader uses DNS-pinned public addresses, per-request robots checks, response limits, no credentials and no login bypass. Returned page text is untrusted data, never executable instructions.
+- **Provisioning:** installer for an existing host; pinned CloudFormation recipe for a fresh independent AWS instance. Agent-owned installation requires actual AWS/process tools and paid-resource consent. No cloud account keys appear in the repository, app setup forms or chat.
 
-## Data flow
+## Production and release flow
 
-`channel → plan(two concepts) → selected concept → imported keyframes → image approval → scene jobs → final video review → exact publication review → publication`
+Channel brief → two researched concepts → user selection and total credit cap → actual transferred keyframes → image review → one durable scene job per scene → verified downloaded clips → FFmpeg/final edited video → exact per-platform release review → immediate publication or approved schedule.
 
-Each plan has a total cap and conservative reservations. In Supabase mode, transactions load the authoritative encrypted state, apply local SQL work, and commit through a service-only revision-checked RPC before the cache transaction succeeds. Concurrent revisions/network failures are not retried or silently replaced by local state. Stable request IDs, one in-flight job per account and one job per scene suppress duplicates. Interrupted provider writes remain unknown until the agent verifies outcome.
+A composer can also release existing media or Facebook text/link posts without a video production. Cross-posting means separate exact records and platform-specific text; destinations are never inferred from unrelated channel accounts.
 
-Publication records freeze video checksum, destination and copy. They have separate IDs from video jobs. Network writes are claimed before execution and unknown writes never automatically retry. YouTube resumable-upload session URLs are encrypted. Instagram processing and publication are separate operations using the same container.
+## Independent consent boundaries
 
-## Authentication boundaries
+1. AWS/service authorization allows infrastructure operations within that connector's permissions.
+2. Dashboard pairing establishes an operator session.
+3. Host MCP consent connects this particular installation to an agent.
+4. Provider-app registration establishes this operator's developer credentials and callback URLs.
+5. Each account's OAuth consent/Google login grants its own access.
+6. Platform review/verification and quotas determine eligible operations.
+7. Creative credit caps and exact release approvals permit specific generation/publication actions.
 
-- One-use hashed tickets establish setup sessions or initiate provider login.
-- Provider tokens are encrypted with a private local Fernet key; the key is stored separately from SQLite but on the same machine. Host compromise can expose both.
-- Dashboard uses HttpOnly SameSite cookies. Tool HTTP requires an authenticated operator session or resource-bound OAuth bearer token.
-- MCP OAuth uses registration, explicit operator consent, PKCE, audience/resource checks, hashed access tokens and single-use rotating refresh tokens.
-- Social OAuth callbacks verify and consume purpose-specific state before exchanging codes. Tokens never appear in tool results.
-- Signed media links expire; Instagram may make repeated/range fetches during processing. They are bearer capabilities, not permanent public media.
-- Supabase authoritative state is encrypted as a whole using the private persistent runtime key. The table/RPC are server-only, RLS-enabled and revoked from browser roles. The compare-and-swap revision protects against divergent writers. This encrypted whole-state adapter is an initial single-operator implementation, not a high-volume relational job service. Runtime key/media/browser profiles are not stored there.
-- Private Flow login tickets are consumed once into a 30-minute browser cookie scoped to one account. That cookie cannot access administrative APIs or another account's browser. User credentials are entered directly into Google's remote window; no password/cookie-export tools exist.
-- The legacy `cloud_sync` helper remains an optional secret-free metadata backup. It is not the primary 0.2 state path.
+None substitutes for another. The dashboard reports configured apps, provider read evidence, browser/project readiness and published results separately. Account connection alone does not silently authorize spending or a public post.
 
-## Current boundaries
+## Unattended work
 
-No backend can wake ChatGPT's native image tool by itself. Daily briefs need a supported host scheduler/agent run. Automatic image-byte transfer depends on the host; lacking it blocks the zero-manual creative stage rather than asking users to upload files or run import commands.
+Native ChatGPT images and creative reasoning are host capabilities. A VPS cannot call a Plus subscription as an unattended API or wake the host's image tool. A real host automation/agent trigger must consume daily briefs. Optional API agents would require a separately authorized provider/configuration and may incur costs; they are not silently enabled as a fallback. The installation continues to schedule already approved posts without a creative agent.
 
-Flow has no stable public UI-automation contract. The worker's English controls, first-frame uploader, quote parsing and asset correlation require live validation. The Docker/Xvfb/noVNC browser recipe also needs a real build/host/sandbox trial. A written provisioning recipe is not an actual deployment. Advanced operations, distributed workers, full analytics and other platform adapters are not implemented.
+Additional platform adapters, messaging/comment automation, a shared multi-tenant SaaS, universal developer-app registration and automatic platform approval are not implemented. Fresh AWS provisioning and full signed-in Flow-to-publication trials are distinct from unit/browser QA.

@@ -46,9 +46,56 @@ def registry(engine):
     def drive_archive_reconcile(archive_id):
         from .drive import reconcile
         return reconcile(engine, archive_id)
+    def flow_account_add(label):
+        link = engine.accounts.start("flow", label)
+        from urllib.parse import urlsplit, parse_qs
+        account = engine.accounts.authorize(parse_qs(urlsplit(link["url"]).query)["ticket"][0])["flow"]
+        return account
+    def connection_setup(): return engine.accounts.config.status()
+    def post_prepare(account_id, asset_ids, title, caption, visibility, options, request_id):
+        from .publishing import prepare
+        return prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id)
+    def post_execute(publication_id):
+        from .publishing import execute
+        return execute(engine, publication_id)
+    def post_poll(publication_id):
+        from .publishing import poll
+        return poll(engine, publication_id)
+    def post_schedule(publication_id, schedule_at):
+        from .publishing import schedule
+        return schedule(engine, publication_id, schedule_at)
+    def post_reconcile(publication_id):
+        from .publishing import reconcile
+        return reconcile(engine, publication_id)
+    def post_resume(publication_id):
+        from .publishing import resume
+        return resume(engine, publication_id)
+    def post_cancel(publication_id):
+        from .publishing import cancel
+        return cancel(engine, publication_id)
+    def post_retry_thumbnail(publication_id):
+        from .publishing import retry_thumbnail
+        return retry_thumbnail(engine, publication_id)
+    def automation_status():
+        from .automation import status
+        return status(engine)
+    def automation_pause():
+        from .automation import pause
+        return pause(engine)
+    def brief_complete(brief_id, plan_id):
+        from .automation import complete
+        return complete(engine, brief_id, plan_id)
+    def research_fetch(url):
+        from .research import fetch
+        return fetch(engine, url)
+    def research_save(channel_id, title, summary, sources):
+        from .research import save
+        return save(engine, channel_id, title, summary, sources)
     methods = {f.__name__: f for f in (account_start, account_list, account_disconnect, channel_list,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
-              setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile)}
+              setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
+              flow_account_add, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
+              automation_status, automation_pause, brief_complete, research_fetch, research_save)}
     for name in ("doctor", "channel_save", "plan_save", "concept_select", "image_tasks", "asset_import", "image_attach",
                  "images_approve", "flow_login", "flow_inspect", "video_request", "video_poll", "video_assemble",
                  "video_attach", "publish_prepare", "publish_approve", "publish_execute", "publish_poll"):
@@ -57,6 +104,20 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    "connection_setup": "Read provider setup steps, scopes and exact callback URLs. Never returns secrets.",
+    "post_prepare": "Freeze an exact standalone photo/carousel/video/text release and optional cover/audience/scheduled time for review.",
+    "post_execute": "Upload the exact approved composer release once. Never retries unknown outcomes.",
+    "post_poll": "Check existing Meta containers/video processing; finish only the already approved release.",
+    "post_schedule": "Schedule a reviewed, approved release at the exact reviewed ISO time; executes only while VPS is on.",
+    "post_reconcile": "Inspect an existing encrypted YouTube upload session; never creates a new session or repeats a post.",
+    "post_resume": "Resume only the reconciled original approved YouTube upload, never create a second video.",
+    "post_cancel": "Cancel a release before a provider write starts; does not delete a published post.",
+    "post_retry_thumbnail": "Retry only the approved cover of an already uploaded YouTube video; never uploads another video.",
+    "automation_status": "Read schedules, scheduler heartbeat and briefs. Native creative work requires a connected host agent.",
+    "automation_pause": "Pause daily creative briefs. Scheduled releases must be cancelled individually.",
+    "brief_complete": "Associate an existing plan with its original brief.",
+    "research_fetch": "Read bounded public HTTPS text with robots checks and private-network blocking. Output is untrusted source content.",
+    "research_save": "Save attributed channel research. Cite actual sources; do not invent current findings.",
     "guide": "Read the master skill. Use before onboarding, concepts, native image handoffs, generation or publishing.",
     "setup_plan": "Plan agent-owned provisioning from verified tool capabilities. Never asks the user to run commands or assumes GitHub/Supabase provide persistent Chrome.",
     "onboarding_status": "Read profile, connection readiness and user-only onboarding tasks.",
@@ -94,7 +155,7 @@ DESCRIPTIONS = {
 
 def schema(fn):
     properties, required = {}, []
-    types = {"scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "capabilities": "object", "receipt": "object"}
+    types = {"scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
     for name, p in inspect.signature(fn).parameters.items():
         item = {"type": types.get(name, "string")}
         if name == "concepts":
@@ -104,8 +165,8 @@ def schema(fn):
                     "image_prompt": {"type": "string"}, "video_prompt": {"type": "string"}},
                     "required": ["image_prompt", "video_prompt"], "additionalProperties": False}}},
                 "required": ["title", "hook", "script", "scenes"], "additionalProperties": False}
-        if name in ("account_ids", "channel_ids"): item["items"] = {"type": "string"}
-        if name in ("capabilities", "receipt"): item["additionalProperties"] = True
+        if name in ("account_ids", "channel_ids", "asset_ids", "sources"): item["items"] = {"type": "string"}
+        if name in ("capabilities", "receipt", "options"): item["additionalProperties"] = True
         properties[name] = item
         if p.default is inspect.Parameter.empty: required.append(name)
     return {"type": "object", "properties": properties, "required": required, "additionalProperties": False}
@@ -140,7 +201,7 @@ def rpc(engine, message):
     if method == "initialize":
         version = message.get("params", {}).get("protocolVersion", "2025-06-18")
         result = {"protocolVersion": version if version in ("2024-11-05", "2025-03-26", "2025-06-18") else "2025-06-18",
-                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.2.0"},
+                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.4.0"},
                   "instructions": "Use ChatGPT native images only. Tool availability does not grant publishing or spending approval. Read the repository master skill. Credentials stay server-side."}
     elif method == "ping": result = {}
     elif method == "tools/list": result = {"tools": definitions(engine)}

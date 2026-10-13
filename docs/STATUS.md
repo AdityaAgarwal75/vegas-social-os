@@ -1,30 +1,34 @@
-# Vegas Social OS verification — 0.3.0 community VPS alpha
+# Status — 0.4.0 community alpha
 
-Updated 2026-10-13.
+Verified on 13 October 2026. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
 
-The community distribution is **single-operator self-hosted**, not a centrally shared SaaS. Every brother/client/community user deploys their own trusted VPS or independently managed runtime, with their own local SQLite state, browser profiles and provider consent. No maintainer credentials or Supabase service keys are distributed.
+## Observed checks
 
-| Area | Verified result | Remaining gaps |
-| --- | --- | --- |
-| Ubuntu VPS installer | Live install succeeded on founder's AWS Ubuntu instance after fixing a virtualenv permission issue | Bootstrap on a completely fresh Debian/Ubuntu host not yet verified |
-| Application service | systemd started isolated vegas-social-os.service as vegas-social; 127.0.0.1:8899; Caddy HTTPS /health returned version 0.3.0 and private /api/state rejected anonymous callers (401) | Uptime/operational hardening need continued review |
-| Existing apps | Orbit, Caddy and five independent Flow-MCP services remained active during install | Do not migrate/copy those legacy browser profiles into community instances |
-| Database | SQLite local default and vault key under /var/lib/vegas-social-os. No Supabase involved in VPS service | Encrypted off-host backup/restore not yet tested |
-| Flow browser | Fresh new account launched graphical Chrome and returned private scoped login URL | No owner-signed-in Google Flow project inspected; no video generation in this edition yet |
-| No-credit inspection | Worker returned workspace_ready=false, blocked=false for disposable signed-out account | This does **not** prove Google sign-in eligibility or current model controls |
-| Account separation | Account-scoped browser ticket tests and HTTP guards passed in existing Python tests | Cross-tenant SaaS not supported |
-| Test suite | 41 Python and 3 Node tests passed on VPS; latest community branch GitHub Actions passed (2026-10-13) | A fresh bare-VPS bootstrap and full production video remain untested |
-| Remote MCP | Source endpoint and OAuth consent code implemented | Actual connected ChatGPT plugin installation/guide/doctor call not yet verified |
-| Native image transfer | Native ChatGPT tool only, actual bytes required | Fully automatic host-to-VPS transfer not verified |
-| Official social platforms | YouTube and Instagram OAuth/publishing adapters included | Real consent and exact private test upload still needed |
-| Daily scheduling | Due-queue supported in source | Requires a separate real host scheduler; no unattended image generation promise |
-| Drive archive | Optional drive.file adapter | Real write/restore not yet verified |
-| Multi-user roles/DMs/automated comment moderation | Not implemented | Use independent installations, not shared credentials |
+- **59 Python tests pass**: state/permissions, OAuth state isolation, encrypted dashboard app settings, Page discovery/grants, exact-release idempotency, duplicate-upload suppression, unknown-write stops, carousel phases, cover-only failure/retry separation, original YouTube-session reconciliation/resume, scheduling/cancel/missed handling, robots/private-network research guards and AWS template boundaries.
+- **3 Node Flow worker tests pass**, plus Python compilation, JavaScript syntax, installer shell syntax and clean diff checks.
+- **CloudFormation schema lint passes** using cfn-lint 1.57.2. This is source/schema validation; no fresh AWS instance or billable resource was created by these tests. Live IAM/quota/change-set/SSM/bootstrap checks and cfn-guard validation remain separate deployment checks.
+- **Real sandboxed Google Chrome dashboard QA passes** on the founder's VPS, against disposable localhost data, separate from the live service. Profile → encrypted app configuration → channel brief → actual image import → exact composer draft → cancellation → daily schedule/pause all passed. Ten workspace routes and 360/768/1440 layouts passed, with no JavaScript page exceptions.
+- QA accounts are explicitly simulated local fixtures; they do not represent verified provider connections. Browser QA never submits a provider login, post or credit-consuming generation.
+- The existing 0.3 deployment was running before the update. Production version/HTTPS checks must be confirmed after deploying the reviewed 0.4 commit; GitHub success and a source checkout alone do not establish deployment.
 
-## Tests and next milestones
+## Implemented in this release
 
-Run python -m unittest discover -s tests -v; node --test tests/flow.test.mjs; bash -n scripts/install-vps.sh scripts/bootstrap-ubuntu.sh scripts/new-setup-link.sh. Verify externally served /health and local /api/state unauthenticated rejection. Test backend restarts without deleting /var/lib/vegas-social-os. Use one manually authorized Google Flow account to confirm real sign-in, model controls, credit quote and downloaded asset after explicit capped approval. Confirm browser sandbox stays enabled.
+Dashboard-owned onboarding with exact callback URLs, official developer-console links, encrypted client settings, multiple isolated Flow identities and an embedded private login browser. Provider identity inspection is separate from publishing evidence. Facebook discovers eligible Pages and checks grants/content tasks; Instagram uses professional-account Instagram Login.
 
-No video generation or social publication has been performed by this new community edition. Google providers can change their UIs, terms, quotas and eligibility; a successful smoke test does not guarantee continued automation.
+Composer/review queue for YouTube MP4s and thumbnails, Instagram JPEG posts/Reels/carousels, Facebook Page text/links/photos/photo sets/videos, and provider-specific fields. Original YouTube upload sessions can be inspected/resumed without creating a second video. Failed thumbnails do not re-upload videos. Scheduled exact approved posts execute while the server runs; stale schedules over one hour become missed.
 
-The optional managed-cloud Render/Supabase recipe remains a separate unverified path, not a requirement for community VPS installs. Old managed-only BOOTSTRAP instructions were superseded by the VPS-first guide.
+Daily creative brief queue and visible scheduler heartbeat; public bounded research reader and source-attributed notes; native-image/scene review controls; FFmpeg final assembly; independent existing-host installer; pinned AWS instance/IP/HTTPS bootstrap template and agent-readable setup/permission documentation.
+
+## Remaining verification and gaps
+
+- **Full signed-in Flow generation through this repository is not verified.** The founder's separate working browser automation was studied for workflow/queue/budget behavior, without copying source or importing cookies. It does not validate this project's worker. English selectors, model/first-frame controls, exact output correlation and live quote parsing remain experimental.
+- **Live YouTube, Instagram and Facebook OAuth/publishing through 0.4 is not verified.** The adapters are implemented and their request sequences are tested with mocked responses. Provider app registration, eligible accounts, redirect registration, consent/2FA, access scopes and platform review remain operator-specific. Business verification alone is insufficient.
+- Meta reference retrieval was rate-limited for several official pages; current version/permission/media acceptance must be checked against the operator's app and controlled live trials. Do not describe mocks as platform acceptance.
+- **Fresh-VPS/AWS provisioning is not yet tested end to end.** Template/schema tests are not proof of every new-account AMI, quota, permission, SSM or certificate condition. Use docs/AWS-ONBOARDING.md for the actual checks and cost/approval boundaries.
+- **Unattended creative execution needs a real host agent trigger.** The VPS cannot access a ChatGPT Plus account or wake native image generation as an API. Daily queue entries alone do not produce scripts/images. Host tools must expose actual image bytes before transfer can be claimed.
+- Facebook dedicated Reels/custom video thumbnail adapters, other social platforms, DMs/comments/full analytics and multi-tenant hosting are not implemented. Do not market all platforms as working.
+- Publishing/generation still use exact approvals and credit caps. No arbitrary autoposting or hidden paid API fallback is enabled.
+
+## Deployment checks to repeat
+
+Verify reviewed Git commit, systemd, HTTPS `/health` returning 0.4.0, authenticated connection/automation state, unauthenticated `/api/state` and `/mcp` denial, Orbit health, existing Flow services and the live scheduler heartbeat. Preserve private data/key/profile directories across update. Run an isolated disposable signed-out browser check, then complete owner sign-in and one controlled generation/publishing trial only when its exact account/model/budget or destination/media/text is authorized.

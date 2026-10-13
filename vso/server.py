@@ -30,7 +30,7 @@ class HTTPServer(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VegasSocialOS/0.3"
+    server_version = "VegasSocialOS/0.4"
 
     @property
     def engine(self): return self.server.engine
@@ -52,7 +52,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self'; frame-ancestors " + ("'self'" if urllib.parse.urlsplit(self.path).path.startswith("/flow/") else "'none'") + "; base-uri 'none'; form-action 'self'")
         for k, v in (headers or {}).items(): self.send_header(k, v)
         self.end_headers()
         if self.command != "HEAD": self.wfile.write(body)
@@ -110,6 +110,9 @@ class Handler(BaseHTTPRequestHandler):
         if not self.origin_ok() or not session:
             self.send({"error": "Private browser login expired or unauthorized"}, 401)
             return None
+        try: self.store.get("account", session["account_id"])
+        except ValueError:
+            self.send({"error": "Flow account disconnected"}, 401); return None
         return session
 
     def origin_ok(self):
@@ -139,11 +142,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def get(self):
         path, q = self.parse()
-        if path == "/health": return self.send({"ok": True, "version": "0.3.0"})
+        if path == "/health": return self.send({"ok": True, "version": "0.4.0"})
         if path in ("/", "/onboarding", "/dashboard", "/app.js", "/style.css", "/flow-login.js"):
             file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
             return self.send((Path(__file__).parent.parent / "web" / file).read_bytes(), content_type=mime)
+        if path in ("/privacy", "/data-deletion"):
+            if path == "/privacy":
+                text = "This independently hosted installation stores the operator's profile, channel briefs, imported media, encrypted OAuth credentials, and private Google Flow browser profiles on its own server. It sends approved media to the connected providers to generate or publish content. The project maintainer receives no account credentials. The installation owner controls access, backups and retention. Disconnect removes the saved provider token; revoke authorization in the provider's settings as well."
+            else:
+                text = "To remove an account, open Connections and choose Disconnect, then revoke the app in the provider's account settings. Browser profiles, media and backups require deletion by this installation's owner. Ask the owner to remove /var/lib/vegas-social-os only when decommissioning the entire installation. This page is a data-deletion instruction URL, not a signed Meta deletion webhook."
+            return self.page("Privacy" if path == "/privacy" else "Data deletion", "<p>" + html.escape(text) + "</p><p>Contact this installation's owner for requests. Configure your own legal/contact details before inviting other users.</p>")
         if path == "/pair":
             self.store.consume(q.get("ticket", ""), "pair")
             token = secrets.token_urlsafe(32)
@@ -185,7 +194,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(file.read_bytes(), content_type=mimetypes.guess_type(file.name)[0] or "application/octet-stream")
         if path.startswith("/callback/"):
             a = self.engine.accounts.callback(path.rsplit("/", 1)[1], q.get("state", ""), q.get("code", ""))
-            return self.page("Account connected", "<p>" + html.escape(a["name"]) + " is connected to this installation. Return to ChatGPT to continue.</p>")
+            return self.page("Account connected", "<p>" + html.escape(a["name"]) + ' is connected to this installation.</p><p><a href="/dashboard#accounts">Return to Connections</a></p>')
         if path in ("/.well-known/oauth-protected-resource", "/.well-known/oauth-protected-resource/mcp"):
             return self.send({"resource": self.base + "/mcp", "authorization_servers": [self.base], "scopes_supported": ["social:manage"]})
         if path == "/.well-known/oauth-authorization-server":
@@ -205,7 +214,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/state":
             if not self.guard(): return
             from .profile import status
-            return self.send({"doctor": self.engine.doctor(), "onboarding": status(self.engine), **self.engine.snapshot()})
+            return self.send({"doctor": self.engine.doctor(), "onboarding": status(self.engine), "connections": self.engine.accounts.config.status(),
+                              "automation": __import__("vso.automation", fromlist=["status"]).status(self.engine),
+                              "research": self.store.all("research"), **self.engine.snapshot()})
         if path == "/media":
             record = self.store.get("media-link", self.store.digest(q.get("ticket", "")))
             if record["expires"] < time.time(): raise ValueError("Media link expired")
@@ -317,6 +328,21 @@ class Handler(BaseHTTPRequestHandler):
             self.store.put("access", self.store.digest(access), {"expires": time.time() + 3600, "resource": self.base + "/mcp", "client_id": data["client_id"]})
             refresh = self.store.ticket("mcp-refresh", {"client_id": data["client_id"]}, ttl=30 * 86400)
             return self.send({"access_token": access, "token_type": "Bearer", "expires_in": 3600, "refresh_token": refresh, "scope": "social:manage"})
+        if path == "/api/config":
+            # Provider secrets may be supplied only in the owner's private dashboard session.
+            # They are deliberately unavailable as MCP tools or returned values.
+            if not self.session() or not self.guard(): return self.send({"error": "Private dashboard session required"}, 401)
+            if "application/json" not in self.headers.get("Content-Type", ""):
+                return self.send({"error": "JSON required"}, 415)
+            return self.send(self.engine.accounts.config.save(body.get("provider"), body.get("values")))
+        if path == "/api/logout":
+            if not self.guard(): return
+            from http.cookies import SimpleCookie
+            c = SimpleCookie(); c.load(self.headers.get("Cookie", ""))
+            if "vso_session" in c:
+                with self.store.db() as db:
+                    db.execute("DELETE FROM records WHERE kind='session' AND id=?", (self.store.digest(c["vso_session"].value),))
+            return self.send({"status": "signed_out"}, headers={"Set-Cookie": "vso_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0"})
         if path in ("/mcp", "/api/tool"):
             if not self.guard(): return
             if path == "/api/tool":

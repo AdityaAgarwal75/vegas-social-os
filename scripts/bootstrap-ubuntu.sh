@@ -5,6 +5,7 @@ set -Eeuo pipefail
 [[ -r /etc/os-release ]] || { echo "Unsupported operating system" >&2; exit 1; }
 . /etc/os-release
 case "$ID" in ubuntu|debian) ;; *) echo "Ubuntu/Debian required" >&2; exit 1;; esac
+python3 -c 'import sys; assert sys.version_info >= (3, 11), "Use Ubuntu 24.04 or Debian 12+ (Python 3.11+)"'
 [[ "$(uname -m)" = x86_64 ]] || { echo "Automatic Chrome install requires x86_64." >&2; exit 1; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DOMAIN=""

@@ -19,14 +19,15 @@ class Engine:
         self.accounts = Accounts(store, base)
 
     def doctor(self):
-        return {"version": "0.3.0-alpha", "image_provider": "chatgpt-native-only",
+        return {"version": "0.4.0-alpha", "image_provider": "chatgpt-native-only",
                 "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
                 "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
                 "node": bool(shutil.which("node")), "ffmpeg": bool(shutil.which("ffmpeg")),
                 "chrome_configured": bool(os.getenv("VSO_CHROME")),
-                "youtube_oauth_configured": all(os.getenv(x) for x in ("GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET")),
-                "instagram_oauth_configured": all(os.getenv(x) for x in ("INSTAGRAM_CLIENT_ID", "INSTAGRAM_CLIENT_SECRET", "META_GRAPH_VERSION")),
+                "youtube_oauth_configured": self.accounts.config.public("google")["configured"],
+                "facebook_oauth_configured": self.accounts.config.public("facebook")["configured"],
+                "instagram_oauth_configured": self.accounts.config.public("instagram")["configured"],
                 "supabase_sync_configured": all(os.getenv(x) for x in ("SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_USER_JWT")),
                 "live_integrations_verified": False}
 
@@ -36,8 +37,8 @@ class Engine:
         account_ids = account_ids or []
         for ident in account_ids:
             account = self.store.get("account", ident)
-            if account["provider"] not in ("youtube", "instagram"):
-                raise ValueError("Only YouTube/Instagram accounts are publishing destinations; Flow is generation and Drive is storage")
+            if account["provider"] not in ("youtube", "instagram", "facebook"):
+                raise ValueError("Only YouTube/Instagram/Facebook accounts are publishing destinations; Flow is generation and Drive is storage")
         ident = uuid.uuid4().hex
         body = {"id": ident, "name": name, "niche": niche, "language": language, "account_ids": account_ids}
         self.store.put("channel", ident, body)
@@ -279,7 +280,7 @@ class Engine:
             raise ValueError("Attach a completed video for final review first")
         if account_id not in channel["account_ids"]:
             raise ValueError("Destination is not assigned to this channel")
-        if a["provider"] not in ("youtube", "instagram") or a["status"] != "connected":
+        if a["provider"] not in ("youtube", "instagram", "facebook") or a["status"] != "connected":
             raise ValueError("Connect a supported publishing account")
         if a["provider"] == "instagram" and visibility != "public":
             raise ValueError("Instagram Reels publish publicly; set visibility=public explicitly")
@@ -338,7 +339,7 @@ class Engine:
                 media_ticket = self.store.ticket("media", {"asset_id": p["asset_id"]}, ttl=3600)
                 # Media tokens are reusable for range/repeated fetches during processing.
                 self.store.put("media-link", self.store.digest(media_ticket), {"asset_id": p["asset_id"], "expires": time.time() + 3600})
-                result, _ = net.request(f"https://graph.instagram.com/{graph_version()}/{a['remote_id']}/media", method="POST", token=token,
+                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{a['remote_id']}/media", method="POST", token=token,
                                         form={"media_type": "REELS", "video_url": self.base + "/media?ticket=" + media_ticket, "caption": p["caption"]})
                 p.update(status="processing", container_id=result["id"])
         except Exception:
@@ -354,7 +355,7 @@ class Engine:
         if p["provider"] != "instagram" or p["status"] != "processing":
             raise ValueError("This publication needs manual reconciliation")
         token = self.accounts.token(p["account_id"])
-        info, _ = net.request(f"https://graph.instagram.com/{graph_version()}/{p['container_id']}?fields=status_code", token=token)
+        info, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{p['container_id']}?fields=status_code", token=token)
         if info.get("status_code") == "FINISHED":
             # Claim the write before network I/O; competing polls cannot publish twice.
             with self.store.db() as db:
@@ -365,7 +366,7 @@ class Engine:
                 self.store.write(db, "publication", publication_id, p)
             a = self.store.get("account", p["account_id"])
             try:
-                result, _ = net.request(f"https://graph.instagram.com/{graph_version()}/{a['remote_id']}/media_publish", method="POST", token=token,
+                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{a['remote_id']}/media_publish", method="POST", token=token,
                                         form={"creation_id": p["container_id"]})
                 p.update(status="published", remote_id=result["id"])
             except Exception:

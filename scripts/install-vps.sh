@@ -30,6 +30,7 @@ done
 CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
 [[ -n "$CHROME" ]] || { echo "Install Google Chrome or Chromium first." >&2; exit 1; }
 [[ -f /usr/share/novnc/vnc.html ]] || { echo "Install noVNC first." >&2; exit 1; }
+python3 -c 'import sys; assert sys.version_info >= (3, 11), "Python 3.11+ required; use Ubuntu 24.04 or Debian 12+"'
 NODE_MAJOR="$(node -v | sed 's/^v//' | cut -d. -f1)"
 (( NODE_MAJOR >= 22 )) || { echo "Node.js 22+ required" >&2; exit 1; }
 [[ "$(uname -s)" = Linux ]] || { echo "Linux VPS required" >&2; exit 1; }
@@ -40,6 +41,12 @@ fi
 (( EUID == 0 )) || { echo "Run as root (sudo)." >&2; exit 1; }
 if [[ -f "$ENV_FILE" ]] && ! grep -Fxq "VSO_PUBLIC_URL=$ORIGIN" "$ENV_FILE"; then
   echo "An existing installation has another domain. Refusing overwrite." >&2; exit 1
+fi
+if [[ -f "$ENV_FILE" ]] && ! grep -Fxq "VSO_PORT=$PORT" "$ENV_FILE"; then
+  echo "An existing installation uses another port. Refusing a route/config mismatch." >&2; exit 1
+fi
+if ss -H -ltn "sport = :$PORT" | grep -q . && ! systemctl is-active --quiet vegas-social-os.service; then
+  echo "The chosen port is already in use. Select an unused --port before installing." >&2; exit 1
 fi
 # Copy only application code; exclude source credentials, build outputs, local data.
 if [[ "$SOURCE" != "$DEST" ]]; then

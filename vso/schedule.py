@@ -8,7 +8,7 @@ def save(engine, hour, timezone, channel_ids):
     try: ZoneInfo(timezone)
     except Exception: raise ValueError("Use an IANA timezone, e.g. Asia/Kolkata") from None
     for ident in channel_ids: engine.store.get("channel", ident)
-    record = {"hour": hour, "timezone": timezone, "channel_ids": channel_ids}
+    record = {"hour": hour, "timezone": timezone, "channel_ids": channel_ids, "paused": False}
     engine.store.put("schedule", "daily", record)
     return {**record, "note": "This schedules brief queue entries. Host-supported ChatGPT automation must consume them; it does not run native image generation by itself."}
 
@@ -16,6 +16,7 @@ def save(engine, hour, timezone, channel_ids):
 def tick(engine):
     try: record = engine.store.get("schedule", "daily")
     except ValueError: return []
+    if record.get("paused"): return []
     now = datetime.now(ZoneInfo(record["timezone"]))
     if now.hour < record["hour"]: return []
     tasks = []
