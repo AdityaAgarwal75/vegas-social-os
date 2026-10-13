@@ -24,11 +24,12 @@ DEST=/opt/vegas-social-os
 DATA=/var/lib/vegas-social-os
 ENV_FILE=/etc/vegas-social-os.env
 ORIGIN="https://$DOMAIN"
-for tool in python3 node ffmpeg Xvfb x11vnc websockify tar; do
+for tool in python3 node ffmpeg Xvfb x11vnc websockify tar curl; do
   command -v "$tool" >/dev/null || { echo "Required executable missing: $tool" >&2; exit 1; }
 done
 CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
 [[ -n "$CHROME" ]] || { echo "Install Google Chrome or Chromium first." >&2; exit 1; }
+[[ -f /usr/share/novnc/vnc.html ]] || { echo "Install noVNC first." >&2; exit 1; }
 NODE_MAJOR="$(node -v | sed 's/^v//' | cut -d. -f1)"
 (( NODE_MAJOR >= 22 )) || { echo "Node.js 22+ required" >&2; exit 1; }
 [[ "$(uname -s)" = Linux ]] || { echo "Linux VPS required" >&2; exit 1; }
@@ -46,7 +47,9 @@ if [[ "$SOURCE" != "$DEST" ]]; then
   tar -C "$SOURCE" --exclude=.git --exclude=.venv --exclude=.env --exclude=.env.local \
     --exclude=__pycache__ --exclude='*.pyc' -cf - . | tar -C "$DEST" -xf -
 fi
-chmod -R a+rX "$DEST"
+# Keep source traversable by the service user, never expose .git auth/config or .env.
+find "$DEST" \( -name .git -o -name .venv -o -name .env -o -name .env.local \) -prune -o \
+  -type d -exec chmod a+rx {} + -o -type f -exec chmod a+r {} +
 if ! id vegas-social >/dev/null 2>&1; then
   useradd --system --home-dir "$DATA" --shell /usr/sbin/nologin vegas-social
 fi
@@ -128,7 +131,21 @@ VSO_CADDY
   fi
 fi
 systemctl daemon-reload
-systemctl enable --now vegas-social-os.service >/dev/null
+systemctl enable vegas-social-os.service >/dev/null
+systemctl restart vegas-social-os.service
+# A systemd "activating" state is not proof of a healthy HTTP service.
+HEALTHY=0
+for attempt in $(seq 1 25); do
+  if curl --fail --silent --max-time 2 "http://127.0.0.1:$PORT/health" >/dev/null; then
+    HEALTHY=1
+    break
+  fi
+  sleep 1
+done
+if (( ! HEALTHY )); then
+  echo "Service did not become healthy; check systemctl status vegas-social-os.service" >&2
+  exit 1
+fi
 if (( ! NO_CADDY )); then systemctl reload caddy; fi
 echo "Installed. Dashboard: $ORIGIN/dashboard"
 echo "Private data: $DATA; Generate a temporary onboarding URL using:"
