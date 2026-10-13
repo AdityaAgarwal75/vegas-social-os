@@ -7,13 +7,13 @@ The community distribution is **single-operator self-hosted**, not a centrally s
 | Area | Verified result | Remaining gaps |
 | --- | --- | --- |
 | Ubuntu VPS installer | Live install succeeded on founder's AWS Ubuntu instance after fixing a virtualenv permission issue | Bootstrap on a completely fresh Debian/Ubuntu host not yet verified |
-| Application service | systemd started isolated vegas-social-os.service as vegas-social; 127.0.0.1:8899; Caddy HTTPS /health returned version | Uptime/operational hardening need continued review |
+| Application service | systemd started isolated vegas-social-os.service as vegas-social; 127.0.0.1:8899; Caddy HTTPS /health returned version 0.3.0 and private /api/state rejected anonymous callers (401) | Uptime/operational hardening need continued review |
 | Existing apps | Orbit, Caddy and five independent Flow-MCP services remained active during install | Do not migrate/copy those legacy browser profiles into community instances |
 | Database | SQLite local default and vault key under /var/lib/vegas-social-os. No Supabase involved in VPS service | Encrypted off-host backup/restore not yet tested |
 | Flow browser | Fresh new account launched graphical Chrome and returned private scoped login URL | No owner-signed-in Google Flow project inspected; no video generation in this edition yet |
 | No-credit inspection | Worker returned workspace_ready=false, blocked=false for disposable signed-out account | This does **not** prove Google sign-in eligibility or current model controls |
 | Account separation | Account-scoped browser ticket tests and HTTP guards passed in existing Python tests | Cross-tenant SaaS not supported |
-| Test suite | 37 Python + 3 Node worker helper tests passed on VPS prior to community changes; community tests added to branch | Full updated branch CI must pass before merge |
+| Test suite | 41 Python and 3 Node tests passed on VPS; latest community branch GitHub Actions passed (2026-10-13) | A fresh bare-VPS bootstrap and full production video remain untested |
 | Remote MCP | Source endpoint and OAuth consent code implemented | Actual connected ChatGPT plugin installation/guide/doctor call not yet verified |
 | Native image transfer | Native ChatGPT tool only, actual bytes required | Fully automatic host-to-VPS transfer not verified |
 | Official social platforms | YouTube and Instagram OAuth/publishing adapters included | Real consent and exact private test upload still needed |
