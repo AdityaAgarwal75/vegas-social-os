@@ -11,12 +11,12 @@ class Accounts:
         self.store, self.base = store, base.rstrip("/")
 
     def start(self, provider, label):
-        if provider not in ("youtube", "instagram", "flow"):
-            raise ValueError("Supported providers: youtube, instagram, flow")
+        if provider not in ("youtube", "instagram", "flow", "drive"):
+            raise ValueError("Supported providers: youtube, instagram, flow, drive")
         if not isinstance(label, str) or not 1 <= len(label) <= 80:
             raise ValueError("Account label must be 1–80 characters")
         if provider != "flow":
-            prefix = "GOOGLE" if provider == "youtube" else "INSTAGRAM"
+            prefix = "GOOGLE" if provider in ("youtube", "drive") else "INSTAGRAM"
             if not os.getenv(prefix + "_CLIENT_ID") or not os.getenv(prefix + "_CLIENT_SECRET"):
                 raise ValueError(f"Configure {prefix}_CLIENT_ID and {prefix}_CLIENT_SECRET on this installation first")
         ticket = self.store.ticket("connect", {"provider": provider, "label": label})
@@ -34,11 +34,12 @@ class Accounts:
             return {"flow": body}
         state = self.store.ticket("oauth-state", data)
         callback = self.base + "/callback/" + provider
-        if provider == "youtube":
+        if provider in ("youtube", "drive"):
+            scope = "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly" if provider == "youtube" else "https://www.googleapis.com/auth/drive.file"
             params = {"client_id": os.environ["GOOGLE_CLIENT_ID"], "redirect_uri": callback,
                       "response_type": "code", "state": state, "access_type": "offline",
                       "prompt": "consent select_account", "include_granted_scopes": "true",
-                      "scope": "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly"}
+                      "scope": scope}
             return {"redirect": "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)}
         params = {"client_id": os.environ["INSTAGRAM_CLIENT_ID"], "redirect_uri": callback,
                   "response_type": "code", "state": state,
@@ -53,11 +54,11 @@ class Accounts:
             raise ValueError("Authorization failed or cancelled")
         ident = uuid.uuid4().hex
         callback = self.base + "/callback/" + provider
-        prefix = "GOOGLE" if provider == "youtube" else "INSTAGRAM"
+        prefix = "GOOGLE" if provider in ("youtube", "drive") else "INSTAGRAM"
         form = {"client_id": os.environ[prefix + "_CLIENT_ID"],
                 "client_secret": os.environ[prefix + "_CLIENT_SECRET"], "code": code,
                 "redirect_uri": callback, "grant_type": "authorization_code"}
-        endpoint = "https://oauth2.googleapis.com/token" if provider == "youtube" else "https://api.instagram.com/oauth/access_token"
+        endpoint = "https://oauth2.googleapis.com/token" if provider in ("youtube", "drive") else "https://api.instagram.com/oauth/access_token"
         tokens, _ = net.request(endpoint, method="POST", form=form)
         if provider == "youtube":
             info, _ = net.request("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", token=tokens["access_token"])
@@ -65,6 +66,10 @@ class Accounts:
             if len(channels) != 1:
                 raise ValueError("Choose a Google/Brand account that exposes exactly one YouTube channel, then reconnect")
             remote_id, name = channels[0]["id"], channels[0]["snippet"]["title"]
+        elif provider == "drive":
+            info, _ = net.request("https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress,permissionId)", token=tokens["access_token"])
+            user = info["user"]
+            remote_id, name = user["permissionId"], user.get("displayName") or data["label"]
         else:
             # Upgrade the short-lived professional-account token on the server.
             url = "https://graph.instagram.com/access_token?" + urllib.parse.urlencode({
@@ -87,7 +92,7 @@ class Accounts:
         account = self.store.get("account", ident)
         tokens = self.store.secret(ident)
         if tokens.get("expires_at", 0) < time.time() + 120:
-            if account["provider"] == "youtube":
+            if account["provider"] in ("youtube", "drive"):
                 if not tokens.get("refresh_token"):
                     raise ValueError("Refresh token missing; reconnect with consent")
                 fresh, _ = net.request("https://oauth2.googleapis.com/token", method="POST", form={
@@ -106,6 +111,8 @@ class Accounts:
         token = self.token(ident)
         if account["provider"] == "youtube":
             return net.request("https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true", token=token)[0]
+        if account["provider"] == "drive":
+            return net.request("https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress),storageQuota", token=token)[0]
         return net.request(f"https://graph.instagram.com/{graph_version()}/{account['remote_id']}?fields=user_id,username,media_count,followers_count", token=token)[0]
 
 

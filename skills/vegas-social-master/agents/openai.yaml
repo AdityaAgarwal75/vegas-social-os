@@ -1,4 +1,4 @@
 interface:
   display_name: "Vegas Social OS"
-  short_description: "Plan, generate and publish content through ChatGPT"
-  default_prompt: "Use Vegas Social OS to prepare two concepts per channel and guide me through production."
+  short_description: "Agent setup and social content workflows in ChatGPT"
+  default_prompt: "Set up Vegas Social OS using my connected tools, give me a verified onboarding link and manage my content through ChatGPT."

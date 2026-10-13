@@ -14,7 +14,7 @@ def main():
     parser = argparse.ArgumentParser(description="Vegas Social OS — self-hosted, ChatGPT-native content pipeline")
     parser.add_argument("command", choices=("serve", "stdio", "setup", "doctor", "flow-login", "call"))
     parser.add_argument("--data-dir", default=os.getenv("VSO_DATA_DIR", str(Path.home() / ".local/share/vegas-social-os")))
-    parser.add_argument("--port", type=int, default=int(os.getenv("VSO_PORT", "8787")))
+    parser.add_argument("--port", type=int, default=int(os.getenv("VSO_PORT", os.getenv("PORT", "8787"))))
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--account-id")
     parser.add_argument("--name")
@@ -27,7 +27,8 @@ def main():
         parser.error("VSO_PUBLIC_URL must be an origin without path/query/userinfo")
     if p.scheme != "https" and not (p.scheme == "http" and p.hostname in ("127.0.0.1", "localhost")):
         parser.error("Use HTTPS except for loopback development")
-    store = Store(args.data_dir)
+    from .supabase_store import from_environment
+    store = from_environment(args.data_dir)
     engine = Engine(store, base)
     if args.command == "setup":
         ticket = store.ticket("pair", {}, ttl=600)

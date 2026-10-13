@@ -1,0 +1,14 @@
+.git
+.venv
+.env
+.env.*
+!.env.example
+__pycache__
+*.pyc
+*.sqlite*
+data
+profiles
+media
+*.log
+dist
+build

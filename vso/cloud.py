@@ -1,4 +1,4 @@
-"""Optional Supabase secret-free state backup; local SQLite remains authoritative."""
+"""Legacy optional metadata backup; agent-first state uses SupabaseStore."""
 import os
 import re
 import urllib.parse

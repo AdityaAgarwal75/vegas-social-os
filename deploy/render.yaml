@@ -1,0 +1,46 @@
+# Setup agent deploys this managed cloud service after cost authorization.
+# This is a blueprint candidate, not an already-provisioned service.
+services:
+  - type: web
+    name: vegas-social-os
+    runtime: docker
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    # Agent selects a suitable paid plan from current provider options.
+    # The baseline is for a small sequential trial; six concurrent browsers
+    # must not be promised to fit without measured memory/capacity checks.
+    plan: 1c-2g
+    disk:
+      name: social-os-private
+      mountPath: /data
+      sizeGB: 10
+    envVars:
+      - key: VSO_PUBLIC_URL
+        sync: false
+      - key: VSO_INSTALLATION_ID
+        sync: false
+      - key: VSO_CLOUD_MANAGED
+        value: "1"
+      - key: VSO_RUNTIME_PERSISTENT
+        value: "1"
+      - key: VSO_REMOTE_BROWSER
+        value: "1"
+      - key: VSO_STATE_BACKEND
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVER_KEY
+        sync: false
+      - key: VSO_VAULT_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: INSTAGRAM_CLIENT_ID
+        sync: false
+      - key: INSTAGRAM_CLIENT_SECRET
+        sync: false
+      - key: META_GRAPH_VERSION
+        sync: false

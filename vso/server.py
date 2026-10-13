@@ -30,7 +30,7 @@ class HTTPServer(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VegasSocialOS/0.1"
+    server_version = "VegasSocialOS/0.2"
 
     @property
     def engine(self): return self.server.engine
@@ -52,7 +52,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
         for k, v in (headers or {}).items(): self.send_header(k, v)
         self.end_headers()
         if self.command != "HEAD": self.wfile.write(body)
@@ -95,6 +95,23 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError: return False
         return self.session() is not None
 
+    def flow_session(self):
+        from http.cookies import SimpleCookie
+        c = SimpleCookie()
+        try:
+            c.load(self.headers.get("Cookie", ""))
+            if "vso_flow" not in c: return None
+            data = self.store.get("flow-session", self.store.digest(c["vso_flow"].value))
+            return data if data["expires"] > time.time() else None
+        except Exception: return None
+
+    def flow_guard(self):
+        session = self.flow_session()
+        if not self.origin_ok() or not session:
+            self.send({"error": "Private browser login expired or unauthorized"}, 401)
+            return None
+        return session
+
     def origin_ok(self):
         origin = self.headers.get("Origin")
         return not origin or origin == self.base
@@ -122,9 +139,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def get(self):
         path, q = self.parse()
-        if path == "/health": return self.send({"ok": True, "version": "0.1.0"})
-        if path in ("/", "/dashboard", "/app.js", "/style.css"):
-            file = {"/": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/style.css": "style.css"}[path]
+        if path == "/health": return self.send({"ok": True, "version": "0.2.0"})
+        if path in ("/", "/onboarding", "/dashboard", "/app.js", "/style.css", "/flow-login.js"):
+            file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
             return self.send((Path(__file__).parent.parent / "web" / file).read_bytes(), content_type=mime)
         if path == "/pair":
@@ -132,12 +149,40 @@ class Handler(BaseHTTPRequestHandler):
             token = secrets.token_urlsafe(32)
             self.store.put("session", self.store.digest(token), {"expires": time.time() + 8 * 3600})
             secure = "; Secure" if self.base.startswith("https://") else ""
-            return self.redirect("/dashboard", {"Set-Cookie": "vso_session=" + token + "; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800" + secure})
+            return self.redirect("/onboarding", {"Set-Cookie": "vso_session=" + token + "; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800" + secure})
         if path == "/connect":
             result = self.engine.accounts.authorize(q.get("ticket", ""))
             if "redirect" in result: return self.redirect(result["redirect"])
             a = result["flow"]
+            if __import__('os').getenv('VSO_REMOTE_BROWSER') == '1':
+                login = self.engine.flow_login(a["id"])
+                return self.redirect(login["login_url"])
             return self.page("Connect Google Flow", "<p>This account has its own browser profile on your worker computer.</p><p>Return to ChatGPT and ask it to open the dedicated Flow login window. You enter your password and 2FA directly into Google.</p><p>Account label: " + html.escape(a["label"]) + "</p><p>No session is exported from your everyday browser.</p>")
+        if path == "/flow/login":
+            data = self.store.consume(q.get("ticket", ""), "flow-browser")
+            token = secrets.token_urlsafe(32)
+            self.store.put("flow-session", self.store.digest(token), {"account_id": data["account_id"], "expires": time.time() + 1800})
+            secure = "; Secure" if self.base.startswith("https://") else ""
+            return self.redirect("/flow/browser", {"Set-Cookie": "vso_flow=" + token + "; HttpOnly; SameSite=Lax; Path=/flow; Max-Age=1800" + secure})
+        if path == "/flow/browser":
+            if not self.flow_guard(): return
+            return self.send((Path(__file__).parent.parent / "web/flow-login.html").read_bytes(), content_type="text/html")
+        if path == "/flow/session":
+            data = self.flow_guard()
+            if not data: return
+            return self.send({"account_id": data["account_id"]})
+        if path.startswith("/flow/socket/"):
+            data = self.flow_guard()
+            if not data: return
+            if path.rsplit("/", 1)[1] != data["account_id"]: return self.send({"error": "Account scope mismatch"}, 403)
+            return self.proxy_browser(data)
+        if path.startswith("/novnc/"):
+            import os
+            root = Path(os.getenv("VSO_NOVNC_ROOT", "/usr/share/novnc")).resolve()
+            file = (root / path.removeprefix("/novnc/")).resolve()
+            if root not in file.parents or not file.is_file(): return self.send({"error": "Browser interface unavailable"}, 404)
+            import mimetypes
+            return self.send(file.read_bytes(), content_type=mimetypes.guess_type(file.name)[0] or "application/octet-stream")
         if path.startswith("/callback/"):
             a = self.engine.accounts.callback(path.rsplit("/", 1)[1], q.get("state", ""), q.get("code", ""))
             return self.page("Account connected", "<p>" + html.escape(a["name"]) + " is connected to this installation. Return to ChatGPT to continue.</p>")
@@ -159,7 +204,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.page("Authorize this plugin", "<p>This client can manage the accounts and productions in this installation. It does not receive provider passwords or tokens.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Social OS</button></form>')
         if path == "/api/state":
             if not self.guard(): return
-            return self.send({"doctor": self.engine.doctor(), **self.engine.snapshot()})
+            from .profile import status
+            return self.send({"doctor": self.engine.doctor(), "onboarding": status(self.engine), **self.engine.snapshot()})
         if path == "/media":
             record = self.store.get("media-link", self.store.digest(q.get("ticket", "")))
             if record["expires"] < time.time(): raise ValueError("Media link expired")
@@ -191,6 +237,43 @@ class Handler(BaseHTTPRequestHandler):
             f.seek(start)
             self.send(f.read(end - start + 1), status, asset["media_type"], headers)
 
+    def proxy_browser(self, session):
+        import socket
+        import select
+        import re
+        from .desktop import websocket_port
+        if self.headers.get("Upgrade", "").lower() != "websocket":
+            return self.send({"error": "WebSocket upgrade required"}, 400)
+        key = self.headers.get("Sec-WebSocket-Key", "")
+        if not re.fullmatch(r"[A-Za-z0-9+/]{22}==", key): raise ValueError("Invalid WebSocket key")
+        port = websocket_port(self.store.root, session["account_id"])
+        upstream = socket.create_connection(("127.0.0.1", port), timeout=5)
+        try:
+            request = (f"GET / HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+                       f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Protocol: binary\r\n\r\n")
+            upstream.sendall(request.encode())
+            header = b""
+            while b"\r\n\r\n" not in header and len(header) < 8192:
+                block = upstream.recv(4096)
+                if not block: break
+                header += block
+            if not header.startswith(b"HTTP/1.1 101") and not header.startswith(b"HTTP/1.0 101"):
+                return self.send({"error": "Private desktop handshake failed"}, 502)
+            self.wfile.flush()
+            self.connection.sendall(header)
+            self.close_connection = True
+            upstream.settimeout(None)
+            last_activity = time.time()
+            while time.time() < session["expires"] and time.time() - last_activity < 300:
+                readable, _, _ = select.select([self.connection, upstream], [], [], 1)
+                for source in readable:
+                    chunk = source.recv(65536)
+                    if not chunk: return
+                    (upstream if source is self.connection else self.connection).sendall(chunk)
+                    last_activity = time.time()
+        finally:
+            upstream.close()
+
     def do_POST(self):
         try: self.post()
         except ValueError as e: self.send({"error": str(e)}, 400)
@@ -200,6 +283,10 @@ class Handler(BaseHTTPRequestHandler):
         path, q = self.parse()
         if not self.origin_ok(): return self.send({"error": "Origin rejected"}, 403)
         body = self.body()
+        if path == "/flow/verify":
+            data = self.flow_guard()
+            if not data: return
+            return self.send(self.engine.flow_inspect(data["account_id"]))
         if path == "/register":
             redirects = body.get("redirect_uris", [])
             if not isinstance(redirects, list) or not 1 <= len(redirects) <= 10 or any(not isinstance(x, str) or not valid_redirect(x) for x in redirects):

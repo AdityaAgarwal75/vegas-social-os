@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from vso.store import Store
+from vso.supabase_store import from_environment
 from vso.engine import Engine
 
 parser = argparse.ArgumentParser()
@@ -17,5 +17,5 @@ parser.add_argument("--data-dir", default=os.getenv("VSO_DATA_DIR", str(Path.hom
 args = parser.parse_args()
 if args.file.stat().st_size > 64 * 1024 * 1024: parser.error("Asset exceeds 64 MiB")
 media_type = mimetypes.guess_type(args.file.name)[0]
-result = Engine(Store(args.data_dir)).asset_import(base64.b64encode(args.file.read_bytes()).decode(), media_type)
+result = Engine(from_environment(args.data_dir)).asset_import(base64.b64encode(args.file.read_bytes()).decode(), media_type)
 print(json.dumps(result, indent=2))

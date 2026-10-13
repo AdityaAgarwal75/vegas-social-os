@@ -18,10 +18,17 @@ class Store:
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         (self.root / "media").mkdir(exist_ok=True, mode=0o700)
         key = self.root / "vault.key"
+        provided_key = os.getenv("VSO_VAULT_KEY")
+        if provided_key:
+            # Managed-host secret can preserve the key independent of an image.
+            # Existing volume key must match; never silently orphan cloud ciphertext.
+            Fernet(provided_key.encode())
+            if key.exists() and key.read_bytes() != provided_key.encode():
+                raise ValueError("Configured vault key does not match the existing installation key")
         try:
             with key.open("xb") as f:
                 os.chmod(key, 0o600)
-                f.write(Fernet.generate_key())
+                f.write(provided_key.encode() if provided_key else Fernet.generate_key())
         except FileExistsError:
             pass
         self.vault = Fernet(key.read_bytes())

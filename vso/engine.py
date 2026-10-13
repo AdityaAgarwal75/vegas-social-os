@@ -19,7 +19,9 @@ class Engine:
         self.accounts = Accounts(store, base)
 
     def doctor(self):
-        return {"version": "0.1.0-alpha", "image_provider": "chatgpt-native-only",
+        return {"version": "0.2.0-alpha", "image_provider": "chatgpt-native-only",
+                "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
+                "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
                 "node": bool(shutil.which("node")), "ffmpeg": bool(shutil.which("ffmpeg")),
                 "chrome_configured": bool(os.getenv("VSO_CHROME")),
@@ -34,8 +36,8 @@ class Engine:
         account_ids = account_ids or []
         for ident in account_ids:
             account = self.store.get("account", ident)
-            if account["provider"] == "flow":
-                raise ValueError("Flow accounts are generation workers, not publishing destinations")
+            if account["provider"] not in ("youtube", "instagram"):
+                raise ValueError("Only YouTube/Instagram accounts are publishing destinations; Flow is generation and Drive is storage")
         ident = uuid.uuid4().hex
         body = {"id": ident, "name": name, "niche": niche, "language": language, "account_ids": account_ids}
         self.store.put("channel", ident, body)
@@ -165,6 +167,10 @@ class Engine:
 
     def flow_login(self, account_id):
         result = self.flow("login", account_id)
+        if os.getenv("VSO_REMOTE_BROWSER") == "1":
+            ticket = self.store.ticket("flow-browser", {"account_id": account_id}, ttl=600)
+            return {**result, "login_url": self.base + "/flow/login?ticket=" + ticket,
+                    "instructions": "Open the private link and sign into Google in this isolated browser. Enter passwords/2FA only there. Return here after opening a Flow project."}
         return {**result, "instructions": "Sign in yourself in the dedicated browser on the worker computer. Then call flow_inspect. Passwords and 2FA stay in Google's window."}
 
     def flow_inspect(self, account_id):

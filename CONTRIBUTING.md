@@ -4,6 +4,6 @@ Start with README, status and architecture. Use a virtual environment, install p
 
 Do not commit credentials, tokens, profiles, private content or generated media. Do not run live generation/publishing in CI. Use mocked provider responses in ordinary tests. Any live trial must name the account/destination and authorized credit ceiling.
 
-Priority work: verify/fix real account onboarding; native-image transfer in supported ChatGPT hosts; exact Flow asset identity, first-frame attachment and settings discovery; resumable-upload reconciliation; Supabase owner-isolation tests; portable packaging; then comments, carousels, analytics and additional platform adapters.
+Priority work: verify managed cloud deployment and sandboxed remote login; service-only Supabase CAS/RLS; native-image transfer in supported ChatGPT hosts; exact Flow asset identity/reference/settings; resumable-upload reconciliation; Drive archives; portable plugin connection; then comments, carousels, analytics and additional platforms. Preserve the agent-owned, cloud-only onboarding contract; do not introduce end-user terminal/PC/VPS steps.
 
 Maintain original code or document a license-reviewed dependency with attribution. Never market unsupported features as implemented. Read `AGENTS.md` when using an AI coding agent.

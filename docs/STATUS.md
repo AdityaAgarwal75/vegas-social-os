@@ -1,31 +1,32 @@
-# Status — 0.1.0 alpha
+# Status — 0.2.0 agent-first cloud alpha
 
-| Capability | Included | Verification |
+End-user contract: share repo link, authorize services/costs, open onboarding, enter details, complete provider/plugin consent, approve creative work. No installation commands, local PC or user-managed VPS.
+
+| Capability | Implementation | Verification |
 |---|---|---|
-| Master skill/local plugin | Yes | Frontmatter/JSON checks |
-| MCP stdio and HTTP | Yes | Offline protocol/local HTTP tests |
-| MCP OAuth discovery/registration/consent/PKCE/refresh | Yes | Local tests; actual ChatGPT client pending |
-| One-use 10-minute setup/account links | Yes | Expiry/reuse tests |
-| Credential encryption | Fernet + local private key file | Offline test; OS keychain not implemented |
-| YouTube OAuth/refresh/channel read/resumable upload | Yes | Code only, no live provider trial |
-| Instagram Login/token upgrade/refresh/profile/Reels | Yes | No live trial; current Meta docs partly login-gated |
-| Flow profile launcher/workspace inspection | Original worker | Syntax/helper tests, live browser pending |
-| First-frame Flow generation/new-asset download | Experimental | No live test; English UI/control/upload matching needs verification |
-| Concepts/scripts/scene records | Yes | Validation/idempotency tests; ChatGPT writes creative content |
-| Native ChatGPT images | Host tool + import bridge | Automatic generated-byte transfer not guaranteed |
-| Credit caps/conservative reservations | Yes | Cap/concurrency/unknown-outcome tests |
-| Actual balances/spend/refunds | No | Reservations are not charges |
-| FFmpeg assembly | Command included | Media smoke test pending |
-| Publication approval/duplicate suppression | Yes | Offline tests; live reconciliation manual |
-| Review dashboard | Yes | Static/syntax checks; browser trial pending |
-| Channel statistics | Basic provider reads | No live test; not full analytics |
-| Daily briefs | On-demand timezone-aware queue | Needs host scheduler to launch ChatGPT |
-| Supabase metadata backup | Optional REST/schema | Mock tests and owner-isolation live trial needed |
-| Supabase jobs/distributed workers | No | Local SQLite authoritative |
-| Two-concept preview images | No | Selected concept keyframes only |
-| IG photos/carousels/comments/DMs | No | Reels only |
-| Facebook/Threads/TikTok/LinkedIn/X | No | No advertised integrations |
-| Flow Extend/upscale/ingredients/last frame | No | Current model/duration selected in Flow |
-| Public plugin directory release | No | Repository package only |
+| Agent entrypoint/manifest/capability planner | BOOTSTRAP.md + machine-readable manifest + planner | Missing-tool/native-image/receipt tests; independent setup-skill trial |
+| Cloud-only setup policy | Managed app host required; no local-PC/VPS route | Planner/script guards and source review |
+| Managed deployment | Docker/compose + Render cloud blueprint | Source only; container build, browser sandbox and live provider deployment not yet tested |
+| User profile/channel onboarding | Dashboard name/brand/timezone/goals/connections | Server/form syntax + profile validation; full browser trial pending |
+| MCP stdio/HTTP/OAuth | Registration, consent, PKCE, refresh, authenticated tools | Local protocol/HTTP tests; real ChatGPT connection pending |
+| Supabase authoritative state | Whole-state encryption, server-only revision RPC, local transaction cache | Mocked round-trip/reload/CAS/outage tests; actual Postgres/RLS grants pending |
+| Private cloud volume | Key, profiles and working media | Deployment recipe; actual restart/persistence trial pending |
+| Scoped remote Flow login | Per-account Xvfb/Chrome + authenticated noVNC stream | Ticket/account/admin-scope tests; real container/browser login pending |
+| YouTube OAuth/read/resumable upload | Adapter included | No live trial |
+| Instagram Login/profile/Reels | Adapter included | No live trial; some current Meta docs login-gated |
+| Drive OAuth/private media archive/reconciliation | drive.file adapter + optional host connector path | Mocked duplicate/unknown/reconciliation tests; no live Drive trial |
+| Native ChatGPT images | Host-native only; agent imports actual bytes | No API fallback; automatic transfer is host-dependent and unverified |
+| Flow first-frame generation/download | Original experimental CDP worker | Helper tests; real controls, upload and asset matching need repair/validation |
+| Credit caps/reservations | Transactional plan/job guards | Offline cap/idempotency/concurrency tests; actual balances/refunds not implemented |
+| FFmpeg assembly | Cloud-runtime command | No media assembly smoke test yet |
+| Exact publication approval | Separate immutable publication identity | Offline tests; live publication trial pending |
+| Daily brief queue | Idempotent timezone-aware tasks | Local tests; supported ChatGPT host scheduler still needed |
+| Silent plugin installation | Not promised | Host consent/install UI remains required when applicable |
+| Full cloud provisioning connectors | Capability contract + runtime script/recipes | No universal Render/Supabase/app-registration connector is bundled |
+| Photos/carousels/comments/DMs/additional social platforms | Not implemented | Current publishing adapters: YouTube videos and Instagram Reels |
+| Advanced Flow edits/Extend/upscale/distributed workers | Not implemented | No verified tools advertised |
+| Central multi-tenant hosting/public plugin listing | Not implemented/submitted | Independently managed single-operator deployments only |
 
-Next: user-authorized end-to-end onboarding, native-image transfer and one capped Flow job. Repair/verify UI integration before adding generation features. Test Supabase owner isolation in a fresh project before backup. This is a complete initial repository, not a completed full social-management product.
+Current local checks: **37 Python tests + 3 Node worker helper tests** pass. They do not prove live Google/Meta/Drive, Render, Supabase SQL or ChatGPT integration.
+
+Next validation: provision one authorized managed cloud trial, check database grants/state and volume persistence, test remote browser sandbox/login, connect one real plugin, verify native-image transfer, then one explicitly capped Flow clip and one private YouTube upload. Do not label the workflow production-ready before this passes.

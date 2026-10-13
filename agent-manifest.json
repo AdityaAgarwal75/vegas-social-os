@@ -1,0 +1,75 @@
+{
+  "name": "vegas-social-os",
+  "version": "0.2.0",
+  "entrypoint": "BOOTSTRAP.md",
+  "agent_setup_script": "scripts/agent_bootstrap.py",
+  "runtime": {
+    "recipe": "deploy/render.yaml",
+    "container_recipe": "deploy/Dockerfile",
+    "requires": [
+      "managed cloud app service",
+      "private persistent cloud volume",
+      "HTTPS origin",
+      "graphical Chromium"
+    ],
+    "local_pc_required": false,
+    "user_managed_vps_required": false
+  },
+  "database": {
+    "provider": "Supabase",
+    "schema": "supabase/agent-state.sql",
+    "mode": "authoritative encrypted installation state"
+  },
+  "plugin": {
+    "manifest": "plugin.json",
+    "master_skill": "skills/vegas-social-master/SKILL.md",
+    "remote_endpoint": "/mcp"
+  },
+  "image_policy": {
+    "provider": "chatgpt-native-only",
+    "fallback": "none",
+    "missing_tool": "block image stage"
+  },
+  "user_interface": {
+    "onboarding": "/onboarding",
+    "dashboard": "/dashboard",
+    "account_signin": "official OAuth or private isolated Flow browser"
+  },
+  "capabilities": [
+    "source_read",
+    "repository_write",
+    "supabase_manage",
+    "persistent_runtime",
+    "persistent_volume",
+    "https_route",
+    "secret_write",
+    "process_exec",
+    "plugin_create",
+    "plugin_install",
+    "native_images",
+    "native_asset_transfer",
+    "provider_app_manage",
+    "host_scheduler",
+    "managed_app_host",
+    "drive_write"
+  ],
+  "secrets": [
+    "SUPABASE_URL",
+    "SUPABASE_SERVER_KEY",
+    "VSO_INSTALLATION_ID",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "INSTAGRAM_CLIENT_ID",
+    "INSTAGRAM_CLIENT_SECRET",
+    "META_GRAPH_VERSION",
+    "VSO_VAULT_KEY"
+  ],
+  "user_commands_required": false,
+  "paid_provisioning": "requires user authorization",
+  "completion": "health + Supabase + persistent browser + plugin connection verified; account consent is separate",
+  "media": {
+    "archive": "Google Drive when explicitly authorized",
+    "working_storage": "private managed-cloud volume",
+    "existing_host_connection": "verify write/upload capabilities; backend uses separate OAuth consent"
+  }
+}

@@ -1,16 +1,16 @@
 # Architecture
 
-One self-hosted installation belongs to one operator. They can manage multiple channel identities. A centrally hosted multi-tenant service is not implemented.
+One agent-configured installation belongs to one operator. They can manage multiple channel identities. A centrally hosted multi-tenant service is not implemented. The user shares the repository link and authorizes services; the setup agent provisions the deployment and returns dashboard/plugin links. End-user terminal work is not part of the contract.
 
 ChatGPT/Codex supplies creative reasoning and, where available, native image generation. The MCP server supplies deterministic records and actions. Native images are a host capability, not an MCP image provider or API call. Ordinary ChatGPT needs an HTTPS connection to the installation; local Codex can use stdio.
 
-The backend and Node/CDP browser worker currently share one machine/private data directory. Browser profiles, credentials, SQLite and media are outside the checkout. The Python HTTP listener is loopback by default; a user's reverse proxy/tunnel may expose authenticated MCP/OAuth endpoints. Chrome debugging stays on loopback.
+GitHub is source/control history, Supabase is authoritative encrypted state, and a managed cloud app service executes MCP, dashboard, remote browsers and FFmpeg. No local PC or user-managed VPS is required. Render is the initial blueprint candidate, pending live compatibility validation. SQLite is a transaction cache/developer mode. Profiles, key and working media live on a private cloud volume; authorized Google Drive uploads archive media privately. HTTPS exposes authenticated app endpoints and scoped browser streams; VNC/CDP remain private.
 
 ## Data flow
 
 `channel → plan(two concepts) → selected concept → imported keyframes → image approval → scene jobs → final video review → exact publication review → publication`
 
-Each plan has a total cap and conservative reservations. Each job reserves before submission in a SQLite transaction. Stable request IDs return existing jobs; one in-flight job per account and one job per scene suppress duplicates. Browser/provider interruptions become unknown and retain reservations. Recovery is intentionally manual until provider outcome is verified.
+Each plan has a total cap and conservative reservations. In Supabase mode, transactions load the authoritative encrypted state, apply local SQL work, and commit through a service-only revision-checked RPC before the cache transaction succeeds. Concurrent revisions/network failures are not retried or silently replaced by local state. Stable request IDs, one in-flight job per account and one job per scene suppress duplicates. Interrupted provider writes remain unknown until the agent verifies outcome.
 
 Publication records freeze video checksum, destination and copy. They have separate IDs from video jobs. Network writes are claimed before execution and unknown writes never automatically retry. YouTube resumable-upload session URLs are encrypted. Instagram processing and publication are separate operations using the same container.
 
@@ -22,10 +22,12 @@ Publication records freeze video checksum, destination and copy. They have separ
 - MCP OAuth uses registration, explicit operator consent, PKCE, audience/resource checks, hashed access tokens and single-use rotating refresh tokens.
 - Social OAuth callbacks verify and consume purpose-specific state before exchanging codes. Tokens never appear in tool results.
 - Signed media links expire; Instagram may make repeated/range fetches during processing. They are bearer capabilities, not permanent public media.
-- Supabase sync verifies a user JWT against Auth and relies on owner RLS. It excludes secrets, browser state, media bytes and worker URLs. It is a metadata backup, not the job backend.
+- Supabase authoritative state is encrypted as a whole using the private persistent runtime key. The table/RPC are server-only, RLS-enabled and revoked from browser roles. The compare-and-swap revision protects against divergent writers. This encrypted whole-state adapter is an initial single-operator implementation, not a high-volume relational job service. Runtime key/media/browser profiles are not stored there.
+- Private Flow login tickets are consumed once into a 30-minute browser cookie scoped to one account. That cookie cannot access administrative APIs or another account's browser. User credentials are entered directly into Google's remote window; no password/cookie-export tools exist.
+- The legacy `cloud_sync` helper remains an optional secret-free metadata backup. It is not the primary 0.2 state path.
 
 ## Current boundaries
 
-No server here can wake ChatGPT's native image tool by itself. The daily queue needs a supported host scheduler/agent run. Automatic image-byte transfer depends on the host; manual import remains a valid explicit pause.
+No backend can wake ChatGPT's native image tool by itself. Daily briefs need a supported host scheduler/agent run. Automatic image-byte transfer depends on the host; lacking it blocks the zero-manual creative stage rather than asking users to upload files or run import commands.
 
-Flow has no stable public UI-automation contract. The worker's English semantic-control discovery, first-frame uploader, quote parsing and exact-new-asset correlation require live validation. It stops on ambiguity. Advanced video operations, distributed workers, full analytics and other platform adapters are not implemented.
+Flow has no stable public UI-automation contract. The worker's English controls, first-frame uploader, quote parsing and asset correlation require live validation. The Docker/Xvfb/noVNC browser recipe also needs a real build/host/sandbox trial. A written provisioning recipe is not an actual deployment. Advanced operations, distributed workers, full analytics and other platform adapters are not implemented.

@@ -1,0 +1,32 @@
+# Used by the SETUP AGENT on an authorized persistent runtime.
+# User never copies this into a terminal. Inject values through runtime secrets.
+services:
+  social-os:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    init: true
+    shm_size: 1gb
+    ports:
+      - "127.0.0.1:8787:8787"
+    volumes:
+      - social-os-private:/data
+    environment:
+      VSO_PUBLIC_URL: ${VSO_PUBLIC_URL:?agent must configure HTTPS origin}
+      VSO_RUNTIME_PERSISTENT: "1"
+      VSO_INSTALLATION_ID: ${VSO_INSTALLATION_ID:?agent must generate installation ID}
+      SUPABASE_URL: ${SUPABASE_URL:?agent must configure dedicated project}
+      SUPABASE_SERVER_KEY: ${SUPABASE_SERVER_KEY:?agent must inject server key securely}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      INSTAGRAM_CLIENT_ID: ${INSTAGRAM_CLIENT_ID:-}
+      INSTAGRAM_CLIENT_SECRET: ${INSTAGRAM_CLIENT_SECRET:-}
+      META_GRAPH_VERSION: ${META_GRAPH_VERSION:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/health', timeout=5)"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+volumes:
+  social-os-private:

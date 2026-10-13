@@ -1,58 +1,15 @@
-# Setup
+# End-user setup
 
-Use a stable source checkout and private data directory. Install Python requirements into `.venv`; verify Node 22+, Chrome and optionally FFmpeg. Export environment settings: `.env` is not auto-loaded.
+You do not install packages or run commands. The intended deployment is entirely in managed cloud services, with no local PC or user-managed VPS.
 
-Windows PowerShell:
-```powershell
-$env:VSO_DATA_DIR = "$env:LOCALAPPDATA\vegas-social-os"
-$env:VSO_CHROME = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-python -m vso doctor
-python -m vso setup
-python -m vso serve
-```
+Give **https://github.com/AdityaAgarwal75/vegas-social-os** to your ChatGPT and ask it to configure the project. The agent reads `BOOTSTRAP.md`, checks its tools and requests any missing service connections.
 
-Linux/macOS:
-```bash
-export VSO_DATA_DIR="$HOME/.local/share/vegas-social-os"
-python -m vso doctor
-python -m vso setup
-python -m vso serve
-```
+You authorize those services and any paid resources. Your agent provisions the database/runtime, verifies them and creates one plugin. Open its private onboarding link, enter your details, connect your social accounts, and accept provider/plugin consent when required.
 
-Use the same environment/data directory for all commands. Open the one-use setup link in your browser; it grants an eight-hour dashboard session. Anyone holding that unexpired link can become the operator. Keep it private.
+Flow sign-in opens in an isolated dashboard browser on your own runtime. Add another Flow account to create another independent browser profile. Google/Instagram passwords and 2FA are entered directly with the provider, never in chat.
 
-## Local Codex
+After onboarding, return to ChatGPT for strategy, scripts, native images, iterations and approvals. The dashboard shows account status and production progress; it does not generate images.
 
-Use a supported installer for the portable package or explicit current client configuration:
-```toml
-[mcp_servers.vegas_social_os]
-command = "/ABSOLUTE/CHECKOUT/.venv/bin/python"
-args = ["-m", "vso", "stdio"]
-cwd = "/ABSOLUTE/CHECKOUT"
-```
+This is an alpha. Agent provisioning and remote login still need live cloud/provider testing. GitHub/Supabase alone are insufficient for persistent Chrome; the agent also needs a managed cloud app-hosting connection. Drive can privately archive media through verified connector writes or separate app OAuth. If your ChatGPT host cannot install plugins or transfer native image bytes, that step remains blocked.
 
-Windows uses the absolute `.venv\Scripts\python.exe` path with appropriate escaping. Preserve other servers and restart the task after connecting. Stdio runs as the OS operator. Native-image capability is still host-dependent.
-
-## Ordinary ChatGPT
-
-Run the backend and browser worker on a machine you control; this alpha keeps both on one machine. Put HTTP behind a reachable HTTPS origin/proxy, set `VSO_PUBLIC_URL`, keep the listener on loopback, and never expose Chrome CDP. Forward `/mcp`, OAuth metadata, `/authorize`, `/register`, `/token`, `/pair`, `/connect`, `/callback/*` and media paths.
-
-Configure exact Google/Meta callbacks, open your setup link, then connect `https://YOUR-ORIGIN/mcp` through your host's supported custom-app/plugin UI. OAuth registration/consent/PKCE is built in but a real remote ChatGPT connection is untested. Current plan/workspace policy controls installation.
-
-`scripts/package_plugin.py` creates a skill/manifest/remote-MCP ZIP; it neither hosts the backend nor submits it to a directory. Read [onboarding](../skills/vegas-social-master/references/onboarding.md) for provider developer-app requirements.
-
-## Image transfer
-
-Use actual native-generated files only. If accessible locally:
-```bash
-python scripts/import_asset.py /ABSOLUTE/PATH/keyframe.png
-```
-Use the returned checksum ID in `image_attach`. The helper must share the backend's `VSO_DATA_DIR`. Otherwise use **Import ChatGPT image** in the dashboard. Some ordinary-chat hosts require downloading/importing manually; do not claim automatic transfer.
-
-## Optional Supabase
-
-Create a fresh project, review/apply `supabase/schema.sql`, configure publishable key and a valid user JWT server-side, then invoke `cloud_sync`. RLS restricts rows with `auth.uid()` ownership for all operations. Never put service-role keys in browsers. JWT renewal is manual in this alpha. Test isolation with two users before live backup.
-
-## Disconnect
-
-`account_disconnect` removes local provider credentials/metadata. It does not revoke provider grants, terminate jobs or erase Flow profiles. Revoke externally, stop Chrome, and explicitly review/delete the correct private profile directory. Never delete unknown jobs just to allow a speculative retry.
+Technical instructions belong to the agent in `BOOTSTRAP.md`. Developer-only local commands are in `DEVELOPER-SETUP.md`.
