@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vegas Social OS</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<aside><a class="brand" href="/">V<span> / SOCIAL OS</span></a><nav><a href="#overview">Overview</a><a href="#accounts">Accounts</a><a href="#channels">Channels</a><a href="#productions">Productions</a><a href="#publishing">Publishing</a></nav><p class="aside-note">YOUR INSTALLATION<br>YOUR ACCOUNTS<br>YOUR CONTENT</p><span class="version">0.1 / ALPHA</span></aside>
+<main id="overview"><header><div><p class="eyebrow">CONTENT OPERATIONS</p><h1>Your creative control room.</h1><p class="muted">Plan in ChatGPT. Review here. Publish with intent.</p></div><button id="refresh" class="secondary">Refresh status</button></header>
+<div id="notice" role="status">Loading your installation…</div>
+<section class="metrics" id="metrics"></section>
+<section id="accounts"><div class="section-heading"><div><p class="eyebrow">01 / CONNECTIONS</p><h2>Keep every identity separate.</h2></div></div><form id="connect-form"><label>Account label<input name="label" required placeholder="Brand / channel name" maxlength="80"></label><label>Service<select name="provider"><option value="youtube">YouTube</option><option value="instagram">Instagram professional</option><option value="flow">Google Flow</option></select></label><button>Get private login link</button></form><div id="connect-result"></div><div class="cards" id="account-cards"></div></section>
+<section id="channels"><p class="eyebrow">02 / BRIEFS</p><h2>Give each channel a direction.</h2><form id="channel-form"><label>Channel name<input name="name" required></label><label>Niche / audience<input name="niche" required></label><label>Language<input name="language" value="English" required></label><fieldset><legend>Publishing destinations</legend><div id="destinations"></div></fieldset><button>Save channel brief</button></form><div class="cards" id="channel-cards"></div></section>
+<section id="productions"><p class="eyebrow">03 / PRODUCTION</p><h2>Two ideas. One deliberate choice.</h2><p class="muted">Ask the master plugin to prepare concepts. Only ChatGPT's native image tool creates keyframes.</p><div id="production-cards" class="productions"></div></section>
+<section id="publishing"><p class="eyebrow">04 / RELEASE</p><h2>Review the exact release.</h2><p class="muted">Account connection does not authorize a post. Approve the destination, video and copy together.</p><div class="cards" id="publication-cards"></div></section>
+<footer>Open source. Self-hosted. No shared credentials.<br>This alpha has not yet been tested with live provider accounts.</footer></main>
+</body></html>

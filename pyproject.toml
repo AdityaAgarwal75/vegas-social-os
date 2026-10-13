@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vegas-social-os"
+version = "0.1.0"
+description = "Self-hosted social content orchestration for ChatGPT and Codex"
+requires-python = ">=3.11"
+dependencies = ["cryptography==50.0.2"]
+license = "MIT"
+
+[tool.setuptools]
+packages = ["vso"]
+
+# Source checkout is the supported installation. Worker/web/skill resources are
+# repository-relative; wheel distribution is intentionally not advertised yet.

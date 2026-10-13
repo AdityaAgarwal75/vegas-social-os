@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "vegas-social-os",
+  "version": "0.1.0",
+  "description": "Self-hosted content planning, native ChatGPT image handoffs, Google Flow browser jobs and approved social publishing. Alpha: live integrations require verification.",
+  "author": {"name": "Vegas Social OS contributors"},
+  "extensions": {"com.openai": {"interface": {
+    "displayName": "Vegas Social OS",
+    "shortDescription": "Your social content pipeline",
+    "longDescription": "Connect your own accounts, prepare two concepts per channel, create keyframes with ChatGPT native images, review Flow videos and approve exact publishing destinations.",
+    "developerName": "Vegas Social OS contributors",
+    "category": "Productivity",
+    "defaultPrompt": "Read the Vegas Social OS guide, check my setup and prepare two original concepts for each configured channel."
+  }}}
+}

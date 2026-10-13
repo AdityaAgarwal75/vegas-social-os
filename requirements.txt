@@ -1,0 +1,2 @@
+# Only runtime dependency. No AI/image API dependency is included.
+cryptography==50.0.2
