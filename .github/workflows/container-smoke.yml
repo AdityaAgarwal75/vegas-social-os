@@ -1,0 +1,45 @@
+name: Container and browser smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the hosted deployment image
+        run: docker build -f deploy/Dockerfile -t vegas-social-os:smoke .
+      - name: Verify dashboard, remote desktop dependencies, and sandboxed Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Offline, ephemeral CI smoke ONLY: not a deployment, not a Google login.
+          # No provider credentials, user sessions, or persistent production state.
+          docker run --detach --name vso-smoke \
+            -p 127.0.0.1:18787:8787 \
+            -e VSO_PUBLIC_URL=http://127.0.0.1:18787 \
+            -e VSO_STATE_BACKEND=sqlite \
+            -e VSO_REMOTE_BROWSER=1 \
+            vegas-social-os:smoke
+          trap 'docker logs vso-smoke || true; docker rm -f vso-smoke || true' EXIT
+          ok=0
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18787/health > /tmp/vso-health.json; then
+              ok=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ok" = 1
+          grep -q '"ok": true' /tmp/vso-health.json
+          curl --fail --silent http://127.0.0.1:18787/dashboard | grep -q 'html'
+          docker exec vso-smoke python -c 'from vso.desktop import ensure; d=ensure("/data/smoke-browser"); assert d["websocket_port"] > 0'
+          docker exec vso-smoke chromium --version
+          docker exec vso-smoke sh -c \
+            'chromium --headless=new --disable-gpu --disable-dev-shm-usage --no-first-run --dump-dom about:blank > /tmp/chromium-dom.html 2>/tmp/chromium-stderr.log || { cat /tmp/chromium-stderr.log; exit 1; }; grep -q "<html" /tmp/chromium-dom.html'
