@@ -124,9 +124,9 @@ def registry(engine):
         from .flow_service import image_poll
         return image_poll(engine, job_id)
     def connection_setup(): return engine.accounts.config.status()
-    def post_prepare(account_id, asset_ids, title, caption, visibility, options, request_id):
+    def post_prepare(account_id, asset_ids, title, caption, visibility, options, request_id, plan_id=""):
         from .publishing import prepare
-        return prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id)
+        return prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id, plan_id=plan_id)
     def post_execute(publication_id):
         from .publishing import execute
         return execute(engine, publication_id)
@@ -347,10 +347,19 @@ def call(engine, name, arguments):
     spec = schema(methods[name])
     if not isinstance(arguments, dict) or set(arguments) - set(spec["properties"]) or set(spec["required"]) - set(arguments):
         raise ValueError("Invalid tool arguments")
-    for k, v in arguments.items():
-        typ = spec["properties"][k]["type"]
-        if (typ == "string" and not isinstance(v, str)) or (typ == "integer" and type(v) is not int) or (typ == "number" and type(v) not in (int,float)) or (typ == "array" and not isinstance(v, list)) or (typ == "object" and not isinstance(v, dict)):
-            raise ValueError("Invalid argument type for " + k)
+    def check(value,spec,depth=0):
+        if depth>20:raise ValueError('Tool arguments too deeply nested')
+        typ=spec.get('type');valid={'string':lambda:isinstance(value,str),'integer':lambda:type(value) is int,'number':lambda:type(value) in (int,float),'boolean':lambda:type(value) is bool,'object':lambda:isinstance(value,dict),'array':lambda:isinstance(value,list)}
+        if typ in valid and not valid[typ]():raise ValueError('Invalid argument type')
+        if typ=='object':
+            properties=spec.get('properties',{})
+            if set(spec.get('required',[]))-set(value) or (spec.get('additionalProperties') is False and set(value)-set(properties)):raise ValueError('Invalid nested fields')
+            for key,item in value.items():
+                if key in properties:check(item,properties[key],depth+1)
+        if typ=='array':
+            if len(value)>1000:raise ValueError('Too many array items')
+            for item in value:check(item,spec.get('items',{}),depth+1)
+    check(arguments,spec)
     return methods[name](**arguments)
 
 

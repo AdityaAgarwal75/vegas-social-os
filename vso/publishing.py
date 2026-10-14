@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from . import net
 
 
-def prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id):
+def prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id, plan_id=""):
     if not request_id or len(request_id) > 200: raise ValueError('A stable request ID is required')
     a = engine.store.get('account', account_id)
     provider = a['provider']
@@ -63,6 +63,10 @@ def prepare(engine, account_id, asset_ids, title, caption, visibility, options, 
     body = {'kind': 'composer', 'account_id': account_id, 'destination_name': a.get('name', a.get('label')),
             'provider': provider, 'asset_ids': asset_ids, 'title': title, 'caption': caption,
             'visibility': visibility, 'options': options}
+    if plan_id:
+        plan=engine.store.get('plan',plan_id);channel=engine.store.get('channel',plan['channel_id'])
+        if plan['status']!='video_review' or asset_ids!=[plan.get('video')] or account_id not in channel['account_ids'] or plan.get('revision_requested'):raise ValueError('Release must match the reviewed final video and channel destination')
+        body['plan_id']=plan_id
     ident = engine.store.digest('post:' + request_id)[:32]
     try:
         old = engine.store.get('publication', ident)

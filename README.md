@@ -10,7 +10,7 @@ ChatGPT is your main workstation. Its private plugin connects to your own instal
 
 Read [the accepted ChatGPT-first architecture](docs/CHATGPT-FIRST.md) and [the complete new-user journey](docs/NEW-USER-JOURNEY.md), including plugin structure, permissions, VPS administration boundaries, optional Drive storage and the unattended-work implementation gates.
 
-**0.6.1 alpha:** founder VPS browser/settings checks and offline tests exist. Durable storyboard-feedback requests and review-focused navigation are implemented. Paid Flow rendering, fresh AWS onboarding, real publishing and event-driven ChatGPT continuation are not yet accepted end to end. [Current evidence](docs/STATUS.md) distinguishes source, menus, submitted jobs and usable outputs.
+**0.7.0 engineering candidate:** founder VPS browser/settings checks and offline tests exist. Durable storyboard-feedback requests and review-focused navigation are implemented. Paid Flow rendering, fresh AWS onboarding, real publishing and event-driven ChatGPT continuation are not yet accepted end to end. [Current evidence](docs/STATUS.md) distinguishes source, menus, submitted jobs and usable outputs.
 
 ## Give this repository to your ChatGPT
 
@@ -30,7 +30,7 @@ YouTube, Instagram professional accounts and Facebook Pages use official OAuth c
 
 ChatGPT saves two ideas per production, scripts, scene direction and actual transferred native images. Choose an idea and review the storyboard in the dashboard. Approve attached images under the agreed credit ceiling or request changes; feedback persists for the agent and revisions preserve the original. Watch the exact clips and final export, then review the prepared release.
 
-**Morning preparation and approve-to-render are the target workflow, not a running background feature yet.** The existing scheduler creates briefs and executes exact approved scheduled posts. The selected design uses [OpenAI MCP Events](https://developers.openai.com/plugins/build/mcp-events) to notify a supported ChatGPT Work workflow of due briefs and decisions. This server does not implement that event bridge yet. Neither a connected badge nor a queued request proves ChatGPT is generating. See the [event contract and acceptance gates](docs/CHATGPT-FIRST.md#event-bridge-required-next-implementation). Until then, resume the connected ChatGPT agent to consume due briefs/review requests.
+**Morning preparation and approve-to-render are the target workflow, not a running background feature yet.** The existing scheduler creates briefs and executes exact approved scheduled posts. The selected design uses [OpenAI MCP Events](https://developers.openai.com/plugins/build/mcp-events) to notify a supported ChatGPT Work workflow of due briefs and decisions. The server implements signed subscriptions and a durable event outbox; actual host continuation remains unverified. Neither a connected badge nor a queued request proves ChatGPT is generating. See the [event contract and acceptance gates](docs/CHATGPT-FIRST.md#event-bridge-implemented-protocol-host-acceptance-pending). Until then, resume the connected ChatGPT agent to consume due briefs/review requests.
 
 ## Existing VPS installation
 
@@ -73,9 +73,11 @@ The ZIP includes the master workflow, Flow craft and setup/review references. In
 | Storyboard revisions | Durable idempotent feedback, immutable originals, fresh approvals on new plans |
 | Social publishing | Implemented adapters/offline guards; real provider consent and release trials pending |
 | Daily briefs/approved schedules | VPS queues briefs and schedules exact approved posts while running |
-| ChatGPT event continuation | Designed; protocol/delivery/host acceptance not implemented |
-| Full VPS admin in same plugin | Scoped broker designed; currently use authorized AWS/SSM/VPS connector |
+| ChatGPT event continuation | Protocol and signed delivery implemented; actual Web host continuation not accepted |
+| Full VPS admin in same plugin | Isolated root-owned Unix broker implemented; owner approval/enrollment required |
 
 Private state/media/profiles live in `/var/lib/vegas-social-os`, code in `/opt/vegas-social-os`, service `vegas-social-os.service`, default loopback port 8899. Back up complete private state/key securely; never commit it. VPS/credits/network costs are separate from this free project. Respect authentication challenges, quotas, provider review and researched dependency licenses.
 
 Read [architecture](docs/ARCHITECTURE.md), [Flow execution contract](docs/FLOW-EXECUTION-CONTRACT.md), [contributing](CONTRIBUTING.md) and [security](SECURITY.md). MIT licensed.
+
+Current engineering repairs, web connection acceptance and owner administration: [operations 0.7](docs/OPERATIONS-0.7.md), [dated audit](docs/audits/2026-10-14-engineering.md).

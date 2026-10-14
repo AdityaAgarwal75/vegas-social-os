@@ -49,6 +49,8 @@ def main():
                 result = {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "Parse error"}}
             if result is not None: print(json.dumps(result), flush=True)
     else:
+        from .recovery import startup
+        startup(engine)
         server = HTTPServer((args.host, args.port), engine)
         print("Vegas Social OS listening at " + base + "; data stays outside the repository", file=sys.stderr)
         from .automation import start

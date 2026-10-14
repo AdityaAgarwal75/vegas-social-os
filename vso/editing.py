@@ -45,7 +45,7 @@ def start(engine,plan_id,width,height,fps,fade_seconds,music_asset_id,music_volu
     return job
 
 def run(engine,ident):
-    job=engine.store.get('edit-job',ident);cfg=job['inputs'];job.update(status='running',pid=os.getpid(),started_at=time.time());engine.store.put('edit-job',ident,job)
+    job=engine.store.get('edit-job',ident);cfg=job['inputs'];job.update(status='running',pid=os.getpid(),start_ticks=Path('/proc/self/stat').read_text().split(') ',1)[1].split()[19],started_at=time.time());engine.store.put('edit-job',ident,job)
     try:
         os.nice(10)
         with tempfile.TemporaryDirectory(prefix='edit-',dir=engine.store.root) as directory:

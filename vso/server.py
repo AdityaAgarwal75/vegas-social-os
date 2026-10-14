@@ -413,6 +413,8 @@ class Handler(BaseHTTPRequestHandler):
             if method not in auth.DISCOVERY_METHODS and not principal:
                 if method=='tools/call':return self.send(tools.auth_error(self.engine,body))
                 return self.send({'error':'Authentication required'},401,headers={'WWW-Authenticate':auth.challenge(self.base)})
+            if method in ('events/subscribe','events/unsubscribe') and principal and (not auth.permits(principal,'social:read') or not auth.permits(principal,'events:subscribe')):
+                return self.send({'error':'Insufficient event scope'},403,headers={'WWW-Authenticate':auth.challenge(self.base,'insufficient_scope',scope='social:read events:subscribe')})
             if method=='tools/call' and principal:
                 required=auth.tool_scope(body.get('params',{}).get('name'))
                 if not auth.permits(principal,required):return self.send(tools.auth_error(self.engine,body,required))

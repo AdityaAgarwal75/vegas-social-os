@@ -4,7 +4,7 @@
 
 ## What your brother needs
 
-His own ChatGPT account with a host that permits custom remote plugins; AWS Core connected to his own AWS account with billing and the scoped provisioning/SSM permissions listed in [AWS onboarding](AWS-ONBOARDING.md); his own eligible Google Flow accounts; optional social publishing accounts. Work/event capability is additionally needed for unattended continuation, and is not assumed for every ChatGPT account. Google/Meta eligibility, Flow subscription/credits and cloud bills belong to him.
+His own ChatGPT account with a host that permits custom remote plugins; an existing owner-controlled VPS with an authorized execution connector, or AWS Core connected to his own AWS account when creating a new VPS; his own eligible Google Flow accounts; optional social publishing accounts. New AWS provisioning additionally needs billing and scoped permissions from [AWS onboarding](AWS-ONBOARDING.md). Work/event capability is additionally needed for unattended continuation, and is not assumed for every ChatGPT account. Google/Meta eligibility, Flow subscription/credits and cloud bills belong to him.
 
 No GitHub login is needed to read/clone this public repository. No Supabase/Render account or image API key is required for the VPS + native ChatGPT image path. Installing this software alone does not bypass social developer-app registration.
 

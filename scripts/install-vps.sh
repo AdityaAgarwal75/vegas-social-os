@@ -35,6 +35,7 @@ if (( CHECK )); then
   exit 0
 fi
 (( EUID == 0 )) || { echo 'Run with sudo.' >&2; exit 1; }
+install -d -m 0755 /run/lock
 exec 9>/run/lock/vegas-social-os-install.lock
 flock -n 9 || { echo 'Another installation/upgrade is running.' >&2; exit 1; }
 if [[ -f "$ENV_FILE" ]]; then

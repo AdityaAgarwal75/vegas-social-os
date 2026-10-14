@@ -55,7 +55,7 @@ def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',r
     result=flow_service.request(config,'generate',{'project':'SocialOS-video-'+engine.store.digest(submission_id)[:24],'scenes':[scene]})
     ids=[j['id'] for j in result.get('jobs',[])]
     if len(ids)!=1:raise ValueError('Expected one durable backend video job')
-    return {'backend_job_ids':ids}
+    return {'backend_job_ids':ids,'project':result.get('output_dir')}
 
 def poll(engine,account_id,worker):
     _,config=flow_service.binding(engine,account_id)
@@ -88,7 +88,7 @@ def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_
         if a['status']!='workspace_ready':raise ValueError('Verify this Flow workspace before generation')
         for row in db.execute("SELECT body FROM records WHERE kind IN ('job','image-job','video-job')"):
             if json.loads(row[0])['status'] in ('submitting','processing','unknown'):raise ValueError('Finish or reconcile active browser work first')
-        job={**body,'id':ident,'status':'submitting','created_at':time.time(),'asset_ids':[]}
+        job={**body,'id':ident,'input_sha256':engine.store.digest(json.dumps(body,sort_keys=True)),'flow_project_url':a.get('project_url'),'status':'submitting','created_at':time.time(),'asset_ids':[]}
         engine.store.write(db,'video-job',ident,job)
     try:job.update(status='processing',worker=submit(engine,account_id,prompt,opts,first_frame_id,last_frame_id,reference_asset_ids,submission_id=ident))
     except ValueError as e:job.update(status='unknown',error=str(e))

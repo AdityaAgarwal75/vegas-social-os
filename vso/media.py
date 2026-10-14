@@ -19,7 +19,7 @@ def probe(path,media_type):
     with Path(path).open('rb') as f:head=f.read(32)
     checks={'image/png':head.startswith(b'\x89PNG\r\n\x1a\n'),'image/jpeg':head.startswith(b'\xff\xd8\xff'),'image/webp':head.startswith(b'RIFF') and head[8:12]==b'WEBP','video/mp4':head[4:8]==b'ftyp','audio/mp4':head[4:8]==b'ftyp','audio/wav':head.startswith(b'RIFF') and head[8:12]==b'WAVE','audio/mpeg':head.startswith(b'ID3') or (len(head)>1 and head[0]==255 and head[1]&224==224)}
     if not checks.get(media_type):raise ValueError('File signature does not match declared media type')
-    r=subprocess.run(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(path)],capture_output=True,timeout=15)
+    r=subprocess.run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-show_streams','-show_format','-of','json',str(path)],capture_output=True,timeout=15)
     if r.returncode or len(r.stdout)>100000:raise ValueError('Media decoder rejected this file')
     data=json.loads(r.stdout);streams=data.get('streams',[])
     expected='audio' if media_type.startswith('audio/') else 'video'
@@ -27,7 +27,7 @@ def probe(path,media_type):
     if not stream:raise ValueError('Expected media stream is missing')
     if expected=='video' and not 0<int(stream.get('width',0))*int(stream.get('height',0))<=64_000_000:raise ValueError('Invalid or excessive image dimensions')
     # Decode actual content, not only a MIME label or header. Longer playback QA is separate.
-    args=['ffmpeg','-v','error','-threads','1','-i',str(path)]
+    args=['ffmpeg','-v','error','-threads','1','-protocol_whitelist','file,pipe','-i',str(path)]
     args+=['-frames:v','1'] if expected=='video' else ['-t','1']
     r=subprocess.run(args+['-f','null','-'],capture_output=True,timeout=30)
     if r.returncode:raise ValueError('Actual media decoding failed')
@@ -140,7 +140,7 @@ def ingest(engine,file,request_id):
 def ingest_run(engine,ident):
     from urllib.parse import urlsplit
     from .research import PinnedHTTPS,public_address
-    job=engine.store.get('media-ingest',ident);job.update(status='running',pid=os.getpid());engine.store.put('media-ingest',ident,job)
+    job=engine.store.get('media-ingest',ident);job.update(status='running',pid=os.getpid(),start_ticks=Path('/proc/self/stat').read_text().split(') ',1)[1].split()[19]);engine.store.put('media-ingest',ident,job)
     path=engine.store.root/'media'/('ingest-'+ident+'.partial');connection=None
     try:
         url=urlsplit(engine.store.secret('media-source:'+ident)['url']);connection=PinnedHTTPS(url.hostname,public_address(url.hostname));connection.timeout=20

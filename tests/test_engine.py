@@ -42,7 +42,7 @@ class EngineTests(unittest.TestCase):
         p = self.ready()
         a = self.e.asset_import(base64.b64encode(MP4).decode(), 'video/mp4')
         self.e.video_attach(p['id'], a['id'])
-        return self.e.publish_prepare(p['id'], 'youtube', 'Title', 'Caption')
+        return self.e.publish_prepare(p['id'], 'youtube', 'Title', 'Caption', options={'made_for_kids':False})
 
     def test_reusable_request_has_same_plan(self):
         a = self.e.plan_save(self.channel['id'], self.concepts, 'same')

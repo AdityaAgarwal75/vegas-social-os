@@ -20,7 +20,7 @@ class Engine:
 
     def doctor(self):
         from . import flow_runtime
-        return {"version": "0.7.0-alpha", "image_provider": "chatgpt-native-only",
+        return {"version": "0.7.0", "image_provider": "chatgpt-native-only",
                 "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
                 "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
@@ -244,7 +244,7 @@ class Engine:
             p["reserved"] += max_credits
             p["status"] = "generating"
             job = {"id": ident, "plan_id": plan_id, "scene": scene, "account_id": account_id,
-                   "max_credits": max_credits, "options": options, "scene_id":p["concepts"][p["selected"]]["scenes"][scene].get("scene_id"), "input_sha256":self.store.digest(json.dumps({"prompt":p["concepts"][p["selected"]]["scenes"][scene]["video_prompt"],"image":p["images"][str(scene)],"options":options,"account_id":account_id},sort_keys=True)), "status": "submitting", "created_at": time.time()}
+                   "max_credits": max_credits, "options": options, "flow_project_url":a.get("project_url"), "scene_id":p["concepts"][p["selected"]]["scenes"][scene].get("scene_id"), "input_sha256":self.store.digest(json.dumps({"prompt":p["concepts"][p["selected"]]["scenes"][scene]["video_prompt"],"image":p["images"][str(scene)],"options":options,"account_id":account_id},sort_keys=True)), "status": "submitting", "created_at": time.time()}
             self.store.write(db, "plan", plan_id, p)
             self.store.write(db, "job", ident, job)
         self.store.log("video.request", ident)
@@ -293,31 +293,11 @@ class Engine:
             self.store.write(db, "plan", plan_id, p)
         return p
 
-    def publish_prepare(self, plan_id, account_id, title, caption, visibility="private"):
-        p = self.store.get("plan", plan_id)
-        a = self.store.get("account", account_id)
-        if a["provider"]=="facebook":raise ValueError("Use post_prepare with this approved final asset; legacy production publishing does not support Facebook")
-        channel = self.store.get("channel", p["channel_id"])
-        if p["status"] != "video_review" or not p["video"]:
-            raise ValueError("Attach a completed video for final review first")
-        if account_id not in channel["account_ids"]:
-            raise ValueError("Destination is not assigned to this channel")
-        if a["provider"] not in ("youtube", "instagram", "facebook") or a["status"] != "connected":
-            raise ValueError("Connect a supported publishing account")
-        if a["provider"] == "instagram" and visibility != "public":
-            raise ValueError("Instagram Reels publish publicly; set visibility=public explicitly")
-        if visibility not in ("private", "unlisted", "public") or not 1 <= len(title) <= 100 or len(caption) > (2200 if a["provider"] == "instagram" else 5000):
-            raise ValueError("Invalid visibility, title or caption length")
-        body = {"plan_id": plan_id, "account_id": account_id, "asset_id": p["video"], "provider": a["provider"],
-                "title": title, "caption": caption, "visibility": visibility}
-        ident = self.store.digest(json.dumps(body, sort_keys=True))[:32]
-        try:
-            return self.store.get("publication", ident)
-        except ValueError:
-            pass
-        body.update(id=ident, status="review", remote_id=None)
-        self.store.put("publication", ident, body)
-        return body
+    def publish_prepare(self, plan_id, account_id, title, caption, visibility="private", options=None):
+        from .publishing import prepare
+        plan=self.store.get('plan',plan_id)
+        signature=self.store.digest(json.dumps([plan_id,account_id,plan.get('video'),title,caption,visibility,options],sort_keys=True))
+        return prepare(self,account_id,[plan.get('video')],title,caption,visibility,options or {},'production:'+signature,plan_id=plan_id)
 
     def publish_approve(self, publication_id):
         with self.store.db() as db:
@@ -330,6 +310,12 @@ class Engine:
         return p
 
     def publish_execute(self, publication_id):
+        record=self.store.get('publication',publication_id)
+        if record.get('kind')=='composer':
+            if record['status']=='review':raise ValueError('Approve the exact release before publishing')
+            from .publishing import execute
+            return execute(self,publication_id)
+        if record.get('provider')=='facebook':raise ValueError('Legacy Facebook release is unsupported; prepare and review a new composer release')
         with self.store.db() as db:
             p = self._load(db, "publication", publication_id)
             if p["status"] in ("published", "processing", "uploading", "unknown"):
@@ -371,6 +357,9 @@ class Engine:
         return p
 
     def publish_poll(self, publication_id):
+        if self.store.get('publication',publication_id).get('kind')=='composer':
+            from .publishing import poll
+            return poll(self,publication_id)
         p = self.store.get("publication", publication_id)
         if p["status"] == "published":
             return p

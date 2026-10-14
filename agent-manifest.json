@@ -1,6 +1,6 @@
 {
   "name": "vegas-social-os",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "entrypoint": "BOOTSTRAP.md",
   "agent_setup_script": "scripts/bootstrap-ubuntu.sh",
   "runtime": {
@@ -93,7 +93,8 @@
   "media": {
     "archive": "Google Drive when explicitly authorized",
     "working_storage": "private VPS /var/lib/vegas-social-os/media",
-    "existing_host_connection": "verify write/upload capabilities; backend uses separate OAuth consent"
+    "existing_host_connection": "verify write/upload capabilities; backend uses separate OAuth consent",
+    "ingestion": "host fileParams or resumable raw-byte PUT, checksummed and decoded"
   },
   "optional_secrets": [
     "SUPABASE_URL",
@@ -117,9 +118,17 @@
   "product_contract": "docs/CHATGPT-FIRST.md",
   "new_user_journey": "docs/NEW-USER-JOURNEY.md",
   "automation": {
-    "host_events_implemented": false,
+    "host_events_implemented": true,
     "feedback_queue_implemented": true,
     "automatic_release_policy_implemented": false,
-    "contract": "docs/CHATGPT-FIRST.md"
+    "contract": "docs/CHATGPT-FIRST.md",
+    "host_continuation_verified": false
+  },
+  "administration": {
+    "implemented": true,
+    "broker": "local root-owned Unix socket",
+    "gateway_user": "vegas-social",
+    "scope": "vps:admin",
+    "dangerous_operation_approval": "private owner TOTP, exact request, 120 seconds"
   }
 }

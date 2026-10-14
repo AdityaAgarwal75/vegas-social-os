@@ -19,6 +19,7 @@ while (( $# )); do
   esac
 done
 export DEBIAN_FRONTEND=noninteractive
+export DPKG_DEB_THREADS_MAX=1
 apt-get update -qq
 apt-get install -y -qq ca-certificates curl gnupg git tar xz-utils python3 python3-venv iproute2 util-linux \
   ffmpeg xvfb x11vnc websockify novnc
@@ -44,6 +45,9 @@ if (( NEED_NODE )); then
   ln -sfn /opt/vegas-social-os-node/bin/npx /usr/local/bin/npx
 fi
 if ! command -v google-chrome >/dev/null 2>&1 && ! command -v chromium >/dev/null 2>&1; then
+  if [[ "$ID" = debian ]]; then
+    apt-get install -y -qq --no-install-recommends chromium chromium-sandbox
+  else
   TMPKEY="$(mktemp)"
   curl --fail --silent --show-error --location https://dl.google.com/linux/linux_signing_key.pub -o "$TMPKEY"
   gpg --dearmor --yes --output /usr/share/keyrings/google-chrome-signing.gpg "$TMPKEY"
@@ -52,6 +56,7 @@ if ! command -v google-chrome >/dev/null 2>&1 && ! command -v chromium >/dev/nul
     >/etc/apt/sources.list.d/google-chrome.list
   apt-get update -qq
   apt-get install -y -qq google-chrome-stable
+  fi
 fi
 if [[ -z "$DOMAIN" ]]; then
   IP="$(curl --fail --silent --show-error --max-time 6 --ipv4 https://api.ipify.org || true)"

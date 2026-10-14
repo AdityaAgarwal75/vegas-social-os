@@ -30,6 +30,7 @@ ROUTINE={'inventory','metrics','file_list','file_read','disk_usage','logs','netw
 
 
 def redact(text):
+    text=re.sub(r"(?i)([\"']?(?:access_token|refresh_token|id_token|client_secret|api_key|cookie|password|secret)[\"']?\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)",r'\1[REDACTED]',text)
     text=re.sub(r'(?im)(authorization\s*[:=]\s*bearer\s+|(?:password|passwd|secret|token|api[_-]?key|cookie|code_verifier)\s*[:=]\s*)[^\s,;]+',r'\1[REDACTED]',text)
     text=re.sub(r'-----BEGIN [^-]*PRIVATE KEY-----.*?-----END [^-]*PRIVATE KEY-----','[REDACTED PRIVATE KEY]',text,flags=re.S)
     text=re.sub(r'([?&](?:ticket|token|code|key)=)[^&\s]+',r'\1[REDACTED]',text)
