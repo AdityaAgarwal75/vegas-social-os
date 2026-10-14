@@ -59,10 +59,14 @@ def ensure(engine, account_id):
             cdp = browser['port']
             if type(cdp) is not int or not 1024 <= cdp <= 65535:
                 raise ValueError('Invalid private browser port')
+            args = Path(f"/proc/{browser['pid']}/cmdline").read_bytes().split(b'\0')
+            if (f'--user-data-dir={root / "profile"}'.encode() not in args or
+                    f'--remote-debugging-port={cdp}'.encode() not in args):
+                raise ValueError('Saved browser belongs to another process/profile')
             with urllib.request.build_opener(NoRedirect).open(f'http://127.0.0.1:{cdp}/json/version', timeout=2) as response:
                 json.load(response)
         except (OSError, KeyError, ValueError):
-            raise ValueError('Open this account’s private Google browser first; no second Chrome was launched') from None
+            raise ValueError('Open and verify this account’s private Google browser first; no second Chrome was launched') from None
         config_file = root / 'engine.json'
         if config_file.exists():
             saved = json.loads(config_file.read_text())

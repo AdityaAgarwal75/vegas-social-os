@@ -69,7 +69,16 @@ async function launch(root) {
   const config = join(root, 'browser.json');
   if (existsSync(config)) {
     const saved = JSON.parse(readFileSync(config, 'utf8'));
-    try { const r = await fetch(`http://127.0.0.1:${saved.port}/json/version`, {signal:AbortSignal.timeout(1000)}); if(r.ok) return saved; } catch {}
+    let up=false;
+    try {up=(await fetch(`http://127.0.0.1:${saved.port}/json/version`, {signal:AbortSignal.timeout(1000)})).ok;} catch {}
+    if(up){
+      let owns=false;
+      if(process.platform==='linux'){
+        try {const args=readFileSync(`/proc/${saved.pid}/cmdline`,'utf8').split('\0');owns=args.includes(`--user-data-dir=${join(root,'profile')}`)&&args.includes(`--remote-debugging-port=${saved.port}`);}catch{}
+      }
+      if(!owns)throw Error('Saved browser port belongs to another process/profile; inspect it before reopening');
+      return saved;
+    }
   }
   const port = await freePort();
   let environment=process.env;

@@ -56,6 +56,16 @@ class ManagedFlowTests(unittest.TestCase):
                 flow_runtime.ensure(self.e,self.ident)
             spawn.assert_not_called()
 
+    def test_stale_browser_mapping_never_attaches_to_an_unrelated_process(self):
+        root=Path(self.tmp.name)/'dependency';(root/'dist').mkdir(parents=True)
+        (root/'dist/server.js').write_text('');(root/'.vso-contract').write_text('test-contract')
+        profile=self.e.store.root/'profiles'/self.ident;profile.mkdir(parents=True)
+        (profile/'browser.json').write_text(json.dumps({'port':9439,'pid':os.getpid()}))
+        with patch.dict(os.environ,{'VSO_FLOW_ENGINE_ROOT':str(root)}),patch('vso.flow_runtime.urllib.request.build_opener') as http,patch('vso.flow_runtime.subprocess.Popen') as spawn:
+            with self.assertRaisesRegex(ValueError,'verify this account'):
+                flow_runtime.ensure(self.e,self.ident)
+            http.assert_not_called();spawn.assert_not_called()
+
     def test_missing_dependency_rejects_production_before_job_reservation(self):
         with patch.dict(os.environ,{'VSO_FLOW_ENGINE_ROOT':''}):
             with self.assertRaisesRegex(ValueError,'before reserving'):

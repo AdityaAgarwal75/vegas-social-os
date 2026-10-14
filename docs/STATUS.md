@@ -53,3 +53,5 @@ Direction accepted on 14 October 2026. Complete engine installation/compilation 
 Exact complete-engine candidate 59c278973f3b84f28f6a984640f00017cef58dc8 passed 88 Python / 4 Node tests and shell checks on the VPS. Its 12-route sandboxed Chrome QA passed against disposable data, and both GitHub CI jobs passed (run 56). Native read-only startup retries also passed without a manual delay. Re-running the exact engine installer was a no-op. All five accounts remained signed in/project-ready and idle at balances 951, 443, 50, 50, 50; no credits spent.
 
 Final menu discovery checks enabled/disabled choices in Frames mode before reading video families, restores the previous input mode, and the dashboard refreshes models after account verification. This avoids presenting account-disabled models as usable or treating Ingredients restrictions as account-wide model absence.
+
+Final native profile ownership hardening also rejects stale browser/CDP mappings that belong to another process or profile. The suite now passes 89 Python / 4 Node tests, including rejection before attachment or job reservation.
