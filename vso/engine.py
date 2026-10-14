@@ -201,6 +201,8 @@ class Engine:
             from .video_service import settings
             if not options: raise ValueError('Choose model, duration, resolution and aspect before generating')
             options=settings(options.get('model'),options.get('duration'),options.get('resolution'),options.get('aspect_ratio'),max_credits)
+            from .flow_models import validate_observed
+            validate_observed(self,account_id,options)
         ident = self.store.digest("video:" + request_id)[:32]
         with self.store.db() as db:
             row = db.execute("SELECT body FROM records WHERE kind='job' AND id=?", (ident,)).fetchone()

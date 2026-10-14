@@ -18,10 +18,14 @@ def catalog(engine,account_id=''):
         try:observed=engine.store.get('flow-models',account_id)
         except ValueError:pass
     fresh=bool(observed and time.time()-observed['observed_at']<1800)
-    result={'source':SOURCE,'documented_on':'2026-10-13','observed_at':observed.get('observed_at') if observed else None,'live_verified':fresh}
+    result={'source':SOURCE,'documented_on':'2026-10-14','observed_at':observed.get('observed_at') if observed else None,'live_verified':fresh}
     for kind,models in [('video',VIDEO),('image',IMAGE)]:
         labels=observed.get(kind,[]) if fresh else []
         result[kind]=[{**m,'availability':'observed' if m['name'] in labels else 'unavailable' if fresh else 'check_in_flow'} for m in models]
+        if fresh and kind=='video':
+            for model in result[kind]:
+                controls=observed.get('video_settings',{}).get(model['name'])
+                if controls:model.update(durations=controls['durations'],resolutions=controls['resolutions'],settings_source='live_controls')
         result[kind]+=[{'name':n,'availability':'observed','durations':[],'resolutions':[],'note':'New live model; settings must be inspected before use'} for n in labels if n not in {m['name'] for m in models}]
     return result
 
@@ -57,3 +61,11 @@ def validate(model,duration,resolution,aspect_ratio):
     if type(duration) is not int or duration not in spec['durations'] or resolution not in spec['resolutions'] or aspect_ratio not in ('9:16','16:9'):
         raise ValueError('This model does not support the chosen duration, resolution or aspect ratio')
     return spec
+
+def validate_observed(engine,account_id,options):
+    current=catalog(engine,account_id)
+    if not current['live_verified']:return
+    choice=next((m for m in current['video'] if m['name']==options['model']),None)
+    if not choice or choice['availability']=='unavailable':raise ValueError('This model is unavailable in the freshly inspected account menu')
+    if choice.get('settings_source')=='live_controls' and (options['duration'] not in choice['durations'] or options['resolution'] not in choice['resolutions']):
+        raise ValueError('Choose settings exposed by this account’s live controls; documented rollout differs')

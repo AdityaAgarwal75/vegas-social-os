@@ -4,7 +4,7 @@ Updated on 14 October 2026; earlier 0.5 observations retain their original scope
 
 ## Observed checks
 
-- **78 Python tests pass**: state/permissions, OAuth state isolation, encrypted dashboard app settings, Page discovery/grants, exact-release idempotency, duplicate-upload suppression, unknown-write stops, carousel phases, cover-only failure/retry separation, original YouTube-session reconciliation/resume, scheduling/cancel/missed handling, robots/private-network research guards and AWS template boundaries.
+- **79 Python tests pass**: state/permissions, OAuth state isolation, encrypted dashboard app settings, Page discovery/grants, exact-release idempotency, duplicate-upload suppression, unknown-write stops, carousel phases, cover-only failure/retry separation, original YouTube-session reconciliation/resume, scheduling/cancel/missed handling, robots/private-network research guards and AWS template boundaries.
 - **4 Node Flow worker tests pass**, plus Python compilation, JavaScript syntax, installer shell syntax and clean diff checks.
 - **CloudFormation schema lint passes** using cfn-lint 1.57.2. This is source/schema validation; no fresh AWS instance or billable resource was created by these tests. Live IAM/quota/change-set/SSM/bootstrap checks and cfn-guard validation remain separate deployment checks.
 - **Real sandboxed Google Chrome dashboard QA passes** on the founder's VPS, against disposable localhost data, separate from the live service. Profile → encrypted app configuration → channel brief → actual image import → exact composer draft → cancellation → daily schedule/pause all passed. Twelve workspace routes and 360/768/1440 layouts passed, with no JavaScript page exceptions.

@@ -69,6 +69,7 @@ def poll(engine,account_id,worker):
 def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id='',last_frame_id='',reference_asset_ids=None):
     if not prompt.strip() or len(prompt)>12000 or not request_id or len(request_id)>200:raise ValueError('Prompt and stable request ID required')
     opts=settings(model,duration,resolution,aspect_ratio,max_credits)
+    flow_models.validate_observed(engine,account_id,opts)
     validate_inputs(engine,opts,first_frame_id,last_frame_id,reference_asset_ids)
     a,_=flow_service.binding(engine,account_id)
     body=dict(account_id=account_id,prompt=prompt,**opts,first_frame_id=first_frame_id,last_frame_id=last_frame_id,reference_asset_ids=reference_asset_ids or [])
