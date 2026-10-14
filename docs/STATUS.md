@@ -1,6 +1,6 @@
-# Status — 0.6.0 community alpha
+# Status — 0.6.1 community alpha
 
-Updated on 14 October 2026. Live is 0.6.0 alpha, deployed from reviewed main 61dc2e786354a8f8a65f8b111b78e1c240f09e02; earlier observations below retain their historical scope. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
+Updated on 14 October 2026. Live is 0.6.1 alpha, deployed from reviewed code d22e5ca4746c9e8755658a080329e5326f88879a; earlier observations below retain their historical scope. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
 
 ## Observed checks
 
@@ -75,3 +75,5 @@ Durable storyboard feedback is idempotent, preserves original plans and stops ne
 The plugin packager now includes referenced product/setup guides and pinned craft materials/licenses; the previous skills-only archive omitted those required references. A generated owner-specific package contains 63 files and no installed account/profile/media state.
 
 MCP Events is the selected architecture for morning and approval continuation, supported by current official OpenAI Work/event documentation, but this server does not implement server/discover, subscriptions or webhook delivery yet. Scheduled briefs and feedback do not wake ChatGPT. Automatic post-storyboard release policies, full scoped VPS administration in this same plugin and convenient persistent dashboard sign-in are designed but unimplemented. Exact final release approval remains required. Fresh independent AWS installation, host-native byte transfer/away-mode image execution and a complete real Flow-to-release remain acceptance gates.
+
+Live 0.6.1 deployment: exact GitHub code passed 95 Python / 4 Node tests on the VPS and as the actual vegas-social service user; CI run 38533892405 passed backend/schema/browser checks. The initial source cutover failed because the new checkout omitted the systemd ExecStart virtualenv; source was rolled back, the existing dependency environment was copied into the release, and service-user imports/tests were verified before the second cutover. Final HTTPS health is 0.6.1, dashboard/Orbit HTTP 200, anonymous API/MCP401, all five existing Flow services active, five ready Flow accounts and six media records preserved. Private source/environment/SQLite rollback checkpoint retained. No credits or public posts were used.
