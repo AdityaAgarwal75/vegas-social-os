@@ -31,7 +31,10 @@ def services():
 
 def binding(engine, account_id):
     a = engine.store.get('account', account_id)
-    if a.get('provider') != 'flow' or not a.get('service_alias'): raise ValueError('This account uses the independent browser worker')
+    if a.get('provider') != 'flow': raise ValueError('Choose a Flow account')
+    if not a.get('service_alias'):
+        from .flow_runtime import ensure
+        return a, ensure(engine, account_id)
     config = services().get(a['service_alias'])
     if not config: raise ValueError('The local Flow service is no longer configured')
     return a, config
@@ -80,7 +83,14 @@ def sync(engine):
 
 def inspect(engine, account_id):
     a, config=binding(engine,account_id)
-    result=request(config,'status',{'detailed':True})
+    # A newly launched native tab may still be navigating. Retry only this
+    # read-only inspection, never a generation or upload submission.
+    for attempt in range(3):
+        try:
+            result=request(config,'status',{'detailed':True});break
+        except ValueError as error:
+            if a.get('service_alias') or attempt==2 or 'HTTP 400' not in str(error):raise
+            time.sleep(1.5)
     f=result.get('flow',{})
     ready=bool(f.get('signedIn') and f.get('inProject'))
     blocked=bool(result.get('pacing') and re.search(r'unusual|verification|blocked|captcha',str(result['pacing']),re.I))
@@ -133,7 +143,7 @@ def image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, 
         except ValueError as e:
             if str(e)!='image-job not found':raise
         if a['status']!='workspace_ready':raise ValueError('Verify this signed-in Flow project before generation')
-        for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','job')"):
+        for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','job','video-job')"):
             other=json.loads(row[0])
             if other['status'] in ('submitting','processing','unknown'):raise ValueError('A browser operation is active or unresolved; finish it before another generation')
         job={**body,'id':ident,'status':'submitting','created_at':time.time(),'project':'SocialOS-'+ident[:16],'asset_ids':[]}

@@ -1,4 +1,4 @@
-# VPS-first self-hosting guide (0.4.0 alpha)
+# VPS-first self-hosting guide (0.6.0 alpha)
 
 ## Model: independent instance per person
 
@@ -56,3 +56,11 @@ These tests do not log into Google, publish a video or spend Flow credits. The f
 The public source may be used under the MIT license. The founder's private VPS accounts are never part of a community install.
 
 For a fresh AWS install, use [AWS agent onboarding](AWS-ONBOARDING.md). For provider scopes/media support, use [platform permissions](PLATFORM-PERMISSIONS.md). The daily scheduler publishes exact approved scheduled releases while running; a real connected host agent consumes creative briefs.
+
+## Model and strategy controls
+
+Use Content manager to save audience, voice, objective and pillars, then request a reviewed weekly plan from your connected host agent. The VPS retains the request and calendar; it does not start ChatGPT itself. Scene prompts can be stored in calendar entries, with unsourced ideas labeled creative hypotheses.
+
+Flow Studio lists model-dependent duration/resolution controls and fresh account-specific model-menu evidence. The normal installer includes the complete pinned Flow engine; native browser sessions and existing-service imports use the same API adapter. Standalone clips, end frames and ingredient uploads no longer depend on founder-only configuration. Every new owner must sign in personally. Paid rendering, actual input attachment and advanced operations remain acceptance tests; see FLOW-EXECUTION-CONTRACT.md.
+
+Dependency source is installed separately at /opt/vegas-social-os-flow-engine and private native queue/output/token state stays under each account profile. Do not overwrite a conflicting engine contract or launch another driver on the same profile.

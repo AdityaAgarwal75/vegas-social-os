@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/GTAI-1/flow-mcp.git",
+  "revision": "06ceeab230da519a7686a12c6c9711eae20ea165",
+  "declared_license": "ISC",
+  "license_evidence": "package.json declares ISC; this revision has no standalone LICENSE file",
+  "patch": "compatibility.patch",
+  "contract_version": 1
+}

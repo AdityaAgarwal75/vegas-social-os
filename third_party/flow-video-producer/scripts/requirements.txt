@@ -1,0 +1,4 @@
+# Local assembly and frame extraction; generation uses the Flow browser UI.
+moviepy>=2.2,<3
+Pillow>=10,<12
+numpy>=1.25,<3

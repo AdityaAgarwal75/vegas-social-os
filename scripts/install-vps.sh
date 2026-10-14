@@ -24,7 +24,7 @@ DEST=/opt/vegas-social-os
 DATA=/var/lib/vegas-social-os
 ENV_FILE=/etc/vegas-social-os.env
 ORIGIN="https://$DOMAIN"
-for tool in python3 node ffmpeg Xvfb x11vnc websockify tar curl; do
+for tool in python3 node npm git ffmpeg Xvfb x11vnc websockify tar curl; do
   command -v "$tool" >/dev/null || { echo "Required executable missing: $tool" >&2; exit 1; }
 done
 CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
@@ -65,6 +65,7 @@ python3 -m venv "$DEST/.venv"
 "$DEST/.venv/bin/python" -m pip install --disable-pip-version-check --quiet -r "$DEST/requirements.txt"
 # umask 077 protects credentials, but code/virtualenv must be traversable by the service user.
 chmod -R a+rX "$DEST/.venv"
+bash "$DEST/scripts/install-flow-engine.sh"
 if [[ ! -f "$ENV_FILE" ]]; then
   cat > "$ENV_FILE" <<VSO_CONFIG
 VSO_PUBLIC_URL=$ORIGIN
@@ -75,8 +76,12 @@ VSO_REMOTE_BROWSER=1
 VSO_CHROME=$CHROME
 VSO_PYTHON=$DEST/.venv/bin/python
 VSO_NOVNC_ROOT=/usr/share/novnc
+VSO_FLOW_ENGINE_ROOT=/opt/vegas-social-os-flow-engine
 VSO_CONFIG
   chmod 0600 "$ENV_FILE"
+fi
+if ! grep -q '^VSO_FLOW_ENGINE_ROOT=' "$ENV_FILE"; then
+  echo 'VSO_FLOW_ENGINE_ROOT=/opt/vegas-social-os-flow-engine' >> "$ENV_FILE"
 fi
 cat > /etc/systemd/system/vegas-social-os.service <<VSO_SERVICE
 [Unit]

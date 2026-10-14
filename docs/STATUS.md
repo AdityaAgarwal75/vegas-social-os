@@ -1,16 +1,20 @@
-# Status — 0.5.0 community alpha
+# Status — 0.6.0 community alpha
 
-Verified on 13 October 2026. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
+Updated on 14 October 2026; earlier 0.5 observations retain their original scope. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
 
 ## Observed checks
 
-- **66 Python tests pass**: state/permissions, OAuth state isolation, encrypted dashboard app settings, Page discovery/grants, exact-release idempotency, duplicate-upload suppression, unknown-write stops, carousel phases, cover-only failure/retry separation, original YouTube-session reconciliation/resume, scheduling/cancel/missed handling, robots/private-network research guards and AWS template boundaries.
-- **3 Node Flow worker tests pass**, plus Python compilation, JavaScript syntax, installer shell syntax and clean diff checks.
+- **79 Python tests pass**: state/permissions, OAuth state isolation, encrypted dashboard app settings, Page discovery/grants, exact-release idempotency, duplicate-upload suppression, unknown-write stops, carousel phases, cover-only failure/retry separation, original YouTube-session reconciliation/resume, scheduling/cancel/missed handling, robots/private-network research guards and AWS template boundaries.
+- **4 Node Flow worker tests pass**, plus Python compilation, JavaScript syntax, installer shell syntax and clean diff checks.
 - **CloudFormation schema lint passes** using cfn-lint 1.57.2. This is source/schema validation; no fresh AWS instance or billable resource was created by these tests. Live IAM/quota/change-set/SSM/bootstrap checks and cfn-guard validation remain separate deployment checks.
-- **Real sandboxed Google Chrome dashboard QA passes** on the founder's VPS, against disposable localhost data, separate from the live service. Profile → encrypted app configuration → channel brief → actual image import → exact composer draft → cancellation → daily schedule/pause all passed. Eleven workspace routes and 360/768/1440 layouts passed, with no JavaScript page exceptions.
+- **Real sandboxed Google Chrome dashboard QA passes** on the founder's VPS, against disposable localhost data, separate from the live service. Profile → encrypted app configuration → channel brief → actual image import → exact composer draft → cancellation → daily schedule/pause all passed. Twelve workspace routes and 360/768/1440 layouts passed, with no JavaScript page exceptions.
 - QA accounts are explicitly simulated local fixtures; they do not represent verified provider connections. Browser QA never submits a provider login, post or credit-consuming generation.
 - **Live authenticated dashboard QA passed** with the founder’s real account references, exact imported image queue, authenticated embedded existing desktop and 360/768/1440 layouts. A real WebSocket subprotocol mismatch was corrected and covered by a socket-level regression test.
 - The rebuilt 0.5 dashboard passed a separate staged localhost browser trial. The reviewed 0.5 runtime was deployed behind HTTPS; `/health` returned 0.5.0, Orbit remained HTTP 200, the scheduler was running, all five existing Flow services remained active, and anonymous `/api/state` and `/mcp` were denied.
+
+## 0.6 audit extension
+
+Model-aware existing-service video jobs and production-scene selection, current documented/live model provenance, content strategy requests and weekly editorial calendar review, original Reel beat/timing checks and truthful workflow readiness. See AUDIT-0.6.md. The candidate passed staged disposable browser QA across 12 routes, strategy/calendar/Reel/model controls and 360/768/1440 layouts. All five existing-account model menus were inspected live; paid rendering and social publication remain unverified.
 
 ## Implemented in this release
 
@@ -33,3 +37,21 @@ Daily creative brief queue and visible scheduler heartbeat; public bounded resea
 ## Deployment checks to repeat
 
 Verify reviewed Git commit, systemd, HTTPS `/health` returning 0.5.0, authenticated connection/automation state, unauthenticated `/api/state` and `/mcp` denial, Orbit health, existing Flow services and the live scheduler heartbeat. Preserve private data/key/profile directories across update. Run an isolated disposable signed-out browser check, then complete owner sign-in and one controlled generation/publishing trial only when its exact account/model/budget or destination/media/text is authorized.
+
+## Product planning checkpoint, 14 October 2026
+
+The live server remains 0.5.0; 0.6 is an unmerged candidate on PR 5. The user requested product definition before further feature work/deployment. See PRODUCT-PLAN.md. The reviewed candidate passed 79 Python / 4 Node tests and 12-route disposable browser QA. Additional licensed skill/continuity work passes 81 Python / 4 Node tests locally; staged/live checks remain pending for those additions. Do not describe them as deployed.
+
+All four model zero-credit guards completed: Omni 7, Lite 10, Fast 20, Quality 100 quoted for the exact diagnostic combinations, zero spent. Account 1 remained at 951. Historical clip import decoded as 8s 1280x720 H.264/AAC; no new paid clip or post was made.
+
+## Accepted plan: complete engine checkpoint
+
+Direction accepted on 14 October 2026. Complete engine installation/compilation succeeded in an isolated candidate directory. Native profiles now use an attached full engine rather than the independent experimental submission algorithm. Native signed-out browser inspection, one engine owner, anonymous API denial, private token permissions and synthetic interrupted-queue recovery passed after initial page navigation settled. The same Chrome remained in use after the engine restart. These are infrastructure tests, not owner login or newly rendered video proof.
+
+33 real settings probes passed across five accounts: account 1 covered all Omni durations/resolutions, both aspects, all four video model families and compatible Frames/Ingredients mode selection; accounts 2–5 covered four model families each. No Generate was clicked and controls were restored. No image/reference attachment or new render follows from these probes. The current original suite passes 88 Python / 4 Node tests. Advanced edit/extend/upscale/voice features remain unwired. See FLOW-EXECUTION-CONTRACT.md.
+
+Exact complete-engine candidate 59c278973f3b84f28f6a984640f00017cef58dc8 passed 88 Python / 4 Node tests and shell checks on the VPS. Its 12-route sandboxed Chrome QA passed against disposable data, and both GitHub CI jobs passed (run 56). Native read-only startup retries also passed without a manual delay. Re-running the exact engine installer was a no-op. All five accounts remained signed in/project-ready and idle at balances 951, 443, 50, 50, 50; no credits spent.
+
+Final menu discovery checks enabled/disabled choices in Frames mode before reading video families, restores the previous input mode, and the dashboard refreshes models after account verification. This avoids presenting account-disabled models as usable or treating Ingredients restrictions as account-wide model absence.
+
+Final native profile ownership hardening also rejects stale browser/CDP mappings that belong to another process or profile. The suite now passes 89 Python / 4 Node tests, including rejection before attachment or job reservation.

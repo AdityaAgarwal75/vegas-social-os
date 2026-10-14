@@ -19,7 +19,7 @@ jobs:
       - run: cfn-lint deploy/aws/instance.json
       - run: python -m compileall -q vso scripts
       - run: node --check web/app.js
-      - run: bash -n scripts/install-vps.sh scripts/bootstrap-ubuntu.sh scripts/new-setup-link.sh
+      - run: bash -n scripts/install-vps.sh scripts/bootstrap-ubuntu.sh scripts/new-setup-link.sh scripts/install-flow-engine.sh
 
   browser:
     runs-on: ubuntu-latest
@@ -49,3 +49,5 @@ jobs:
           path: |
             /tmp/vso-desktop-qa.png
             /tmp/vso-mobile-qa.png
+            /tmp/vso-content-manager-qa.png
+            /tmp/vso-video-workspace-qa.png

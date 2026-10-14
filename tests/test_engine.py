@@ -18,6 +18,8 @@ class EngineTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.store = Store(self.tmp.name)
         self.e = Engine(self.store)
+        runtime = patch('vso.flow_runtime.installed', return_value=True)
+        runtime.start(); self.addCleanup(runtime.stop)
         self.flow_id = 'a' * 32
         self.store.put('account', self.flow_id, {'id': self.flow_id, 'provider': 'flow', 'status': 'workspace_ready'})
         self.store.put('account', 'youtube', {'id': 'youtube', 'provider': 'youtube', 'status': 'connected'})
@@ -74,29 +76,29 @@ class EngineTests(unittest.TestCase):
     def test_credit_cap_before_browser_call(self):
         p = self.ready(10)
         with patch.object(self.e, 'flow') as worker:
-            with self.assertRaises(ValueError): self.e.video_request(p['id'], 0, self.flow_id, 20, 'expensive')
+            with self.assertRaises(ValueError): self.e.video_request(p['id'], 0, self.flow_id, 20, 'expensive', options={'model':'Veo 3.1 - Fast','duration':8,'resolution':'720p','aspect_ratio':'9:16'})
             worker.assert_not_called()
 
     def test_same_job_does_not_submit_twice(self):
         p = self.ready()
         with patch.object(self.e, 'flow', return_value={'id': 'worker-1'}) as worker:
-            a = self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key')
-            b = self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key')
+            a = self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key', options={'model':'Veo 3.1 - Fast','duration':8,'resolution':'720p','aspect_ratio':'9:16'})
+            b = self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key', options={'model':'Veo 3.1 - Fast','duration':8,'resolution':'720p','aspect_ratio':'9:16'})
             self.assertEqual(a['id'], b['id']); self.assertEqual(worker.call_count, 1)
 
     def test_unknown_generation_not_retried(self):
         p = self.ready()
         with patch.object(self.e, 'flow', side_effect=ValueError('interrupted')) as worker:
-            a = self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key')
+            a = self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key', options={'model':'Veo 3.1 - Fast','duration':8,'resolution':'720p','aspect_ratio':'9:16'})
             self.assertEqual(a['status'], 'unknown')
-            self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key')
-            with self.assertRaises(ValueError): self.e.video_request(p['id'], 0, self.flow_id, 20, 'new-key')
+            self.e.video_request(p['id'], 0, self.flow_id, 20, 'job-key', options={'model':'Veo 3.1 - Fast','duration':8,'resolution':'720p','aspect_ratio':'9:16'})
+            with self.assertRaises(ValueError): self.e.video_request(p['id'], 0, self.flow_id, 20, 'new-key', options={'model':'Veo 3.1 - Fast','duration':8,'resolution':'720p','aspect_ratio':'9:16'})
             self.assertEqual(worker.call_count, 1)
 
     def test_concurrent_scene_submissions_are_serialized(self):
         p = self.ready()
         def submit(i):
-            try: return self.e.video_request(p['id'], 0, self.flow_id, 20, f'job-{i}')
+            try: return self.e.video_request(p['id'], 0, self.flow_id, 20, f'job-{i}', options={'model':'Veo 3.1 - Fast','duration':8,'resolution':'720p','aspect_ratio':'9:16'})
             except ValueError: return None
         with patch.object(self.e, 'flow', return_value={'id': 'worker-1'}) as worker:
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:

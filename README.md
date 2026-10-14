@@ -2,7 +2,11 @@
 
 **An independent AI social production workspace.** Use your own VPS, Google Flow account(s), and authorized YouTube/Instagram/Facebook apps. ChatGPT or Codex can plan original video concepts, generate native images when supported, review clips, and prepare approved publishing actions. This project is **not affiliated with OpenAI, Google, or Meta**.
 
-**Status (October 2026): 0.5.0 alpha.** The dashboard, local state, private remote-browser login, MCP tools, approval guards and offline tests exist. The founder's Ubuntu VPS deployment has passed HTTPS health and remote-browser startup tests. The optional existing-service adapter passed one free-only image trial on each of five founder accounts. The independent video worker and live social publishing remain unverified. See [status](docs/STATUS.md).
+**Status (October 2026): 0.6.0 alpha.** The dashboard, local state, private remote-browser login, MCP tools, approval guards and offline tests exist. The founder's Ubuntu VPS deployment has passed HTTPS health and remote-browser startup tests. The optional existing-service adapter passed one free-only image trial on each of five founder accounts. The 0.6 content manager adds strategies, weekly calendars and labeled Reel timing checks. The complete video engine is now packaged for native profiles; newly packaged rendering and live social publishing remain unverified. See [status](docs/STATUS.md).
+
+Product scope is being consolidated; read the [proposed product plan](docs/PRODUCT-PLAN.md) before treating this alpha as a finished automation platform.
+
+See the [0.6 production audit](docs/AUDIT-0.6.md) for model-aware clip controls, the original content strategy manager and verification limits.
 
 ## A complete independent control room
 
@@ -57,9 +61,9 @@ A Google Flow login does not grant YouTube/Instagram publishing access. Flow UI 
 | Separate service user, state/media directory and private Flow browser sessions | Browser launch and signed-out workspace inspection tested |
 | Original content planning, prompt/image approvals, idempotency and budget caps | Offline unit tests passed |
 | Existing local Flow service images | Five real account trials passed; one 1024×1024 image each, zero quoted credits |
-| Independent Flow video worker | Experimental; signed-in generation not validated |
+| Complete packaged Flow execution engine | Pinned source installs/compiles; fresh signed-out session and queue recovery tested; paid rendering not validated |
 | YouTube upload/thumbnail + Instagram photos/Reels/carousels + Facebook Page posts/photos/videos | Implemented adapters, offline request tests passed; live end-to-end testing pending |
-| Rebuilt control centre, consent buttons, Google Flow Studio and media/review controls | Real isolated Chrome QA passed at 360/768/1440; 11 routes |
+| Rebuilt control centre, consent buttons, Google Flow Studio and media/review controls | Real isolated Chrome QA passed at 360/768/1440; 12 routes |
 | AWS independent-instance bootstrap | CloudFormation schema validated; new-account provisioning trial pending |
 | Native ChatGPT image transfer | Host-dependent; do not assume generated files are automatically available |
 | ChatGPT plugin creation/consent | Supported as packaged remote MCP; installation is host-controlled |
@@ -81,3 +85,5 @@ A Google Flow login does not grant YouTube/Instagram publishing access. Flow UI 
 Read [VPS installation and security details](docs/SELF-HOSTING.md), [agent setup](BOOTSTRAP.md), [architecture](docs/ARCHITECTURE.md), and [current limitations](docs/STATUS.md).
 
 MIT licensed. Contributions and security reports are welcome through [CONTRIBUTING](CONTRIBUTING.md) and [SECURITY](SECURITY.md).
+
+The installer now includes the complete pinned Flow engine. Read the [execution contract](docs/FLOW-EXECUTION-CONTRACT.md) for current controls, provenance, recovery tests and advanced-feature gaps.

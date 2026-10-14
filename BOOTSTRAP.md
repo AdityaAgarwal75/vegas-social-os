@@ -33,3 +33,7 @@ Always respect the user's request about spending and existing infrastructure. No
 ## Maintainer testing
 
 Run python -m unittest discover -s tests -v and node --test tests/flow.test.mjs, plus installer shell syntax checks. For any production server tests, never publish externally or consume Flow credits without explicit approval and a destination.
+
+## Audit 0.6 workflows
+
+Read docs/AUDIT-0.6.md and docs/FEATURE-AUDIT-0.6.md. Inspect workflow_audit, refresh idle model menus and use the account's actual settings rather than assuming a documented rollout. The VPS installer includes the complete pinned execution engine, which serves native and imported scene/standalone input modes through the same adapter. Read docs/FLOW-EXECUTION-CONTRACT.md for actual tests and remaining advanced-feature gaps. Run zero-credit compatibility preflights and reconcile the original job after a timeout. Never call menu discovery or a quote stop proof of a rendered video or a successful post.

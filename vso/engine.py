@@ -19,12 +19,14 @@ class Engine:
         self.accounts = Accounts(store, base)
 
     def doctor(self):
-        return {"version": "0.4.0-alpha", "image_provider": "chatgpt-native-only",
+        from . import flow_runtime
+        return {"version": "0.6.0-alpha", "image_provider": "chatgpt-native-only",
                 "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
                 "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
                 "node": bool(shutil.which("node")), "ffmpeg": bool(shutil.which("ffmpeg")),
                 "chrome_configured": bool(os.getenv("VSO_CHROME")),
+                "flow_engine_installed": flow_runtime.installed(),
                 "youtube_oauth_configured": self.accounts.config.public("google")["configured"],
                 "facebook_oauth_configured": self.accounts.config.public("facebook")["configured"],
                 "instagram_oauth_configured": self.accounts.config.public("instagram")["configured"],
@@ -154,11 +156,20 @@ class Engine:
         account = self.store.get("account", account_id)
         if account["provider"] != "flow":
             raise ValueError("Select a Flow account")
-        if account.get("service_alias"):
+        from . import flow_runtime
+        if account.get("service_alias") or (flow_runtime.configured() and operation != 'login'):
             from . import flow_service
             if operation == "login": return flow_service.login(self, account_id)
             if operation == "inspect": return flow_service.inspect(self, account_id)
-            raise ValueError("Use local-service image controls; video bridge support requires a reviewed implementation")
+            if operation == 'submit':
+                from .video_service import submit
+                return submit(self,account_id,kwargs['prompt'],kwargs['options'],kwargs['first_frame_id'],submission_id=kwargs['request_id'])
+            if operation == 'poll':
+                from .video_service import poll
+                return poll(self,account_id,kwargs['job'])
+            raise ValueError('Unsupported local Flow operation')
+        if operation in ('submit','poll'):
+            raise ValueError('Complete Flow engine is required; legacy experimental generation is disabled')
         worker = Path(__file__).resolve().parent.parent / "worker" / "flow.mjs"
         command = ["node", str(worker)]
         payload = {"operation": operation, "account_id": account_id, "data_dir": str(self.store.root), **kwargs}
@@ -169,6 +180,7 @@ class Engine:
             raise ValueError("Flow worker interrupted; inspect the existing job before resubmitting") from None
         if not body.get("ok"):
             raise ValueError(body.get("error", "Flow worker failed"))
+        if operation == 'login' and flow_runtime.configured(): flow_runtime.ensure(self,account_id)
         return body["result"]
 
     def flow_login(self, account_id):
@@ -187,15 +199,24 @@ class Engine:
         self.store.put("account", account_id, a)
         return result
 
-    def video_request(self, plan_id, scene, account_id, max_credits, request_id):
+    def video_request(self, plan_id, scene, account_id, max_credits, request_id, options=None):
         if type(max_credits) is not int or max_credits < 1 or type(scene) is not int:
             raise ValueError("Positive integer max_credits and integer scene are required")
+        account=self.store.get('account',account_id)
+        from .flow_runtime import installed
+        if not account.get('service_alias') and not installed():
+            raise ValueError('Install the complete Flow engine before reserving a production job')
+        from .video_service import settings
+        if not isinstance(options,dict): raise ValueError('Choose model, duration, resolution and aspect before generating')
+        options=settings(options.get('model'),options.get('duration'),options.get('resolution'),options.get('aspect_ratio'),max_credits)
+        from .flow_models import validate_observed
+        validate_observed(self,account_id,options)
         ident = self.store.digest("video:" + request_id)[:32]
         with self.store.db() as db:
             row = db.execute("SELECT body FROM records WHERE kind='job' AND id=?", (ident,)).fetchone()
             if row:
                 job = json.loads(row[0])
-                if any(job[k] != v for k, v in {"plan_id": plan_id, "scene": scene, "account_id": account_id, "max_credits": max_credits}.items()):
+                if any(job[k] != v for k, v in {"plan_id": plan_id, "scene": scene, "account_id": account_id, "max_credits": max_credits, **({"options":options} if options else {})}.items()):
                     raise ValueError("Request ID already belongs to a different generation")
                 return self.public_job(job)
             p = self._load(db, "plan", plan_id)
@@ -206,21 +227,24 @@ class Engine:
                 raise ValueError("Approve keyframes and select a valid scene first")
             for row in db.execute("SELECT body FROM records WHERE kind='job'"):
                 other = json.loads(row[0])
-                if (other["account_id"] == account_id and other["status"] in ("submitting", "processing", "unknown")) or (other["plan_id"] == plan_id and other["scene"] == scene):
+                if other["status"] in ("submitting", "processing", "unknown") or (other["plan_id"] == plan_id and other["scene"] == scene):
                     raise ValueError("Account is busy or scene already has a job; poll/reconcile it")
+            for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','video-job')"):
+                if json.loads(row[0])['status'] in ('submitting','processing','unknown'):
+                    raise ValueError('Finish or reconcile active browser work before production')
             if p["reserved"] + max_credits > p["budget"]:
                 raise ValueError("Production credit budget exceeded")
             p["reserved"] += max_credits
             p["status"] = "generating"
             job = {"id": ident, "plan_id": plan_id, "scene": scene, "account_id": account_id,
-                   "max_credits": max_credits, "status": "submitting", "created_at": time.time()}
+                   "max_credits": max_credits, "options": options, "status": "submitting", "created_at": time.time()}
             self.store.write(db, "plan", plan_id, p)
             self.store.write(db, "job", ident, job)
         self.store.log("video.request", ident)
         try:
             prompt = p["concepts"][p["selected"]]["scenes"][scene]["video_prompt"]
             result = self.flow("submit", account_id, prompt=prompt, max_credits=max_credits,
-                               first_frame=str(self.asset_path(p["images"][str(scene)])))
+                               first_frame=str(self.asset_path(p["images"][str(scene)])), first_frame_id=p["images"][str(scene)], options=options, request_id=ident)
             job.update(status="processing", worker=result)
         except ValueError as e:
             job.update(status="unknown", error=str(e))
@@ -235,10 +259,14 @@ class Engine:
             raise ValueError("Submission outcome unknown; inspect Flow before any new request")
         result = self.flow("poll", job["account_id"], job=job["worker"])
         if result.get("completed"):
-            data = Path(result["file"]).read_bytes()
-            asset = self.asset_import(base64.b64encode(data).decode(), "video/mp4")
+            if result.get('asset_id'): asset=self.store.get('asset',result['asset_id'])
+            else:
+                data = Path(result["file"]).read_bytes()
+                asset = self.asset_import(base64.b64encode(data).decode(), "video/mp4")
             job.update(status="completed", asset_id=asset["id"])
             self.store.put("job", job_id, job)
+        if result.get('status') in ('stopped','failed'):
+            job.update(status=result['status'],error=result.get('error'));self.store.put('job',job_id,job)
         return {**self.public_job(job), "progress": result.get("status")}
 
     def video_assemble(self, plan_id):
@@ -380,8 +408,11 @@ class Engine:
         return {**p, "provider_status": info.get("status_code")}
 
     def snapshot(self):
-        result = {kind: self.store.all(kind) for kind in ("channel", "account", "plan", "asset", "job", "publication", "image-job")}
+        result = {kind: self.store.all(kind) for kind in ("channel", "account", "plan", "asset", "job", "publication", "image-job", "video-job", "strategy", "content-request")}
         result["job"] = [self.public_job(j) for j in result["job"]]
+        result["video-job"]=[self.public_job(j) for j in result["video-job"]]
+        from . import flow_runtime
+        result['flow_engine_installed'] = flow_runtime.installed()
         return result
 
     @staticmethod
