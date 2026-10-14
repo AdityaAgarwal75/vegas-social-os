@@ -50,9 +50,9 @@ class AuthTests(unittest.TestCase):
             req = urllib.request.Request(base+path, data=json.dumps(data).encode(), method='POST', headers={'Content-Type':'application/json', **(headers or {})})
             with urllib.request.urlopen(req) as r: return json.load(r)
         try:
-            with self.assertRaises(urllib.error.HTTPError) as err:
-                post('/mcp', {'id':1, 'method':'tools/list'})
-            self.assertEqual(err.exception.code, 401)
+            self.assertIn('tools', post('/mcp', {'id':1, 'method':'tools/list'})['result'])
+            challenge=post('/mcp',{'id':2,'method':'tools/call','params':{'name':'doctor','arguments':{}}})
+            self.assertTrue(challenge['result']['isError']);self.assertIn('mcp/www_authenticate',challenge['result']['_meta'])
             client = post('/register', {'client_name':'Test MCP', 'redirect_uris':['https://example.com/callback']})
             verifier = 'a'*43
             payload = {'client_id':client['client_id'], 'redirect_uri':'https://example.com/callback', 'code_challenge':pkce(verifier)}

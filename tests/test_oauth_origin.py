@@ -58,7 +58,7 @@ class OAuthOriginTests(unittest.TestCase):
                 with browser.open(req) as response:
                     client = json.load(response)
                 params = {"client_id": client["client_id"], "redirect_uri": payload["redirect_uris"][0],
-                          "response_type": "code", "scope": "social:manage",
+                          "response_type": "code", "scope": "social:read social:write",
                           "code_challenge": pkce("v"*43), "code_challenge_method": "S256",
                           "resource": base + "/mcp", "state": "test"}
                 with browser.open(base + "/authorize?" + urllib.parse.urlencode(params)) as response:

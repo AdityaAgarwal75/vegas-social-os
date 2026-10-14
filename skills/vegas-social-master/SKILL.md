@@ -5,7 +5,7 @@ description: Set up and operate agent-first Vegas Social OS for a community user
 
 # Vegas Social OS
 
-Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily production, dashboard feedback and approval continuation. ChatGPT is the main creative workplace; the dashboard is only sign-in and storyboard/clip/release review. Use review_queue for pending revisions and review_complete after saving a fresh same-channel plan. Current server has no host events or full root shell; do not imply it automatically wakes ChatGPT.
+Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily production, dashboard feedback and approval continuation. ChatGPT is the main creative workplace; the dashboard is only sign-in and storyboard/clip/release review. Use review_queue for pending revisions and review_complete after saving a fresh same-channel plan. Read [operations 0.7](../../docs/OPERATIONS-0.7.md) for web OAuth, native fileParams, raw transfers, events, editing and the isolated owner administrator broker. Do not claim host continuation until the subscribed Work chat actually responds.
 
 Treat every installation as its owner's independent system. Never assume maintainer accounts, credentials, infrastructure or references exist. Call `doctor`, `account_list` and `guide` first. State actual capability and verification level. This is an alpha, not an official Google/Meta/OpenAI product.
 
@@ -35,7 +35,7 @@ Call `image_tasks`, then use the actual host-native ChatGPT image tool for one s
 
 Preserve supplied character identity, exact product geometry/count, garment patterns, room landmarks and lighting. Inspect real outputs before approval. Native tools have host-specific saving rules; follow them. The MCP server cannot manufacture access to generated image bytes.
 
-When actual bytes are accessible, transfer them yourself with `asset_import` and then `image_attach` for the exact zero-based scene. Use an available host file-transfer/code tool for large outputs, without printing base64 into chat. If the host cannot transfer the actual native output, identify that capability gap and pause at `images_pending`; do not ask the end user to run an import script or manually upload images as the default. If no native image tool exists, pause as well. A host lacking generated-byte access cannot fulfill the zero-manual image stage.
+When actual bytes are accessible, use `media_ingest` with a real host fileParams object, or `media_transfer_prepare` and bounded raw-byte PUTs, then `image_attach` for the exact zero-based scene. Use an available host file-transfer/code tool for large outputs, without printing base64 into chat. If the host cannot transfer the actual native output, identify that capability gap and pause at `images_pending`; do not ask the end user to run an import script or manually upload images as the default. If no native image tool exists, pause as well. A host lacking generated-byte access cannot fulfill the zero-manual image stage.
 
 Review all keyframes with the user and record authorization with `images_approve`.
 
@@ -44,14 +44,14 @@ Review all keyframes with the user and record authorization with `images_approve
 1. Inspect the exact Flow account immediately before production. Settings, quote, credits and eligibility are dynamic; never infer balance from a daily allowance.
 2. Imported existing local services apply explicit model/duration/resolution/aspect settings, first/end frames OR up to three ingredients. Veo ingredients require 8 seconds; Quality rejects ingredients. The complete pinned engine also serves native profiles through the same scene adapter. Its paid rendering and frame/output correlation remain unverified. It verifies video mode, one output, first-frame attachment and a unique positive credit quote. Extend, video editing and upscaling are not implemented in this project.
 3. Call `video_request` once per scene with stable request IDs and an approved scene cap within the production total. A valid submission returns a durable job ID. No spend is authorized merely by connecting an account.
-4. Poll that ID with `video_poll`. Unknown outcomes need provider inspection and local-manifest reconciliation, never speculative regeneration. Budget reservations remain held. No automated unknown-job recovery is currently implemented.
+4. Poll that ID with `video_poll`. Unknown outcomes need provider inspection and local-manifest reconciliation, never speculative regeneration. Budget reservations remain held. Use `flow_job_reconcile` to link the original job/project; it never resubmits. Queued-only cancellation is `flow_job_cancel`; active provider cancellation is unsupported.
 5. Keep one in-flight job per account. Manual activity in that Flow project during a job can make matching ambiguous. Never use gallery order or "latest video" to choose an asset.
-6. Use `video_assemble` for completed clips, or import an edited MP4 and call `video_attach`. Inspect playback, duration, dimensions, voice, lip sync, continuity and product fidelity. Signatures do not prove visual quality.
+6. Use durable `video_edit` with explicit dimensions/FPS/fades/music/subtitles or `video_assemble` for completed clips; poll `edit_status`, or import an edited MP4 and call `video_attach`. Inspect playback, duration, dimensions, voice, lip sync, continuity and product fidelity. Signatures do not prove visual quality.
 7. Report caps/quotes separately from actual charges. The alpha does not have a verified balance/spend/refund ledger.
 
 ## Release content
 
-Use `publish_prepare` to freeze the exact video checksum, destination, title, caption and visibility. Record explicit user review with `publish_approve`. Default YouTube visibility is private. Instagram Reels are public; private/unlisted visibility is not supported there.
+Use `publish_prepare` to freeze the exact video checksum, destination, title, caption and visibility and options (including explicit YouTube audience). Record explicit user review with `publish_approve`. Default YouTube visibility is private. Instagram Reels are public; private/unlisted visibility is not supported there.
 
 Call `publish_execute` only for authorized releases. Poll existing Instagram containers with `publish_poll`. Unknown upload/publish outcomes require provider reconciliation, not retries or video regeneration.
 
@@ -81,3 +81,28 @@ Use `flow_model_catalog` and refresh idle menus with `flow_models_refresh` befor
 ## Bundled premade Flow craft
 
 Read ../flow-production/SKILL.md for complex Flow productions, continuity, ads and chained scenes. It loads pinned licensed materials through the Vegas tool adapter. Current controls and owner authorization take precedence over old model/default/retry examples. Use continuity_frame on an exact downloaded imported MP4 for a continuation, review its PNG, then explicitly select that start frame; extraction is not another generation.
+
+## Vegas Creative Engine — first-party content operations
+
+Read [creative feature and provenance matrix](../../docs/CREATIVE-ENGINE.md).
+Use studio_catalog for 13 distinct production stage contracts and honest
+limits. Start with studio_brief for an idempotent, source-aware campaign; use
+studio_draft to save two ChatGPT-written ideas with distinct hooks and image/video
+prompts; then studio_select only after owner creative review. These operations
+do NOT call a paid provider or publish. Bridge to the existing native image
+handoff and Flow job tools once the actual assets and approvals are available.
+
+Use studio_quality, studio_caption_review, studio_copycheck, studio_carousel_outline,
+studio_story_sequence, studio_engagement_triage, studio_profile_audit,
+studio_repurpose and studio_outliers for individual editorial decisions. Never
+invent metric baselines, scrape private competitor data, mistake a heuristic
+for a quality guarantee, or send DMs/comments without the owner's review.
+
+When OpenMontage source is separately installed, studio_external_catalog lists
+its AGPL-preserved manifests. Do not claim its renderers run or copy its code
+into Vegas without complying with the license.
+
+Owner password setup is optional and requires a private interactive terminal
+running python -m vso owner-password. The secure password unlocks the owner's
+browser session only; the ChatGPT plugin requires OAuth/PKCE consent as well.
+Do not ask for or store the password in chat.

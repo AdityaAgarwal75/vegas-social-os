@@ -20,7 +20,7 @@ class Engine:
 
     def doctor(self):
         from . import flow_runtime
-        return {"version": "0.6.1-alpha", "image_provider": "chatgpt-native-only",
+        return {"version": "0.7.0", "image_provider": "chatgpt-native-only",
                 "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
                 "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
@@ -31,7 +31,7 @@ class Engine:
                 "facebook_oauth_configured": self.accounts.config.public("facebook")["configured"],
                 "instagram_oauth_configured": self.accounts.config.public("instagram")["configured"],
                 "supabase_sync_configured": all(os.getenv(x) for x in ("SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_USER_JWT")),
-                "live_integrations_verified": False}
+                "live_integrations_verified": False, "content_studio_tools": 15, "owner_password_configured": __import__("vso.owner_auth",fromlist=["configured"]).configured(self.store), "external_pipeline_catalog": __import__("vso.external_pipeline",fromlist=["status"]).status().get("source_present",False)}
 
     def channel_save(self, name, niche, language="English", account_ids=None):
         if not name.strip() or not niche.strip():
@@ -59,6 +59,8 @@ class Engine:
                 if not all(isinstance(s.get(k), str) and s[k].strip() for k in ("image_prompt", "video_prompt")):
                     raise ValueError("Each scene needs image_prompt and video_prompt")
         ident = self.store.digest("plan:" + channel_id + ":" + request_id)[:32]
+        from .production import scenes
+        concepts=scenes(concepts,ident)
         body = {"id": ident, "channel_id": channel_id, "channel_name": channel["name"],
                 "concepts": concepts, "selected": None, "status": "concept_review", "images": {},
                 "video": None, "budget": 0, "reserved": 0, "created_at": time.time()}
@@ -125,7 +127,8 @@ class Engine:
         path = (self.store.root / "media" / asset["file"]).resolve()
         if path.parent != self.store.root / "media" or not path.is_file():
             raise ValueError("Asset unavailable")
-        if hashlib.sha256(path.read_bytes()).hexdigest() != ident:
+        from .media import sha256_file
+        if sha256_file(path) != ident:
             raise ValueError("Asset checksum mismatch")
         return path
 
@@ -236,10 +239,12 @@ class Engine:
                     raise ValueError('Finish or reconcile active browser work before production')
             if p["reserved"] + max_credits > p["budget"]:
                 raise ValueError("Production credit budget exceeded")
+            from .production import enforce
+            enforce(db,self._load(db,"channel",p["channel_id"]),account_id,max_credits)
             p["reserved"] += max_credits
             p["status"] = "generating"
             job = {"id": ident, "plan_id": plan_id, "scene": scene, "account_id": account_id,
-                   "max_credits": max_credits, "options": options, "status": "submitting", "created_at": time.time()}
+                   "max_credits": max_credits, "options": options, "flow_project_url":a.get("project_url"), "scene_id":p["concepts"][p["selected"]]["scenes"][scene].get("scene_id"), "input_sha256":self.store.digest(json.dumps({"prompt":p["concepts"][p["selected"]]["scenes"][scene]["video_prompt"],"image":p["images"][str(scene)],"options":options,"account_id":account_id},sort_keys=True)), "status": "submitting", "created_at": time.time()}
             self.store.write(db, "plan", plan_id, p)
             self.store.write(db, "job", ident, job)
         self.store.log("video.request", ident)
@@ -272,27 +277,8 @@ class Engine:
         return {**self.public_job(job), "progress": result.get("status")}
 
     def video_assemble(self, plan_id):
-        p = self.store.get("plan", plan_id)
-        jobs = [j for j in self.store.all("job") if j["plan_id"] == plan_id]
-        count = len(p["concepts"][p["selected"]]["scenes"])
-        if len(jobs) != count or any(j["status"] != "completed" for j in jobs):
-            raise ValueError("Every scene must have one completed clip")
-        paths = [self.asset_path(j["asset_id"]) for j in sorted(jobs, key=lambda j: j["scene"])]
-        output = self.store.root / "media" / (uuid.uuid4().hex + ".mp4")
-        listing = self.store.root / "concat.txt"
-        # All paths originate from checksum-named media files, never untrusted input.
-        listing.write_text("".join("file '" + path.as_posix().replace("'", "'\\''") + "'\n" for path in paths))
-        try:
-            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(listing),
-                            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", str(output)],
-                           check=True, capture_output=True, timeout=120)
-            asset = self.asset_import(base64.b64encode(output.read_bytes()).decode(), "video/mp4")
-        except Exception:
-            raise ValueError("Assembly failed; verify FFmpeg and matching clip dimensions/audio streams") from None
-        finally:
-            listing.unlink(missing_ok=True)
-            output.unlink(missing_ok=True)
-        return self.video_attach(plan_id, asset["id"])
+        from .editing import start
+        return start(self,plan_id,1080,1920,30,0,'',0.2,[],'assemble:'+plan_id)
 
     def video_attach(self, plan_id, asset_id):
         a = self.store.get("asset", asset_id)
@@ -307,30 +293,11 @@ class Engine:
             self.store.write(db, "plan", plan_id, p)
         return p
 
-    def publish_prepare(self, plan_id, account_id, title, caption, visibility="private"):
-        p = self.store.get("plan", plan_id)
-        a = self.store.get("account", account_id)
-        channel = self.store.get("channel", p["channel_id"])
-        if p["status"] != "video_review" or not p["video"]:
-            raise ValueError("Attach a completed video for final review first")
-        if account_id not in channel["account_ids"]:
-            raise ValueError("Destination is not assigned to this channel")
-        if a["provider"] not in ("youtube", "instagram", "facebook") or a["status"] != "connected":
-            raise ValueError("Connect a supported publishing account")
-        if a["provider"] == "instagram" and visibility != "public":
-            raise ValueError("Instagram Reels publish publicly; set visibility=public explicitly")
-        if visibility not in ("private", "unlisted", "public") or not 1 <= len(title) <= 100 or len(caption) > (2200 if a["provider"] == "instagram" else 5000):
-            raise ValueError("Invalid visibility, title or caption length")
-        body = {"plan_id": plan_id, "account_id": account_id, "asset_id": p["video"], "provider": a["provider"],
-                "title": title, "caption": caption, "visibility": visibility}
-        ident = self.store.digest(json.dumps(body, sort_keys=True))[:32]
-        try:
-            return self.store.get("publication", ident)
-        except ValueError:
-            pass
-        body.update(id=ident, status="review", remote_id=None)
-        self.store.put("publication", ident, body)
-        return body
+    def publish_prepare(self, plan_id, account_id, title, caption, visibility="private", options=None):
+        from .publishing import prepare
+        plan=self.store.get('plan',plan_id)
+        signature=self.store.digest(json.dumps([plan_id,account_id,plan.get('video'),title,caption,visibility,options],sort_keys=True))
+        return prepare(self,account_id,[plan.get('video')],title,caption,visibility,options or {},'production:'+signature,plan_id=plan_id)
 
     def publish_approve(self, publication_id):
         with self.store.db() as db:
@@ -343,6 +310,12 @@ class Engine:
         return p
 
     def publish_execute(self, publication_id):
+        record=self.store.get('publication',publication_id)
+        if record.get('kind')=='composer':
+            if record['status']=='review':raise ValueError('Approve the exact release before publishing')
+            from .publishing import execute
+            return execute(self,publication_id)
+        if record.get('provider')=='facebook':raise ValueError('Legacy Facebook release is unsupported; prepare and review a new composer release')
         with self.store.db() as db:
             p = self._load(db, "publication", publication_id)
             if p["status"] in ("published", "processing", "uploading", "unknown"):
@@ -374,7 +347,7 @@ class Engine:
                 media_ticket = self.store.ticket("media", {"asset_id": p["asset_id"]}, ttl=3600)
                 # Media tokens are reusable for range/repeated fetches during processing.
                 self.store.put("media-link", self.store.digest(media_ticket), {"asset_id": p["asset_id"], "expires": time.time() + 3600})
-                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{a['remote_id']}/media", method="POST", token=token,
+                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version('instagram')}/{a['remote_id']}/media", method="POST", token=token,
                                         form={"media_type": "REELS", "video_url": self.base + "/media?ticket=" + media_ticket, "caption": p["caption"]})
                 p.update(status="processing", container_id=result["id"])
         except Exception:
@@ -384,13 +357,16 @@ class Engine:
         return p
 
     def publish_poll(self, publication_id):
+        if self.store.get('publication',publication_id).get('kind')=='composer':
+            from .publishing import poll
+            return poll(self,publication_id)
         p = self.store.get("publication", publication_id)
         if p["status"] == "published":
             return p
         if p["provider"] != "instagram" or p["status"] != "processing":
             raise ValueError("This publication needs manual reconciliation")
         token = self.accounts.token(p["account_id"])
-        info, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{p['container_id']}?fields=status_code", token=token)
+        info, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version('instagram')}/{p['container_id']}?fields=status_code", token=token)
         if info.get("status_code") == "FINISHED":
             # Claim the write before network I/O; competing polls cannot publish twice.
             with self.store.db() as db:
@@ -401,7 +377,7 @@ class Engine:
                 self.store.write(db, "publication", publication_id, p)
             a = self.store.get("account", p["account_id"])
             try:
-                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{a['remote_id']}/media_publish", method="POST", token=token,
+                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version('instagram')}/{a['remote_id']}/media_publish", method="POST", token=token,
                                         form={"creation_id": p["container_id"]})
                 p.update(status="published", remote_id=result["id"])
             except Exception:

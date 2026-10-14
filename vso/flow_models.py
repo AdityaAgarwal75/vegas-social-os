@@ -18,7 +18,7 @@ def catalog(engine,account_id=''):
         try:observed=engine.store.get('flow-models',account_id)
         except ValueError:pass
     fresh=bool(observed and time.time()-observed['observed_at']<1800)
-    result={'source':SOURCE,'documented_on':'2026-10-14','observed_at':observed.get('observed_at') if observed else None,'live_verified':fresh}
+    result={'source':SOURCE,'documented_on':'2026-10-14','observed_at':observed.get('observed_at') if observed else None,'live_verified':fresh,'execution_capabilities':{'text_to_video':'wired_unverified_new_render','frames':'wired_unverified_new_render','ingredients':'wired_unverified_attachment','original_download':'wired_historical_output_verified','extend':'not_implemented','edit':'not_implemented','upscale':'not_implemented','audio_controls':'not_implemented','provider_cancellation':'not_verified'},'discovery_note':'Observed controls do not prove successful generation or credits. Undocumented models remain blocked until adapter validation.'}
     for kind,models in [('video',VIDEO),('image',IMAGE)]:
         labels=observed.get(kind,[]) if fresh else []
         result[kind]=[{**m,'availability':'observed' if m['name'] in labels else 'unavailable' if fresh else 'check_in_flow'} for m in models]

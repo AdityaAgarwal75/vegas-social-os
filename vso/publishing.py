@@ -7,7 +7,7 @@ from urllib.parse import urlencode
 from . import net
 
 
-def prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id):
+def prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id, plan_id=""):
     if not request_id or len(request_id) > 200: raise ValueError('A stable request ID is required')
     a = engine.store.get('account', account_id)
     provider = a['provider']
@@ -63,6 +63,10 @@ def prepare(engine, account_id, asset_ids, title, caption, visibility, options, 
     body = {'kind': 'composer', 'account_id': account_id, 'destination_name': a.get('name', a.get('label')),
             'provider': provider, 'asset_ids': asset_ids, 'title': title, 'caption': caption,
             'visibility': visibility, 'options': options}
+    if plan_id:
+        plan=engine.store.get('plan',plan_id);channel=engine.store.get('channel',plan['channel_id'])
+        if plan['status']!='video_review' or asset_ids!=[plan.get('video')] or account_id not in channel['account_ids'] or plan.get('revision_requested'):raise ValueError('Release must match the reviewed final video and channel destination')
+        body['plan_id']=plan_id
     ident = engine.store.digest('post:' + request_id)[:32]
     try:
         old = engine.store.get('publication', ident)
@@ -121,7 +125,8 @@ def youtube(engine, p, a, token):
     url = headers.get('Location') or headers.get('location')
     if not url: raise ValueError('Upload session missing')
     engine.store.secret('upload:' + p['id'], {'url': url})
-    result, _ = net.request(url, method='PUT', token=token, raw=file.read_bytes(), headers={'Content-Type': 'video/mp4'})
+    with file.open('rb') as source:
+        result, _ = net.request(url, method='PUT', token=token, raw=source, headers={'Content-Type':'video/mp4','Content-Length':str(file.stat().st_size)})
     p.update(status='published', remote_id=result['id'], url='https://www.youtube.com/watch?v=' + result['id'])
     save(engine, p)  # A failed cover cannot cause a second video upload.
     thumbnail(engine, p, token)
@@ -300,9 +305,10 @@ def resume(engine, publication_id):
         file = engine.asset_path(p['asset_ids'][0]); size = file.stat().st_size
         offset = p['uploaded_bytes']
         token = engine.accounts.token(p['account_id'])
-        with file.open('rb') as f: f.seek(offset); remaining = f.read()
-        result, _ = net.request(url, method='PUT', token=token, raw=remaining,
-            headers={'Content-Type': 'video/mp4', 'Content-Range': f'bytes {offset}-{size-1}/{size}'})
+        with file.open('rb') as source:
+            source.seek(offset)
+            result, _ = net.request(url, method='PUT', token=token, raw=source,
+                headers={'Content-Type':'video/mp4','Content-Length':str(size-offset),'Content-Range':f'bytes {offset}-{size-1}/{size}'})
         p.update(status='published', remote_id=result['id'], url='https://www.youtube.com/watch?v=' + result['id'])
         save(engine, p); thumbnail(engine, p, token)
     except Exception:

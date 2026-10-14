@@ -13,6 +13,6 @@ RUN python -m pip install --no-cache-dir -r /app/requirements.txt \
 COPY . /app
 USER vso
 ENV VSO_DATA_DIR=/data VSO_REMOTE_BROWSER=1 VSO_CHROME=/usr/bin/chromium \
-    VSO_PYTHON=/usr/local/bin/python VSO_NOVNC_ROOT=/usr/share/novnc VSO_STATE_BACKEND=supabase
+    VSO_PYTHON=/usr/local/bin/python VSO_NOVNC_ROOT=/usr/share/novnc VSO_STATE_BACKEND=sqlite
 EXPOSE 8787
 CMD ["python", "-m", "vso", "serve", "--host", "0.0.0.0"]

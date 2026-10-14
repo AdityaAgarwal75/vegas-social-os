@@ -27,11 +27,7 @@ services:
       - key: VSO_REMOTE_BROWSER
         value: "1"
       - key: VSO_STATE_BACKEND
-        value: supabase
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SERVER_KEY
-        sync: false
+        value: sqlite
       - key: VSO_VAULT_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID

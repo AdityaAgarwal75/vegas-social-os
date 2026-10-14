@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "vegas-social-os",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "Independent self-hosted VPS social content pipeline with optional ChatGPT MCP connection, isolated Google Flow browser login and reviewed publishing. Alpha; real Google generation pending.",
   "author": {
     "name": "Vegas Social OS contributors"

@@ -4,8 +4,7 @@ set -Eeuo pipefail
 (( EUID == 0 )) || { echo "Run with sudo." >&2; exit 1; }
 [[ -r /etc/os-release ]] || { echo "Unsupported operating system" >&2; exit 1; }
 . /etc/os-release
-case "$ID" in ubuntu|debian) ;; *) echo "Ubuntu/Debian required" >&2; exit 1;; esac
-python3 -c 'import sys; assert sys.version_info >= (3, 11), "Use Ubuntu 24.04 or Debian 12+ (Python 3.11+)"'
+case "$ID:$VERSION_ID" in ubuntu:24.04|debian:12|debian:13) ;; *) echo "Ubuntu 24.04 or Debian 12+ required" >&2; exit 1;; esac
 [[ "$(uname -m)" = x86_64 ]] || { echo "Automatic Chrome install requires x86_64." >&2; exit 1; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DOMAIN=""
@@ -20,9 +19,22 @@ while (( $# )); do
   esac
 done
 export DEBIAN_FRONTEND=noninteractive
+export DPKG_DEB_THREADS_MAX=1
 apt-get update -qq
-apt-get install -y -qq ca-certificates curl gnupg git tar xz-utils python3 python3-venv \
-  ffmpeg xvfb x11vnc websockify novnc caddy
+# Minimal Ubuntu images may only enable main; noVNC/FFmpeg need the official universe component.
+if [[ "$ID" = ubuntu ]] && { [[ -f /etc/apt/sources.list.d/vegas-social-universe.list ]] || ! apt-get -s install ffmpeg novnc >/dev/null 2>&1; }; then
+  apt-get install -y -qq ubuntu-keyring ca-certificates
+  cat > /etc/apt/sources.list.d/vegas-social-universe.list <<'APT'
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates main universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security main universe
+APT
+  apt-get update -qq
+fi
+apt-get install -y -qq ca-certificates curl gnupg git tar xz-utils python3 python3-venv iproute2 util-linux \
+  ffmpeg xvfb x11vnc websockify novnc
+if (( ! NO_CADDY )); then apt-get install -y -qq caddy; fi
+python3 -c 'import sys; assert sys.version_info >= (3,11), "Python 3.11+ required"'
 NEED_NODE=1
 if command -v node >/dev/null 2>&1; then
   if (( $(node -v | sed 's/^v//' | cut -d. -f1) >= 22 )) && command -v npm >/dev/null 2>&1; then NEED_NODE=0; fi
@@ -43,6 +55,9 @@ if (( NEED_NODE )); then
   ln -sfn /opt/vegas-social-os-node/bin/npx /usr/local/bin/npx
 fi
 if ! command -v google-chrome >/dev/null 2>&1 && ! command -v chromium >/dev/null 2>&1; then
+  if [[ "$ID" = debian ]]; then
+    apt-get install -y -qq --no-install-recommends chromium chromium-sandbox
+  else
   TMPKEY="$(mktemp)"
   curl --fail --silent --show-error --location https://dl.google.com/linux/linux_signing_key.pub -o "$TMPKEY"
   gpg --dearmor --yes --output /usr/share/keyrings/google-chrome-signing.gpg "$TMPKEY"
@@ -51,6 +66,7 @@ if ! command -v google-chrome >/dev/null 2>&1 && ! command -v chromium >/dev/nul
     >/etc/apt/sources.list.d/google-chrome.list
   apt-get update -qq
   apt-get install -y -qq google-chrome-stable
+  fi
 fi
 if [[ -z "$DOMAIN" ]]; then
   IP="$(curl --fail --silent --show-error --max-time 6 --ipv4 https://api.ipify.org || true)"

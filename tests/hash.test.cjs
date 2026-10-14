@@ -1,0 +1,2 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const crypto=require('node:crypto');const {Hash,file}=require('../web/sha256.js');
+test('incremental upload SHA-256 matches independent Node implementation across block boundaries',async()=>{for(const n of [0,1,55,56,63,64,65,1048593]){const bytes=crypto.randomBytes(n),h=new Hash();for(let i=0;i<n;i+=57)h.update(bytes.subarray(i,i+57));const expected=crypto.createHash('sha256').update(bytes).digest('hex');assert.equal(h.digest(),expected);assert.equal(await file(new Blob([bytes])),expected);}});

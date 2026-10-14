@@ -55,7 +55,7 @@ def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',r
     result=flow_service.request(config,'generate',{'project':'SocialOS-video-'+engine.store.digest(submission_id)[:24],'scenes':[scene]})
     ids=[j['id'] for j in result.get('jobs',[])]
     if len(ids)!=1:raise ValueError('Expected one durable backend video job')
-    return {'backend_job_ids':ids}
+    return {'backend_job_ids':ids,'project':result.get('output_dir')}
 
 def poll(engine,account_id,worker):
     _,config=flow_service.binding(engine,account_id)
@@ -88,7 +88,7 @@ def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_
         if a['status']!='workspace_ready':raise ValueError('Verify this Flow workspace before generation')
         for row in db.execute("SELECT body FROM records WHERE kind IN ('job','image-job','video-job')"):
             if json.loads(row[0])['status'] in ('submitting','processing','unknown'):raise ValueError('Finish or reconcile active browser work first')
-        job={**body,'id':ident,'status':'submitting','created_at':time.time(),'asset_ids':[]}
+        job={**body,'id':ident,'input_sha256':engine.store.digest(json.dumps(body,sort_keys=True)),'flow_project_url':a.get('project_url'),'status':'submitting','created_at':time.time(),'asset_ids':[]}
         engine.store.write(db,'video-job',ident,job)
     try:job.update(status='processing',worker=submit(engine,account_id,prompt,opts,first_frame_id,last_frame_id,reference_asset_ids,submission_id=ident))
     except ValueError as e:job.update(status='unknown',error=str(e))
@@ -103,3 +103,34 @@ def check(engine,job_id):
         elif result['status'] in ('failed','stopped'):job.update(status=result['status'],error=result['error'],quoted_credits=result.get('quoted_credits'))
         engine.store.put('video-job',job_id,job)
     return {k:v for k,v in job.items() if k!='worker'}
+
+
+def locate(engine,job):
+    _,config=flow_service.binding(engine,job['account_id']);view=flow_service.request(config,'status',{'detailed':True})
+    ids=job.get('worker',{}).get('backend_job_ids',[])
+    project='SocialOS-video-'+engine.store.digest(job['id'])[:24]
+    matches=[j for j in view.get('jobs',[]) if j.get('id') in ids] if ids else [j for j in view.get('jobs',[]) if Path(j.get('project','')).name==project]
+    if len(matches)!=1:raise ValueError('Cannot identify one original backend job; preserve unknown state and inspect the exact project. Never resubmit.')
+    return config,matches[0]
+
+
+def reconcile(engine,job_id):
+    try:job=engine.store.get('video-job',job_id);kind='video-job'
+    except ValueError:job=engine.store.get('job',job_id);kind='job'
+    if job['status'] in ('completed','stopped','failed','cancelled'):return {k:v for k,v in job.items() if k!='worker'}
+    try:
+        _,original=locate(engine,job)
+    except ValueError as error:return {**{k:v for k,v in job.items() if k!='worker'},'reconciliation':str(error),'safe_to_resubmit':False}
+    job.update(worker={'backend_job_ids':[original['id']]},backend_project=original.get('project'),status='processing');engine.store.put(kind,job_id,job)
+    return check(engine,job_id) if kind=='video-job' else engine.video_poll(job_id)
+
+
+def cancel(engine,job_id):
+    try:job=engine.store.get('video-job',job_id);kind='video-job'
+    except ValueError:job=engine.store.get('job',job_id);kind='job'
+    if job['status']=='cancelled':return {k:v for k,v in job.items() if k!='worker'}
+    config,original=locate(engine,job)
+    if original['status']!='queued':return {'id':job_id,'cancelled':False,'provider_status':original['status'],'reason':'Pinned engine only cancels locally queued jobs. Active provider generation cancellation is not supported; reconcile the original output.'}
+    result=flow_service.request(config,'cancel',{'job_id':original['id']})
+    if result.get('status')=='cancelled':job.update(status='cancelled',cancelled_at=time.time());engine.store.put(kind,job_id,job)
+    return {'id':job_id,'cancelled':result.get('status')=='cancelled','provider_status':result.get('status'),'credit_reservation_retained':True}
