@@ -1,89 +1,79 @@
-# Vegas Social OS — community self-hosted alpha
+# Vegas Social OS — your social production team inside ChatGPT
 
-**An independent AI social production workspace.** Use your own VPS, Google Flow account(s), and authorized YouTube/Instagram/Facebook apps. ChatGPT or Codex can plan original video concepts, generate native images when supported, review clips, and prepare approved publishing actions. This project is **not affiliated with OpenAI, Google, or Meta**.
+**Plan in ChatGPT. Execute on your own VPS. Sign in and review in the dashboard.** An open-source, independently self-hosted social production system for original research, scripts, scene images, Google Flow clips and reviewed publishing. Not affiliated with OpenAI, Google or Meta.
 
-**Status (October 2026): 0.6.0 alpha.** The dashboard, local state, private remote-browser login, MCP tools, approval guards and offline tests exist. The founder's Ubuntu VPS deployment has passed HTTPS health and remote-browser startup tests. The optional existing-service adapter passed one free-only image trial on each of five founder accounts. The 0.6 content manager adds strategies, weekly calendars and labeled Reel timing checks. The complete video engine is now packaged for native profiles; newly packaged rendering and live social publishing remain unverified. See [status](docs/STATUS.md).
+## The product
 
-Product scope is being consolidated; read the [proposed product plan](docs/PRODUCT-PLAN.md) before treating this alpha as a finished automation platform.
+ChatGPT is your main workstation. Its private plugin connects to your own installation. You discuss strategy and scenes in chat; ChatGPT uses native images and the VPS's Flow browser/execution engine. The dashboard is only for account onboarding, storyboard decisions, watching clips/final videos and reviewing releases. Manual generation forms are excluded from normal navigation.
 
-See the [0.6 production audit](docs/AUDIT-0.6.md) for model-aware clip controls, the original content strategy manager and verification limits.
+Read [the accepted ChatGPT-first architecture](docs/CHATGPT-FIRST.md) and [the complete new-user journey](docs/NEW-USER-JOURNEY.md), including plugin structure, permissions, VPS administration boundaries, optional Drive storage and the unattended-work implementation gates.
 
-## A complete independent control room
+**0.6.1 alpha:** founder VPS browser/settings checks and offline tests exist. Durable storyboard-feedback requests and review-focused navigation are implemented. Paid Flow rendering, fresh AWS onboarding, real publishing and event-driven ChatGPT continuation are not yet accepted end to end. [Current evidence](docs/STATUS.md) distinguishes source, menus, submitted jobs and usable outputs.
 
-Your own **Overview, Content studio, Google Flow Studio, Connections, Media library, Publishing and Automation** live in a rebuilt control centre. Click a provider button to redirect to official sign-in and consent. Developer app settings are kept in advanced operator setup; the setup agent configures them once, rather than asking every account owner to paste secrets. See [connection design](docs/CONNECTION-EXPERIENCE.md) for the independent-host and shared-registration options.
+## Give this repository to your ChatGPT
 
-**Starting without a VPS?** Give this URL to a capable ChatGPT/Codex agent connected to your AWS account. Follow [AWS agent onboarding](docs/AWS-ONBOARDING.md) and the pinned [CloudFormation template](deploy/aws/instance.json). The agent can provision through its actual available permissions and return a private dashboard link after checks; billable resource consent, platform consent and app approval are still individual steps. We do not provision everyone on a maintainer server.
+If AWS Core is connected to your own AWS account, send:
 
-See [provider permissions](docs/PLATFORM-PERMISSIONS.md). YouTube MP4s/thumbnails, Instagram professional photos/Reels/carousels and Facebook Page posts/photos/videos have implemented adapters, with live account trials still pending. Additional social platforms are not represented as working. Scheduled approved releases run on the VPS; native creative work requires a real connected agent/host trigger.
+> Set up https://github.com/AdityaAgarwal75/vegas-social-os on my own independent AWS VPS. Read BOOTSTRAP.md and docs/CHATGPT-FIRST.md. Prepare the deployment and costs for approval, install a pinned revision, verify HTTPS/private browser, and prepare my own ChatGPT plugin. I will use the dashboard to sign into Google accounts and review storyboards/clips. Keep credentials private; do not spend Flow credits or publish yet. Explain tested versus pending automation.
 
-## Install on an independent VPS (recommended)
+Your agent uses the [AWS setup recipe](docs/AWS-ONBOARDING.md), scoped AWS tools and SSM. It derives a stable HTTPS address and returns the dashboard plus private onboarding link after checks. AWS Core connection alone does not prove all required permissions are available. Account login/2FA, provider approval, billable-resource authorization and plugin installation consent remain personal steps. There is no maintainer VPS or shared account pool in this path.
 
-Each person installs their **own instance**. Your accounts and browser profiles stay on your VPS, not the maintainer's server. Supabase, Render, Google Drive and any centrally hosted service are **not required**.
+## Google accounts and social connections
 
-For **Ubuntu 24.04 / Debian 12+ x86_64**, with a public IPv4, DNS/HTTPS access (ports 80/443) and sudo rights:
+The dashboard opens a private screen mirror of Chrome on **your VPS**. Your agent creates profiles; you sign into them one by one and open Flow. Sessions persist on that server. No Google API key or pasted cookie is required for Flow. Connecting Flow does not grant YouTube upload access.
 
-~~~bash
+YouTube, Instagram professional accounts and Facebook Pages use official OAuth consent after the owner's developer app is configured. [Permissions and eligibility](docs/PLATFORM-PERMISSIONS.md) and [connection setup](docs/CONNECTION-EXPERIENCE.md) explain registration, exact callbacks and scopes. This repository contains no universal approved OAuth app, so independent social setup cannot yet be promised as “only click Allow.” Optional Drive can archive assets through a verified writable ChatGPT connector or separately authorized server OAuth.
+
+## Review and automation
+
+ChatGPT saves two ideas per production, scripts, scene direction and actual transferred native images. Choose an idea and review the storyboard in the dashboard. Approve attached images under the agreed credit ceiling or request changes; feedback persists for the agent and revisions preserve the original. Watch the exact clips and final export, then review the prepared release.
+
+**Morning preparation and approve-to-render are the target workflow, not a running background feature yet.** The existing scheduler creates briefs and executes exact approved scheduled posts. The selected design uses [OpenAI MCP Events](https://developers.openai.com/plugins/build/mcp-events) to notify a supported ChatGPT Work workflow of due briefs and decisions. This server does not implement that event bridge yet. Neither a connected badge nor a queued request proves ChatGPT is generating. See the [event contract and acceptance gates](docs/CHATGPT-FIRST.md#event-bridge-required-next-implementation). Until then, resume the connected ChatGPT agent to consume due briefs/review requests.
+
+## Existing VPS installation
+
+Supported target: Ubuntu 24.04 / Debian 12+ x86_64, persistent disk, public IPv4, sudo and HTTPS ports 80/443. An agent can run these for you:
+
+```bash
 git clone https://github.com/AdityaAgarwal75/vegas-social-os.git
 cd vegas-social-os
 sudo bash scripts/bootstrap-ubuntu.sh
-~~~
+```
 
-The installer attempts to install missing system dependencies, then chooses a free sslip.io hostname based on your public IPv4, configures a standalone SQLite state store, systemd service and Caddy HTTPS reverse proxy. Use your own domain when you have one:
+Use `--domain social.example.com` for your own DNS, or the installer derives an sslip.io hostname. On a host with dependencies already installed use `scripts/install-vps.sh`. Read [self-hosting](docs/SELF-HOSTING.md) before changing an existing server. One isolated service user, loopback port, state directory and Caddy virtual host keep other apps separate.
 
-~~~bash
-sudo bash scripts/bootstrap-ubuntu.sh --domain social.example.com
-~~~
+Generate a private ten-minute, one-use pairing link with:
 
-Already have Python 3.11+, Node 22+, Chrome/Chromium, FFmpeg, Xvfb, x11vnc, websockify, noVNC and Caddy? Skip dependency installation:
+```bash
+sudo bash /opt/vegas-social-os/scripts/new-setup-link.sh
+```
 
-~~~bash
-sudo bash scripts/install-vps.sh --domain social.example.com
-~~~
+Current owner browser sessions last eight hours; issue a fresh link after expiry. Convenient persistent owner sign-in is planned. Never post pairing links publicly.
 
-The installer **does not create accounts, silently log in to Google, bypass Google restrictions, or guarantee free cloud hosting**. Your VPS/provider and optional AI services may charge. Neither project source nor generated clips are sent to the maintainer. Using another person's shared VPS/account pool is not supported by this single-operator edition.
+## Per-owner ChatGPT plugin
 
-## Finish onboarding
+After verifying the owner's HTTPS endpoint, the setup agent packages it:
 
-1. On the VPS, request an expiring private link via the admin helper: **sudo bash /opt/vegas-social-os/scripts/new-setup-link.sh**. The first setup URL works for ten minutes and only once. A connected ChatGPT/Codex agent may run this for you; do not post it publicly.
-2. Open the link in your browser and complete the dashboard profile (name, brand, channel goals, timezone).
-3. Open **Google Flow Studio → Add Google account**, follow the private browser link and sign in directly with Google. Complete consent and 2FA yourself, then open a Flow project.
-4. Your setup agent configures the Google/Instagram/Facebook developer applications once in **Workspace settings → Advanced operator setup**. Then click **Connect YouTube / Instagram / Facebook** in **Connections**, sign in on the official provider page and Allow access. Verify the workspace through **flow_inspect**, before scheduling or spending credits. YouTube and Instagram require separate official developer-app OAuth configurations and approvals where applicable.
-5. Optionally connect your private MCP endpoint at **https://YOUR-DOMAIN/mcp** to a compatible ChatGPT/Codex host through its **consent/installation** flow. A package is not automatically installed into every user account.
-6. Prepare two creative concepts, select one, approve exact native images, explicitly cap Flow credits, verify generated videos, and approve any YouTube or Instagram release separately.
+```bash
+python scripts/package_plugin.py --url https://YOUR-DOMAIN/mcp --output /tmp/vegas-social-os-plugin.zip
+```
 
-A Google Flow login does not grant YouTube/Instagram publishing access. Flow UI selectors can change. **Never automate CAPTCHA/2FA, evade quotas, or assume Google/Meta API review is automatic.** This project is for authorized accounts and explicit publishing approval.
+The ZIP includes the master workflow, Flow craft and setup/review references. Install through a supported ChatGPT plugin/custom MCP workflow and complete OAuth consent; test `guide`, `doctor` and `account_list`. Packaging does not install/authorize the host connection. Each brother/client generates a package for their own endpoint. [Plugin/setup instructions](BOOTSTRAP.md) explain host prerequisites and unavailable capabilities honestly.
 
-## What works, what remains experimental
+## What is verified
 
-| Capability | Status |
+| Capability | Evidence / boundary |
 | --- | --- |
-| Dedicated Ubuntu VPS + HTTPS + SQLite deployment | Live health tested on founder's VPS |
-| Separate service user, state/media directory and private Flow browser sessions | Browser launch and signed-out workspace inspection tested |
-| Original content planning, prompt/image approvals, idempotency and budget caps | Offline unit tests passed |
-| Existing local Flow service images | Five real account trials passed; one 1024×1024 image each, zero quoted credits |
-| Complete packaged Flow execution engine | Pinned source installs/compiles; fresh signed-out session and queue recovery tested; paid rendering not validated |
-| YouTube upload/thumbnail + Instagram photos/Reels/carousels + Facebook Page posts/photos/videos | Implemented adapters, offline request tests passed; live end-to-end testing pending |
-| Rebuilt control centre, consent buttons, Google Flow Studio and media/review controls | Real isolated Chrome QA passed at 360/768/1440; 12 routes |
-| AWS independent-instance bootstrap | CloudFormation schema validated; new-account provisioning trial pending |
-| Native ChatGPT image transfer | Host-dependent; do not assume generated files are automatically available |
-| ChatGPT plugin creation/consent | Supported as packaged remote MCP; installation is host-controlled |
-| Scheduled releases and daily creative briefs | VPS scheduler publishes exact approved releases; creative briefs require a host agent trigger |
-| Multi-user shared SaaS, DMs, comments and all-platform scheduling | Not implemented |
+| VPS + HTTPS + private SQLite | Live founder deployment; independent AWS provisioning still pending |
+| Google profiles/private mirror | Existing five accounts verified; disposable fresh browser startup tested; new-owner login is personal |
+| Flow models/settings | Account-specific menu/settings probes; advanced operations and paid render acceptance pending |
+| Native ChatGPT keyframes | Requires actual host image tool and transferable bytes; prompts alone are not images |
+| Storyboard revisions | Durable idempotent feedback, immutable originals, fresh approvals on new plans |
+| Social publishing | Implemented adapters/offline guards; real provider consent and release trials pending |
+| Daily briefs/approved schedules | VPS queues briefs and schedules exact approved posts while running |
+| ChatGPT event continuation | Designed; protocol/delivery/host acceptance not implemented |
+| Full VPS admin in same plugin | Scoped broker designed; currently use authorized AWS/SSM/VPS connector |
 
-**One install per operator, not one server for all clients.** If you run a managed agency, put each client on an independently secured instance with their own approval and credentials. No one receives maintainer accounts or cookies.
+Private state/media/profiles live in `/var/lib/vegas-social-os`, code in `/opt/vegas-social-os`, service `vegas-social-os.service`, default loopback port 8899. Back up complete private state/key securely; never commit it. VPS/credits/network costs are separate from this free project. Respect authentication challenges, quotas, provider review and researched dependency licenses.
 
-## Operations
-
-- Web app: HTTPS domain configured at install.
-- Runtime: **vegas-social-os.service**, bound only to **127.0.0.1:8899** by default, behind Caddy.
-- Private data: **/var/lib/vegas-social-os** (including SQLite, encryption key, profiles, media); backup this folder securely. Never commit it.
-- Code: **/opt/vegas-social-os**; use version-controlled updates and run tests before installing an update.
-- Restart: **sudo systemctl restart vegas-social-os.service**.
-- Diagnostics: **sudo systemctl status vegas-social-os.service** and **sudo journalctl -u vegas-social-os.service**; redact URLs containing setup tickets before sharing logs.
-- VPS running cost is separate from this free/open-source project; the service is offline whenever your VPS is stopped.
-
-Read [VPS installation and security details](docs/SELF-HOSTING.md), [agent setup](BOOTSTRAP.md), [architecture](docs/ARCHITECTURE.md), and [current limitations](docs/STATUS.md).
-
-MIT licensed. Contributions and security reports are welcome through [CONTRIBUTING](CONTRIBUTING.md) and [SECURITY](SECURITY.md).
-
-The installer now includes the complete pinned Flow engine. Read the [execution contract](docs/FLOW-EXECUTION-CONTRACT.md) for current controls, provenance, recovery tests and advanced-feature gaps.
+Read [architecture](docs/ARCHITECTURE.md), [Flow execution contract](docs/FLOW-EXECUTION-CONTRACT.md), [contributing](CONTRIBUTING.md) and [security](SECURITY.md). MIT licensed.

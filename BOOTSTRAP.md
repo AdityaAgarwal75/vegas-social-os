@@ -2,6 +2,10 @@
 
 A user who shares this repository link wants an independently installed Vegas Social OS. **Do not assume that their provider accounts, this project's maintainer server, Google Flow cookies or paid subscriptions are available.** Start by reading README.md, AGENTS.md, agent-manifest.json, docs/SELF-HOSTING.md and docs/STATUS.md.
 
+## ChatGPT is the workstation
+
+Read docs/CHATGPT-FIRST.md and docs/NEW-USER-JOURNEY.md first. Prepare an independent owner plugin after HTTPS checks. The dashboard is for login and storyboard/clip/release review; do strategy/scripts/native images/Flow direction in ChatGPT. Configure a real supported host subscription only after the MCP Events bridge exists and passes host tests. Today consume morning_queue and review_queue when resumed; do not claim approvals wake ChatGPT. Full VPS administration still uses authorized infrastructure tools; proposed broker tools are not installed. Never substitute paid API execution silently.
+
 ## Choose the operating model
 
 **Preferred when a VPS is already available: VPS-first / local SQLite.** Discover the actual VPS tool, read its operational runbook and inspect RAM, disk, existing services, spare ports, Chrome, Node, Python, noVNC, Caddy and DNS. Install via scripts/install-vps.sh if dependencies already exist, otherwise use scripts/bootstrap-ubuntu.sh on supported Debian/Ubuntu hosts. Deploy under a separate Linux user, data directory, port, systemd unit and HTTPS hostname. Do not modify another service or its Google sessions. Require no Render, Supabase, paid managed hosting or locally running personal computer.

@@ -1,5 +1,7 @@
 # Vegas Social OS — proposed product plan
 
+> Superseded product boundary: [CHATGPT-FIRST.md](CHATGPT-FIRST.md) is the accepted owner contract. ChatGPT is the workstation; the dashboard is onboarding and review. Historical component descriptions below retain implementation context, not the intended navigation.
+
 14 October 2026. Product definition and acceptance plan; not a claim that the complete product is already implemented. The operator accepted this direction; the Flow execution milestone is in progress. This document remains a product contract rather than a completed-feature claim.
 
 ## Purpose

@@ -20,7 +20,7 @@ class Engine:
 
     def doctor(self):
         from . import flow_runtime
-        return {"version": "0.6.0-alpha", "image_provider": "chatgpt-native-only",
+        return {"version": "0.6.1-alpha", "image_provider": "chatgpt-native-only",
                 "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
                 "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
@@ -221,6 +221,8 @@ class Engine:
                 return self.public_job(job)
             p = self._load(db, "plan", plan_id)
             a = self._load(db, "account", account_id)
+            if p.get('revision_requested'):
+                raise ValueError('Storyboard revision requested; review a new plan before new rendering')
             if a["provider"] != "flow" or a["status"] != "workspace_ready":
                 raise ValueError("Inspect a signed-in Flow workspace before generation")
             if p["status"] not in ("ready", "generating") or not 0 <= scene < len(p["concepts"][p["selected"]]["scenes"]):
@@ -408,7 +410,7 @@ class Engine:
         return {**p, "provider_status": info.get("status_code")}
 
     def snapshot(self):
-        result = {kind: self.store.all(kind) for kind in ("channel", "account", "plan", "asset", "job", "publication", "image-job", "video-job", "strategy", "content-request")}
+        result = {kind: self.store.all(kind) for kind in ("channel", "account", "plan", "asset", "job", "publication", "image-job", "video-job", "strategy", "content-request", "review-request")}
         result["job"] = [self.public_job(j) for j in result["job"]]
         result["video-job"]=[self.public_job(j) for j in result["video-job"]]
         from . import flow_runtime

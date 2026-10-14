@@ -1,4 +1,6 @@
-# VPS-first self-hosting guide (0.6.0 alpha)
+# VPS-first self-hosting guide (0.6.1 alpha)
+
+The accepted interface is [ChatGPT-first](CHATGPT-FIRST.md): sign in and review in the dashboard, do creative production through the owner plugin. Follow the [new-user journey](NEW-USER-JOURNEY.md). Unattended host events and same-plugin privileged administration are designed but not yet implemented.
 
 ## Model: independent instance per person
 

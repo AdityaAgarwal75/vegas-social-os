@@ -4,6 +4,13 @@ import json
 
 def registry(engine):
     s = engine.store
+    def storyboard_regenerate(plan_id, feedback, request_id):
+        from .review import request
+        return request(engine, plan_id, feedback, request_id)
+    def review_queue(): return s.all('review-request')
+    def review_complete(request_id, replacement_plan_id):
+        from .review import complete
+        return complete(engine, request_id, replacement_plan_id)
     def account_start(provider, label): return engine.accounts.start(provider, label)
     def account_list(): return s.all("account")
     def account_disconnect(account_id):
@@ -134,7 +141,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -147,6 +154,9 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    'storyboard_regenerate': 'Persist owner feedback for ChatGPT to create a new storyboard revision. Does not generate media or wake ChatGPT.',
+    'review_queue': 'Read durable storyboard revision requests; consume awaiting_agent records with the host creative tools.',
+    'review_complete': 'Link a new same-channel plan to its feedback request. Preserves old plans and never inherits approvals.',
     "continuity_frame":"Extract the last actual retained frame of a private imported MP4 for reviewed continuity. Local only; no generation, spend or source overwrite.",
     "flow_model_catalog":"Read model-specific settings with documentation/live provenance; availability is account-specific.",
     "flow_models_refresh":"Inspect idle private Flow model menus and restore mode. No generation or spend.",
@@ -260,7 +270,7 @@ def rpc(engine, message):
     if method == "initialize":
         version = message.get("params", {}).get("protocolVersion", "2025-06-18")
         result = {"protocolVersion": version if version in ("2024-11-05", "2025-03-26", "2025-06-18") else "2025-06-18",
-                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.6.0"},
+                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.6.1"},
                   "instructions": "Use ChatGPT native images only. Tool availability does not grant publishing or spending approval. Read the repository master skill. Credentials stay server-side."}
     elif method == "ping": result = {}
     elif method == "tools/list": result = {"tools": definitions(engine)}

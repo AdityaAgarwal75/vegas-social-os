@@ -1,5 +1,7 @@
 # Architecture — independent self-hosted control room
 
+> Superseded product boundary: [CHATGPT-FIRST.md](CHATGPT-FIRST.md) is the accepted owner contract. ChatGPT is the workstation; the dashboard is onboarding and review. Historical component descriptions below retain implementation context, not the intended navigation.
+
 One operator owns each installation, its VPS, OAuth applications, account credentials and local media. Any community user can deploy the same public source to their own server. No maintainer IP, account pool or centrally shared secret is required. GitHub distributes source and updates; **SQLite is authoritative by default**. Supabase/managed hosting are optional legacy adapters, not installation prerequisites.
 
 ## Components

@@ -7,3 +7,12 @@
 
 #reel-review-form{display:grid;grid-template-columns:1fr 1fr;align-items:start}#reel-review-form>h2,#reel-review-form>.form-row,#reel-review-form>.review-result{grid-column:1/-1}#reel-review-form>button{justify-self:start}.review-result{font-size:12px;overflow-wrap:anywhere}.review-result h3{font-size:17px;margin:12px 0}.review-result ul{padding-left:20px;color:#e5b883}.calendar-entry pre{white-space:pre-wrap;font:12px/1.7 inherit;overflow-wrap:anywhere}@media(max-width:760px){#reel-review-form{grid-template-columns:1fr}}
 #flow-video-form fieldset{min-width:0;width:100%;margin:0}#video-reference-assets{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr))}#video-reference-assets label{display:flex;align-items:center;gap:8px;min-width:0;overflow-wrap:anywhere}#video-reference-assets input{flex:0 0 auto;width:auto}
+
+/* The owner dashboard is a review surface; execution stays in ChatGPT. */
+.review-workspace #flow-image-form,.review-workspace #flow-video-form,.review-workspace #upload-form,.review-workspace #image-job-list,.review-workspace #video-job-list,.review-workspace #refresh-models,.review-workspace #model-provenance{display:none!important}
+.review-workspace .page[hidden]{display:none!important}
+.review-workspace .content-tabs a[href="#channels"],.review-workspace .content-tabs a[href="#research"]{display:none}
+
+.review-workspace #flow .flow-bottom{display:none!important}
+
+.skip-link{position:fixed;top:-80px;left:16px;z-index:100;background:#fff;color:#111;padding:12px}.skip-link:focus{top:12px}

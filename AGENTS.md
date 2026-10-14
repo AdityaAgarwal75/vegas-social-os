@@ -1,6 +1,6 @@
 # Agent guidance — Vegas Social OS community
 
-Read README.md, BOOTSTRAP.md, agent-manifest.json, docs/SELF-HOSTING.md and docs/STATUS.md before changing or deploying anything.
+Read README.md, BOOTSTRAP.md, agent-manifest.json, docs/SELF-HOSTING.md, docs/CHATGPT-FIRST.md and docs/STATUS.md before changing or deploying anything.
 
 - **One owner per install.** No shared service-role keys, login cookies, Flow accounts or API tokens in the repo. Clients/brothers must use independently isolated VPS installations.
 - **Prefer existing VPS + SQLite** when users want zero *additional* hosting bills. Use a dedicated Linux user, loopback port, /var/lib/vegas-social-os and one Caddy vhost. Cloud/Render/Supabase deployment is optional, not required.

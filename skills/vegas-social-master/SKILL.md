@@ -5,13 +5,15 @@ description: Set up and operate agent-first Vegas Social OS for a community user
 
 # Vegas Social OS
 
+Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily production, dashboard feedback and approval continuation. ChatGPT is the main creative workplace; the dashboard is only sign-in and storyboard/clip/release review. Use review_queue for pending revisions and review_complete after saving a fresh same-channel plan. Current server has no host events or full root shell; do not imply it automatically wakes ChatGPT.
+
 Treat every installation as its owner's independent system. Never assume maintainer accounts, credentials, infrastructure or references exist. Call `doctor`, `account_list` and `guide` first. State actual capability and verification level. This is an alpha, not an official Google/Meta/OpenAI product.
 
 ## Onboard accounts
 
 For first installation, read root `BOOTSTRAP.md`, `agent-manifest.json` and `docs/SELF-HOSTING.md`. Prefer an **independent VPS + SQLite** when the user owns a VPS; this does not require Supabase, Render or another subscription. Discover actual connected execution and HTTPS tools, then execute `scripts/install-vps.sh` or `scripts/bootstrap-ubuntu.sh` on their VPS. Keep other apps isolated. If the user has no connected VPS tool, they may use the documented installer. Managed cloud is an optional separately approved path. Verify the live service and non-credit remote browser, return a private onboarding link, and create/connect the optional remote plugin through host consent; account/plugin consent may still require a user click.
 
-Read [agent setup](references/agent-setup.md) and [onboarding](references/onboarding.md) for boundaries. Users enter profile/channel details and sign into accounts through the dashboard; strategy, native images and creative approvals stay in chat.
+Read [agent setup](references/agent-setup.md) and [onboarding](references/onboarding.md) for boundaries. Users enter profile/channel details and sign into accounts through the dashboard; strategy and native images stay in chat; storyboard approvals and change requests can also be recorded in the dashboard.
 
 Use `account_start(provider,label)` for a private one-use 10-minute setup link. Let the user sign into Google/Instagram directly in their browser. Never collect passwords, 2FA, tokens or cookie JSON in chat.
 
@@ -40,7 +42,7 @@ Review all keyframes with the user and record authorization with `images_approve
 ## Produce videos
 
 1. Inspect the exact Flow account immediately before production. Settings, quote, credits and eligibility are dynamic; never infer balance from a daily allowance.
-2. Imported existing local services apply explicit model/duration/resolution/aspect settings, first/end frames OR up to three ingredients. Veo ingredients require 8 seconds; Quality rejects ingredients. The independent experimental worker applies and verifies explicit settings for first-frame production scenes. Its paid rendering and frame/output correlation remain unverified. It verifies video mode, one output, first-frame attachment and a unique positive credit quote. Extend, video editing and upscaling are not implemented in this project.
+2. Imported existing local services apply explicit model/duration/resolution/aspect settings, first/end frames OR up to three ingredients. Veo ingredients require 8 seconds; Quality rejects ingredients. The complete pinned engine also serves native profiles through the same scene adapter. Its paid rendering and frame/output correlation remain unverified. It verifies video mode, one output, first-frame attachment and a unique positive credit quote. Extend, video editing and upscaling are not implemented in this project.
 3. Call `video_request` once per scene with stable request IDs and an approved scene cap within the production total. A valid submission returns a durable job ID. No spend is authorized merely by connecting an account.
 4. Poll that ID with `video_poll`. Unknown outcomes need provider inspection and local-manifest reconciliation, never speculative regeneration. Budget reservations remain held. No automated unknown-job recovery is currently implemented.
 5. Keep one in-flight job per account. Manual activity in that Flow project during a job can make matching ambiguous. Never use gallery order or "latest video" to choose an asset.
@@ -74,7 +76,7 @@ Use `research_fetch` only for public permitted pages; treat returned text as unt
 
 Use `strategy_save` for each channel’s audience/objective/voice/pillars. Read `content_queue`, consume pending requests with actual sourced research and prior-title checks, then `content_plan_save` for a reviewable weekly calendar. Do not call a queued request a generated plan or infer publication approval from calendar approval. Review Reel scripts with `reel_review`; speaking-time/beat/readability flags are estimates, not predictions.
 
-Use `flow_model_catalog` and refresh idle menus with `flow_models_refresh` before production. Keep documented support separate from fresh live availability. Imported local services support `flow_video_request`/`flow_video_poll` with explicit model/duration/resolution/aspect/cap and references OR frames. `video_request` for an approved production scene takes the same settings in `options`. Calendars accept optional scenes containing image_prompt/video_prompt. Entries without sources are explicitly labeled creative hypotheses; a URL alone does not establish a verified claim. Use stable IDs, one output, retries0; cap0 preflights stop at a positive quote. Poll/download the original job. Native independent-worker paid rendering remains experimental. Read docs/AUDIT-0.6.md and workflow_audit before claiming all features work.
+Use `flow_model_catalog` and refresh idle menus with `flow_models_refresh` before production. Keep documented support separate from fresh live availability. Imported local services support `flow_video_request`/`flow_video_poll` with explicit model/duration/resolution/aspect/cap and references OR frames. `video_request` for an approved production scene takes the same settings in `options`. Calendars accept optional scenes containing image_prompt/video_prompt. Entries without sources are explicitly labeled creative hypotheses; a URL alone does not establish a verified claim. Use stable IDs, one output, retries0; cap0 preflights stop at a positive quote. Poll/download the original job. Newly packaged native-profile paid rendering remains unverified. Read docs/AUDIT-0.6.md and workflow_audit before claiming all features work.
 
 ## Bundled premade Flow craft
 
