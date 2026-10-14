@@ -59,7 +59,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
-        self.send_header("Referrer-Policy", "no-referrer")
+        # Allow origin-only Referer, not sensitive paths. no-referrer produces Origin: null
+        # for normal HTML form submits, which fails the exact-Origin CSRF guard.
+        self.send_header("Referrer-Policy", "origin")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Content-Security-Policy", "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self'; frame-ancestors " + ("'self'" if urllib.parse.urlsplit(self.path).path.startswith("/flow/") else "'none'") + "; base-uri 'none'; form-action 'self'")
         for k, v in (headers or {}).items(): self.send_header(k, v)
@@ -168,8 +170,8 @@ class Handler(BaseHTTPRequestHandler):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
             file='admin.js' if path=='/admin.js' else 'admin.html'
             return self.send((Path(__file__).parent.parent/'web'/file).read_bytes(),content_type='application/javascript' if file.endswith('.js') else 'text/html')
-        if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js"):
-            file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/sha256.js":"sha256.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
+        if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js", "/oauth-consent.js"):
+            file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/sha256.js":"sha256.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js", "/oauth-consent.js": "oauth-consent.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
             return self.send((Path(__file__).parent.parent / "web" / file).read_bytes(), content_type=mime)
         if path in ("/privacy", "/data-deletion"):
@@ -179,7 +181,14 @@ class Handler(BaseHTTPRequestHandler):
                 text = "To remove an account, open Connections and choose Disconnect, then revoke the app in the provider's account settings. Browser profiles, media and backups require deletion by this installation's owner. Ask the owner to remove /var/lib/vegas-social-os only when decommissioning the entire installation. This page is a data-deletion instruction URL, not a signed Meta deletion webhook."
             return self.page("Privacy" if path == "/privacy" else "Data deletion", "<p>" + html.escape(text) + "</p><p>Contact this installation's owner for requests. Configure your own legal/contact details before inviting other users.</p>")
         if path == "/pair":
-            self.store.consume(q.get("ticket", ""), "pair")
+            # Pairing tickets are one-use; repeat visits from an already paired
+            # browser should remain on the dashboard, not throw an invalid grant.
+            try:
+                self.store.consume(q.get("ticket", ""), "pair")
+            except ValueError:
+                if self.session(): return self.redirect("/onboarding")
+                return self.page("Setup link expired or already used",
+                    "<p>This owner link can only be opened once. If setup already opened your dashboard, return there. Otherwise generate a new private setup link on your own installation.</p>", 410)
             token = secrets.token_urlsafe(32)
             self.store.put("session", self.store.digest(token), {"expires": time.time() + 8 * 3600})
             secure = "; Secure" if self.base.startswith("https://") else ""
@@ -238,7 +247,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Invalid OAuth client, PKCE challenge or resource")
             q['scope'] = auth.scopes(q.get('scope','social:read social:write'))
             ticket = self.store.ticket("consent", q)
-            return self.page("Authorize this plugin", "<p>Approve only a client you trust. Requested scopes: " + html.escape(q["scope"]) + ". VPS administration has additional per-operation approval. Provider passwords and tokens are not returned.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Social OS</button></form>')
+            return self.page("Authorize this plugin", "<p>Approve only a client you trust. Requested scopes: " + html.escape(q["scope"]) + ". VPS administration has additional per-operation approval. Provider passwords and tokens are not returned.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Social OS</button></form><script defer src="/oauth-consent.js"></script>')
         if path == "/api/state":
             if not self.guard(): return
             from .profile import status
@@ -376,7 +385,11 @@ class Handler(BaseHTTPRequestHandler):
         if path == '/revoke': return self.send(auth.revoke(self.store,body))
         if path == "/consent":
             if not self.session(): raise ValueError("Sign into this installation before consent")
-            data = self.store.consume(body.get("ticket", ""), "consent")
+            try:
+                data = self.store.consume(body.get("ticket", ""), "consent")
+            except ValueError:
+                return self.page("Authorization request already submitted",
+                    "<p>This one-time approval has already been sent or expired. Return to ChatGPT and reconnect Vegas Social OS to start a fresh authorization request. If your dashboard opens, you do not need another owner setup link.</p>", 409)
             code = self.store.ticket("mcp-code", data, ttl=120)
             sep = "&" if "?" in data["redirect_uri"] else "?"
             return self.redirect(data["redirect_uri"] + sep + urllib.parse.urlencode({"code": code, "state": data.get("state", "")}))

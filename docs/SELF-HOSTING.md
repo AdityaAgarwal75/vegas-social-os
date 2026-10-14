@@ -66,3 +66,31 @@ Use Content manager to save audience, voice, objective and pillars, then request
 Flow Studio lists model-dependent duration/resolution controls and fresh account-specific model-menu evidence. The normal installer includes the complete pinned Flow engine; native browser sessions and existing-service imports use the same API adapter. Standalone clips, end frames and ingredient uploads no longer depend on founder-only configuration. Every new owner must sign in personally. Paid rendering, actual input attachment and advanced operations remain acceptance tests; see FLOW-EXECUTION-CONTRACT.md.
 
 Dependency source is installed separately at /opt/vegas-social-os-flow-engine and private native queue/output/token state stays under each account profile. Do not overwrite a conflicting engine contract or launch another driver on the same profile.
+
+### OAuth Authorize reports Origin rejected
+
+Older releases combined Referrer-Policy: no-referrer with exact-Origin CSRF checks.
+Browsers can submit normal HTML authorization forms with Origin: null under that policy.
+Social OS and its generated Caddy route now use Referrer-Policy: origin, which sends
+only the hostname origin, not OAuth paths, codes, or private setup tickets. This
+does not weaken CSRF protection: foreign/null Origins still receive HTTP 403.
+
+For existing installs, rerun the installer with the same domain and port. The
+installer repairs only its marked Caddy route and saves a backup. When using
+--no-caddy or your own reverse proxy, configure a single Referrer-Policy: origin
+response header for Social OS. Do not append another no-referrer policy.
+Verify GET /authorize has that header and browser consent succeeds.
+
+### Already used pairing/authorization link
+
+Owner pairing tickets and OAuth approvals are intentionally single-use; do not
+bookmark or resubmit them. A paired browser that reopens its old pairing URL
+now returns to the dashboard instead of showing a generic OAuth error. Repeat
+consent submissions display a specific retry instruction and do not mint a
+second authorization code. The consent button disables during redirect.
+
+If a single authorized click returns you to ChatGPT but the connector does
+not finish, inspect whether the host exchanged the code at POST /token.
+A successful HTTP 303 from POST /consent proves approval/redirect only,
+not an installed or authorized ChatGPT plugin. Restart connection in ChatGPT
+to create a fresh authorization request; keep owner setup separate.

@@ -194,7 +194,7 @@ if (( ! NO_CADDY )); then
 $DOMAIN {
     encode zstd gzip
     header Strict-Transport-Security "max-age=31536000"
-    header Referrer-Policy no-referrer
+    header Referrer-Policy origin
     header X-Content-Type-Options nosniff
     header X-Robots-Tag "noindex, nofollow"
     reverse_proxy 127.0.0.1:$PORT
@@ -202,6 +202,7 @@ $DOMAIN {
 # END VSO $DOMAIN
 CFG
   fi
+  python3 "$SOURCE/scripts/repair-caddy-referrer.py" "$CADDYFILE" "$DOMAIN"
   caddy validate --config "$CADDYFILE" --adapter caddyfile >/dev/null
 fi
 systemctl daemon-reload
