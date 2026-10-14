@@ -79,6 +79,18 @@ def safe_open(path,flags=os.O_RDONLY,mode=0o600):
     finally:os.close(directory)
 
 
+def secured_parent(path):
+    """Privileged mutations require a root-owned, non-writable parent chain."""
+    fd=os.open('/',os.O_RDONLY|os.O_DIRECTORY)
+    try:
+        for name in Path(path).parts[1:-1]:
+            nxt=os.open(name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=fd)
+            os.close(fd);fd=nxt;info=os.fstat(fd)
+            if info.st_uid!=0 or info.st_mode&0o022:raise ValueError('Untrusted parent directory; use an explicitly reviewed break-glass operation')
+        return os.dup(fd)
+    finally:os.close(fd)
+
+
 def process_matches(pid,ticks):
     try:return Path('/proc',str(pid),'stat').read_text().split(') ',1)[1].split()[19]==ticks
     except (OSError,IndexError):return False
@@ -102,7 +114,7 @@ def run_read(argv):return run_command(argv,15,track=False)
 
 def validate(op,args):
     if not isinstance(args,dict) or len(json.dumps(args))>50000:raise ValueError('Bounded object arguments required')
-    keys={'inventory':set(),'metrics':set(),'network':set(),'file_list':{'path'},'file_read':{'path','offset','limit'},'disk_usage':{'path'},'logs':{'unit','lines'},'service':{'unit','action'},'file_write':{'path','content','expected_sha256'},'file_move':{'source','destination'},'backup':{'path'},'restore':{'backup_id'},'packages':{'names','action'},'command':{'command','timeout'},'request_status':{'request_id'},'job_status':{'job_id'},'job_cancel':{'job_id'}}
+    keys={'inventory':set(),'metrics':set(),'network':set(),'file_list':{'path'},'file_read':{'path','offset','limit'},'disk_usage':{'path'},'logs':{'unit','lines'},'service':{'unit','action'},'file_write':{'path','content','expected_sha256'},'file_move':{'source','destination'},'backup':{'path'},'restore':{'backup_id'},'packages':{'names','action'},'command':{'command','timeout'},'job_resolve':{'job_id','acknowledge_partial_effects'},'request_status':{'request_id'},'job_status':{'job_id'},'job_cancel':{'job_id'}}
     if op not in keys or set(args)-keys[op]:raise ValueError('Unsupported operation or arguments')
     if op in ('file_list','file_read','disk_usage','backup','file_write'):target(args.get('path'),read=op=='file_read')
     if op in ('service','logs'):service(args.get('unit'))
@@ -112,6 +124,7 @@ def validate(op,args):
     if op=='packages':
         names=args.get('names',[])
         if not isinstance(names,list) or not 1<=len(names)<=30 or any(not isinstance(n,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9+._:-]{0,100}',n) for n in names) or args.get('action') not in ('install','upgrade'):raise ValueError('Provide exact package names and install/upgrade')
+    if op=='job_resolve' and args.get('acknowledge_partial_effects') is not True:raise ValueError('Explicitly acknowledge inspected partial effects')
     if op=='command' and (not isinstance(args.get('command'),str) or not args['command'].strip() or len(args['command'])>12000 or type(args.get('timeout',60)) is not int or not 1<=args.get('timeout',60)<=900):raise ValueError('Bounded command and 1–900 second timeout required')
 
 
@@ -189,7 +202,7 @@ def execute(ident):
         validate(record['operation'],record['arguments'])
         if needs_approval(record['operation'],record['arguments']) and not record.get('owner_approved'):raise ValueError('Owner approval required for these exact arguments')
         active=conn.execute("SELECT 1 FROM records WHERE kind='job' AND json_extract(body,'$.status') IN ('starting','running','unknown')").fetchone()
-        if active:raise ValueError('Finish or cancel active administrator job first')
+        if active and record['operation']!='job_resolve':raise ValueError('Finish or cancel active administrator job first')
         job={'id':ident,'request_id':ident,'status':'starting','created_at':time.time(),'operation':record['operation']};record.update(status='executing',job_id=ident)
         conn.execute('INSERT INTO records VALUES(?,?,?)',('job',ident,json.dumps(job)));conn.execute("UPDATE records SET body=? WHERE kind='request' AND id=?",(json.dumps(record),ident))
     runner=subprocess.Popen([sys.executable,'-I',str(Path(__file__).resolve()),'run-job',ident],env={'PATH':'/usr/sbin:/usr/bin:/sbin:/bin','LANG':'C.UTF-8','VSO_ADMIN_STATE':str(STATE)},start_new_session=True,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
@@ -225,19 +238,46 @@ def perform(op,args):
     if op=='service':return run_read(['systemctl',args['action'],service(args['unit'])])
     if op=='backup':return backup(args['path'])
     if op=='file_write':
-        p=target(args['path']);expected=args.get('expected_sha256','')
-        if p.exists():
-            if not p.is_file() or not expected or hashlib.sha256(p.read_bytes()).hexdigest()!=expected:raise ValueError('Expected checksum required before replacing existing file')
-            checkpoint=backup(str(p))
-        else:checkpoint={}
-        p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_name(p.name+'.vso-'+secrets.token_hex(6));tmp.write_text(args['content']);tmp.chmod(p.stat().st_mode&0o777 if p.exists() else 0o644);os.replace(tmp,p)
-        return {'path':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),**checkpoint}
+        p=target(args['path']);expected=args.get('expected_sha256','');checkpoint={}
+        parent=secured_parent(p);tmp=p.name+'.vso-'+secrets.token_hex(6)
+        try:
+            try:
+                fd=os.open(p.name,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK,dir_fd=parent)
+            except FileNotFoundError:fd=None
+            mode=0o644
+            if fd is not None:
+                with os.fdopen(fd,'rb') as f:
+                    info=os.fstat(f.fileno())
+                    if not stat.S_ISREG(info.st_mode) or info.st_nlink!=1 or info.st_size>16*1024**2:raise ValueError('Use a regular bounded file with one link')
+                    raw=f.read();mode=info.st_mode&0o777
+                if not expected or hashlib.sha256(raw).hexdigest()!=expected:raise ValueError('Expected checksum required before replacing existing file')
+                checkpoint=backup(str(p))
+            with os.fdopen(os.open(tmp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,mode,dir_fd=parent),'wb') as f:
+                f.write(args['content'].encode());f.flush();os.fsync(f.fileno())
+            os.replace(tmp,p.name,src_dir_fd=parent,dst_dir_fd=parent);os.fsync(parent)
+        finally:
+            try:os.unlink(tmp,dir_fd=parent)
+            except FileNotFoundError:pass
+            os.close(parent)
+        return {'path':str(p),'sha256':hashlib.sha256(args['content'].encode()).hexdigest(),**checkpoint}
     if op=='file_move':
         src=target(args['source']);dst=target(args['destination'])
         if dst.exists():raise ValueError('Destination exists; do not overwrite')
-        checkpoint=backup(str(src));shutil.move(str(src),str(dst));return {'source':str(src),'destination':str(dst),**checkpoint}
+        srcfd=secured_parent(src);dstfd=secured_parent(dst)
+        try:
+            checkpoint=backup(str(src))
+            # Both root-owned parent chains remain open; refuse overwriting destinations.
+            if dst.exists():raise ValueError('Destination exists')
+            os.rename(src.name,dst.name,src_dir_fd=srcfd,dst_dir_fd=dstfd)
+        finally:os.close(srcfd);os.close(dstfd)
+        return {'source':str(src),'destination':str(dst),**checkpoint}
+    if op=='job_resolve':
+        job=reconcile(args['job_id'])
+        if job['status']!='unknown' or job['original_process_alive']:raise ValueError('Only an inspected, ended unknown job can be resolved')
+        job.update(status='resolved',owner_acknowledged_at=time.time());put('job',job['id'],{k:v for k,v in job.items() if k not in ('safe_to_repeat','original_process_alive')})
+        return {'resolved_job_id':job['id'],'operation_was_not_repeated':True}
     if op=='restore':
-        record=get('backup',args['backup_id']);src=Path(record['payload']);dst=target(record['source']);checkpoint=backup(str(dst)) if dst.exists() else {}
+        record=get('backup',args['backup_id']);src=Path(record['payload']);dst=target(record['source']);parent=secured_parent(dst);os.close(parent);checkpoint=backup(str(dst)) if dst.exists() else {}
         if src.is_dir():
             if dst.exists():raise ValueError('Directory restore requires explicit break-glass migration; existing tree retained')
             shutil.copytree(src,dst,symlinks=True)

@@ -5,7 +5,6 @@ set -Eeuo pipefail
 [[ -r /etc/os-release ]] || { echo "Unsupported operating system" >&2; exit 1; }
 . /etc/os-release
 case "$ID" in ubuntu|debian) ;; *) echo "Ubuntu/Debian required" >&2; exit 1;; esac
-python3 -c 'import sys; assert sys.version_info >= (3, 11), "Use Ubuntu 24.04 or Debian 12+ (Python 3.11+)"'
 [[ "$(uname -m)" = x86_64 ]] || { echo "Automatic Chrome install requires x86_64." >&2; exit 1; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DOMAIN=""
@@ -21,8 +20,10 @@ while (( $# )); do
 done
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq ca-certificates curl gnupg git tar xz-utils python3 python3-venv \
-  ffmpeg xvfb x11vnc websockify novnc caddy
+apt-get install -y -qq ca-certificates curl gnupg git tar xz-utils python3 python3-venv iproute2 util-linux \
+  ffmpeg xvfb x11vnc websockify novnc
+if (( ! NO_CADDY )); then apt-get install -y -qq caddy; fi
+python3 -c 'import sys; assert sys.version_info >= (3,11), "Python 3.11+ required"'
 NEED_NODE=1
 if command -v node >/dev/null 2>&1; then
   if (( $(node -v | sed 's/^v//' | cut -d. -f1) >= 22 )) && command -v npm >/dev/null 2>&1; then NEED_NODE=0; fi

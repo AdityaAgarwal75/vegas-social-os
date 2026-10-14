@@ -31,7 +31,8 @@ LimitNOFILE=1024
 WantedBy=multi-user.target
 UNIT
 systemctl daemon-reload
-systemctl enable --now vegas-social-admin.service >/dev/null
+systemctl enable vegas-social-admin.service >/dev/null
+systemctl restart vegas-social-admin.service
 # Never print the TOTP enrollment secret. Issue a private owner link separately:
 # python3 -I /usr/local/lib/vegas-social-admin/broker.py enrollment-link https://YOUR-DOMAIN
 printf '%s\n' 'Private Unix broker installed. Owner enrollment is required for dangerous operations.'

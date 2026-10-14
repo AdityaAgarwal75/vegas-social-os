@@ -4,6 +4,7 @@ import html
 import json
 import secrets
 import socket
+import threading
 import re
 import time
 import urllib.parse
@@ -21,8 +22,21 @@ class HTTPServer(ThreadingHTTPServer):
     daemon_threads = True
     def __init__(self, address, engine):
         self.engine = engine
+        self.slots=threading.BoundedSemaphore(24)
         super().__init__(address, Handler)
 
+    def process_request(self,request,client_address):
+        request.settimeout(20)
+        if not self.slots.acquire(blocking=False):
+            try:request.sendall(b"HTTP/1.0 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+            finally:self.shutdown_request(request)
+            return
+        try:super().process_request(request,client_address)
+        except Exception:self.slots.release();raise
+
+    def process_request_thread(self,request,client_address):
+        try:super().process_request_thread(request,client_address)
+        finally:self.slots.release()
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "VegasSocialOS/0.7"
@@ -37,7 +51,7 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         # Never log request query strings, authorization codes, tickets or tokens.
         import sys
-        sys.stderr.write(f"{self.command} {urllib.parse.urlsplit(self.path).path}\n")
+        sys.stderr.write(json.dumps({"event":"http","method":self.command,"path":urllib.parse.urlsplit(self.path).path,"status":str(args[1]) if len(args)>1 else "unknown"})+"\n")
 
     def send(self, data, status=200, content_type="application/json", headers=None):
         body = json.dumps(data).encode() if content_type == "application/json" else data.encode() if isinstance(data, str) else data
@@ -145,13 +159,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def get(self):
         path, q = self.parse()
+        if path == '/ready':
+            if not self.guard():return
+            with self.store.db() as db:db.execute('SELECT 1').fetchone()
+            return self.send({'ready':True,'database':'sqlite','version':'0.7.0','flow_engine_installed':self.engine.doctor()['flow_engine_installed']})
         if path == "/health": return self.send({"ok": True, "version": "0.7.0"})
         if path in ('/admin','/admin/enroll','/admin.js'):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
             file='admin.js' if path=='/admin.js' else 'admin.html'
             return self.send((Path(__file__).parent.parent/'web'/file).read_bytes(),content_type='application/javascript' if file.endswith('.js') else 'text/html')
-        if path in ("/", "/onboarding", "/dashboard", "/app.js", "/style.css", "/flow-login.js"):
-            file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
+        if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js"):
+            file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/sha256.js":"sha256.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
             return self.send((Path(__file__).parent.parent / "web" / file).read_bytes(), content_type=mime)
         if path in ("/privacy", "/data-deletion"):
@@ -391,6 +409,7 @@ class Handler(BaseHTTPRequestHandler):
                 if not auth.permits(principal,required):return self.send({'error':'Insufficient scope'},403)
                 return self.send(tools.call(self.engine,name,body.get('arguments',{})))
             method=body.get('method')
+            if not isinstance(method,str) or not isinstance(body.get('params',{}),dict):return self.send({'jsonrpc':'2.0','id':body.get('id'),'error':{'code':-32600,'message':'Invalid JSON-RPC request'}},400)
             if method not in auth.DISCOVERY_METHODS and not principal:
                 if method=='tools/call':return self.send(tools.auth_error(self.engine,body))
                 return self.send({'error':'Authentication required'},401,headers={'WWW-Authenticate':auth.challenge(self.base)})

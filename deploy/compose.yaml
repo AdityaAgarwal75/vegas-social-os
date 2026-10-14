@@ -16,8 +16,7 @@ services:
       VSO_PUBLIC_URL: ${VSO_PUBLIC_URL:?agent must configure HTTPS origin}
       VSO_RUNTIME_PERSISTENT: "1"
       VSO_INSTALLATION_ID: ${VSO_INSTALLATION_ID:?agent must generate installation ID}
-      SUPABASE_URL: ${SUPABASE_URL:?agent must configure dedicated project}
-      SUPABASE_SERVER_KEY: ${SUPABASE_SERVER_KEY:?agent must inject server key securely}
+      VSO_STATE_BACKEND: sqlite
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       INSTAGRAM_CLIENT_ID: ${INSTAGRAM_CLIENT_ID:-}

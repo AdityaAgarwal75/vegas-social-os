@@ -59,6 +59,8 @@ class Engine:
                 if not all(isinstance(s.get(k), str) and s[k].strip() for k in ("image_prompt", "video_prompt")):
                     raise ValueError("Each scene needs image_prompt and video_prompt")
         ident = self.store.digest("plan:" + channel_id + ":" + request_id)[:32]
+        from .production import scenes
+        concepts=scenes(concepts,ident)
         body = {"id": ident, "channel_id": channel_id, "channel_name": channel["name"],
                 "concepts": concepts, "selected": None, "status": "concept_review", "images": {},
                 "video": None, "budget": 0, "reserved": 0, "created_at": time.time()}
@@ -237,10 +239,12 @@ class Engine:
                     raise ValueError('Finish or reconcile active browser work before production')
             if p["reserved"] + max_credits > p["budget"]:
                 raise ValueError("Production credit budget exceeded")
+            from .production import enforce
+            enforce(db,self._load(db,"channel",p["channel_id"]),account_id,max_credits)
             p["reserved"] += max_credits
             p["status"] = "generating"
             job = {"id": ident, "plan_id": plan_id, "scene": scene, "account_id": account_id,
-                   "max_credits": max_credits, "options": options, "status": "submitting", "created_at": time.time()}
+                   "max_credits": max_credits, "options": options, "scene_id":p["concepts"][p["selected"]]["scenes"][scene].get("scene_id"), "input_sha256":self.store.digest(json.dumps({"prompt":p["concepts"][p["selected"]]["scenes"][scene]["video_prompt"],"image":p["images"][str(scene)],"options":options,"account_id":account_id},sort_keys=True)), "status": "submitting", "created_at": time.time()}
             self.store.write(db, "plan", plan_id, p)
             self.store.write(db, "job", ident, job)
         self.store.log("video.request", ident)
@@ -273,27 +277,8 @@ class Engine:
         return {**self.public_job(job), "progress": result.get("status")}
 
     def video_assemble(self, plan_id):
-        p = self.store.get("plan", plan_id)
-        jobs = [j for j in self.store.all("job") if j["plan_id"] == plan_id]
-        count = len(p["concepts"][p["selected"]]["scenes"])
-        if len(jobs) != count or any(j["status"] != "completed" for j in jobs):
-            raise ValueError("Every scene must have one completed clip")
-        paths = [self.asset_path(j["asset_id"]) for j in sorted(jobs, key=lambda j: j["scene"])]
-        output = self.store.root / "media" / (uuid.uuid4().hex + ".mp4")
-        listing = self.store.root / "concat.txt"
-        # All paths originate from checksum-named media files, never untrusted input.
-        listing.write_text("".join("file '" + path.as_posix().replace("'", "'\\''") + "'\n" for path in paths))
-        try:
-            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(listing),
-                            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-movflags", "+faststart", str(output)],
-                           check=True, capture_output=True, timeout=120)
-            asset = self.asset_import(base64.b64encode(output.read_bytes()).decode(), "video/mp4")
-        except Exception:
-            raise ValueError("Assembly failed; verify FFmpeg and matching clip dimensions/audio streams") from None
-        finally:
-            listing.unlink(missing_ok=True)
-            output.unlink(missing_ok=True)
-        return self.video_attach(plan_id, asset["id"])
+        from .editing import start
+        return start(self,plan_id,1080,1920,30,0,'',0.2,[],'assemble:'+plan_id)
 
     def video_attach(self, plan_id, asset_id):
         a = self.store.get("asset", asset_id)
@@ -311,6 +296,7 @@ class Engine:
     def publish_prepare(self, plan_id, account_id, title, caption, visibility="private"):
         p = self.store.get("plan", plan_id)
         a = self.store.get("account", account_id)
+        if a["provider"]=="facebook":raise ValueError("Use post_prepare with this approved final asset; legacy production publishing does not support Facebook")
         channel = self.store.get("channel", p["channel_id"])
         if p["status"] != "video_review" or not p["video"]:
             raise ValueError("Attach a completed video for final review first")

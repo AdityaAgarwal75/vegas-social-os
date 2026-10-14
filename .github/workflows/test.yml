@@ -5,21 +5,25 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11','3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
       - run: python -m pip install -r requirements.txt cfn-lint==1.57.2
       - run: python -m unittest discover -s tests -v
-      - run: node --test tests/flow.test.mjs
+      - run: node --test tests/flow.test.mjs tests/hash.test.cjs
       - run: cfn-lint deploy/aws/instance.json
       - run: python -m compileall -q vso scripts
       - run: node --check web/app.js
-      - run: bash -n scripts/install-vps.sh scripts/bootstrap-ubuntu.sh scripts/new-setup-link.sh scripts/install-flow-engine.sh
+      - run: bash -n scripts/install-vps.sh scripts/bootstrap-ubuntu.sh scripts/new-setup-link.sh scripts/install-flow-engine.sh scripts/install-admin-broker.sh
 
   browser:
     runs-on: ubuntu-latest

@@ -10,7 +10,7 @@ const python=process.env.VSO_QA_PYTHON||'python';
 from vso.store import Store
 from vso.engine import Engine
 s=Store(sys.argv[1]);e=Engine(s)
-with s.db() as db: db.execute('DELETE FROM records')
+with s.db() as db: db.execute("DELETE FROM records WHERE kind!='installation'")
 s.put('account','qa-facebook',{'id':'qa-facebook','provider':'facebook','remote_id':'qa-only','name':'Simulated test Page','status':'connected'})
 c=e.channel_save('Furniture stories','Small apartment buyers',['qa-facebook'])
 concepts=[{'title':t,'hook':'Measure before you buy','script':'Measure the doorway and leave room to move.','scenes':[{'image_prompt':'A small room with a sofa','video_prompt':'Camera reveals the doorway'}]} for t in ['Make room for living','The doorway test']]
