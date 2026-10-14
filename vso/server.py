@@ -50,7 +50,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
-        self.send_header("Referrer-Policy", "no-referrer")
+        # Allow origin-only Referer, not sensitive paths. no-referrer produces Origin: null
+        # for normal HTML form submits, which fails the exact-Origin CSRF guard.
+        self.send_header("Referrer-Policy", "origin")
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Content-Security-Policy", "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self'; frame-ancestors " + ("'self'" if urllib.parse.urlsplit(self.path).path.startswith("/flow/") else "'none'") + "; base-uri 'none'; form-action 'self'")
         for k, v in (headers or {}).items(): self.send_header(k, v)
@@ -124,7 +126,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send({"error": "Origin rejected"}, 403); return False
         if not self.authorized():
             self.send({"error": "Authentication required"}, 401, headers={
-                "WWW-Authenticate": 'Bearer resource_metadata="' + self.base + '/.well-known/oauth-protected-resource/mcp"'})
+                "WWW-Authenticate": 'Bearer [REDACTED]="' + self.base + '/.well-known/oauth-protected-resource/mcp"'})
             return False
         return True
 

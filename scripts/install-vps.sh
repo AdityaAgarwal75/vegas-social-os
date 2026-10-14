@@ -128,7 +128,7 @@ $DOMAIN {
     encode zstd gzip
     header {
         Strict-Transport-Security "max-age=31536000"
-        Referrer-Policy no-referrer
+        Referrer-Policy origin
         X-Content-Type-Options nosniff
         X-Robots-Tag "noindex, nofollow"
     }
@@ -141,6 +141,8 @@ VSO_CADDY
       echo "Caddy config rejected; new Caddy block reverted." >&2; exit 1
     fi
   fi
+  python3 "$SOURCE/scripts/repair-caddy-referrer.py" "$CADDYFILE" "$DOMAIN"
+  caddy validate --config "$CADDYFILE" --adapter caddyfile >/dev/null
 fi
 systemctl daemon-reload
 systemctl enable vegas-social-os.service >/dev/null
