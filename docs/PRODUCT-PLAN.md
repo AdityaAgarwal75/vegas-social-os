@@ -1,6 +1,6 @@
 # Vegas Social OS — proposed product plan
 
-14 October 2026. Product definition and acceptance plan; not a claim that the complete product is already implemented. Further feature work/deployment is paused while this direction is reviewed.
+14 October 2026. Product definition and acceptance plan; not a claim that the complete product is already implemented. The operator accepted this direction; the Flow execution milestone is in progress. This document remains a product contract rather than a completed-feature claim.
 
 ## Purpose
 
@@ -39,7 +39,7 @@ Social account connection can be an official sign-in/Allow flow after developer-
 
 ## Implementation order
 
-1. Freeze feature expansion. Write the current failure list and record which controls are implemented, live verified, unsupported or broken.
+1. Keep feature expansion focused. Write the current failure list and record which controls are implemented, live verified, unsupported or broken.
 2. Complete Flow Studio first. Build a real capability inventory from each account's current UI. Test exact model/mode/settings, uploads, generation, download and restart/recovery. Include advanced controls only when they are wired and verified. Use no-spend probes first; paid acceptance trials need an explicit cap/account/model.
 3. Prove one vertical content workflow: one real channel, two ideas, separate images, complete short Reel, review and one authorized destination. Success means usable final content, not passing unit tests or seeing a menu.
 4. Make the same workflow installable on a fresh independently owned VPS with its own accounts and callbacks. Keep secrets/state/profiles out of source and setup links private.
@@ -63,3 +63,7 @@ Live server remains 0.5.0. The 0.6 candidate is on PR 5; it is not merged/deploy
 All five existing account menus were observed. Omni exposed 4/6/8/10s and 360p/720p; Veo controls exposed fixed 8s/720p during this audit. Model quote guards stopped Omni/Lite/Fast/Quality at zero cap (7/10/20/100 quoted credits for those exact diagnostic settings); account 1 stayed at 951 credits. No paid render or public post was created by this audit. A historical 8s 1280×720 H.264/AAC clip was recovered/imported and decoded; that proves download/import, not a new production run.
 
 Pinned Flow skill source packs have been reviewed and copied with licenses. The adapted active skill routes them through Vegas controls. Its last-retained-frame helper passed a synthetic two-color test and preserved the source. No claim that the full new product works follows from these partial checks.
+
+## Accepted direction checkpoint
+
+The next execution checkpoint packages one complete pinned engine for new profiles, disables legacy independent submission, and adds actual-engine settings and disposable native-session/restart tests. See FLOW-EXECUTION-CONTRACT.md. This does not satisfy the complete Reel/publishing release gates by itself.

@@ -23,7 +23,10 @@
       "Xvfb/noVNC"
     ],
     "aws_recipe": "deploy/aws/instance.json",
-    "aws_agent_guide": "docs/AWS-ONBOARDING.md"
+    "aws_agent_guide": "docs/AWS-ONBOARDING.md",
+    "flow_engine_installer": "scripts/install-flow-engine.sh",
+    "flow_engine_lock": "deploy/flow-engine/lock.json",
+    "flow_execution": "complete pinned engine, attach-only for native profiles; imported engines retain ownership"
   },
   "database": {
     "provider": "SQLite",

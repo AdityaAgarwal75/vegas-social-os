@@ -23,7 +23,7 @@ def validate_inputs(engine,options,first_frame_id='',last_frame_id='',reference_
         if ident and not engine.store.get('asset',ident)['media_type'].startswith('image/'):
             raise ValueError('Frame/reference must be an imported image')
 
-def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',reference_asset_ids=None):
+def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',reference_asset_ids=None,submission_id=''):
     validate_inputs(engine,options,first_frame_id,last_frame_id,reference_asset_ids)
     _,config=flow_service.binding(engine,account_id)
     scene={'type':'video','prompt':prompt,**options,'variants':1,'retries':0,'download_quality':'original'}
@@ -47,7 +47,12 @@ def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',r
     if refs:scene['reference_images']=[upload(i) for i in refs]
     status=flow_service.request(config,'status',{'detailed':False})
     if any(j.get('status') in ('queued','running') for j in status.get('jobs',[])):raise ValueError('Existing service is busy; no clip submitted')
-    result=flow_service.request(config,'generate',{'project':'SocialOS-video-'+engine.store.digest(prompt+json.dumps(options))[:16],'scenes':[scene]})
+    # Every intentional take needs its own output directory, even if prompt,
+    # model and settings are identical to an earlier completed request.
+    if not submission_id:
+        import uuid
+        submission_id=uuid.uuid4().hex
+    result=flow_service.request(config,'generate',{'project':'SocialOS-video-'+engine.store.digest(submission_id)[:24],'scenes':[scene]})
     ids=[j['id'] for j in result.get('jobs',[])]
     if len(ids)!=1:raise ValueError('Expected one durable backend video job')
     return {'backend_job_ids':ids}
@@ -85,7 +90,7 @@ def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_
             if json.loads(row[0])['status'] in ('submitting','processing','unknown'):raise ValueError('Finish or reconcile active browser work first')
         job={**body,'id':ident,'status':'submitting','created_at':time.time(),'asset_ids':[]}
         engine.store.write(db,'video-job',ident,job)
-    try:job.update(status='processing',worker=submit(engine,account_id,prompt,opts,first_frame_id,last_frame_id,reference_asset_ids))
+    try:job.update(status='processing',worker=submit(engine,account_id,prompt,opts,first_frame_id,last_frame_id,reference_asset_ids,submission_id=ident))
     except ValueError as e:job.update(status='unknown',error=str(e))
     engine.store.put('video-job',ident,job)
     return {k:v for k,v in job.items() if k!='worker'}

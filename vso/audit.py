@@ -6,6 +6,9 @@ def status(engine):
     checks=[{'feature':'Runtime','state':'ready','detail':'Private state opened successfully'},
             {'feature':'Media assembly','state':'ready' if shutil.which('ffmpeg') else 'missing','detail':'FFmpeg executable; actual rendering must be checked separately'},
             {'feature':'Creative agent','state':'host_required','detail':'Strategy/daily brief queues need a real connected host; no unattended ChatGPT claim'}]
+    from .flow_runtime import installed
+    checks.append({'feature':'Flow execution engine','state':'installed' if installed() else 'existing_service_only' if any(a.get('service_alias') for a in accounts) else 'missing',
+                   'detail':'Complete managed engine for native profiles; imported accounts retain their existing engine owner. Installed does not mean rendering verified.'})
     for provider in ['flow','youtube','instagram','facebook','drive']:
         entries=[a for a in accounts if a['provider']==provider];verified=[a for a in entries if a['status'] in ('workspace_ready','connected')]
         checks.append({'feature':provider.title(),'state':'connected' if verified else 'needs_connection','detail':f'{len(verified)}/{len(entries)} identities ready; publishing/rendering evidence is separate'})

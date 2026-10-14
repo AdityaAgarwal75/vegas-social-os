@@ -1,0 +1,234 @@
+diff --git a/src/assemble.ts b/src/assemble.ts
+index 37b41e4..0634923 100644
+--- a/src/assemble.ts
++++ b/src/assemble.ts
+@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } f
+ import { basename, join } from "node:path";
+ import { promisify } from "node:util";
+ 
+-import { FFMPEG_HINT, IS_WIN, powershell, psQuote } from "./platform.js";
++import { FFMPEG_HINT, IS_MAC, IS_WIN, powershell, psQuote } from "./platform.js";
+ 
+ const run = promisify(execFile);
+ const FFMPEG = process.env.FLOW_MCP_FFMPEG ?? "ffmpeg";
+@@ -90,6 +90,10 @@ export async function localVoices(): Promise<{ name: string; description: string
+       return [];
+     }
+   }
++  if (!IS_MAC) {
++    const {stdout} = await run("espeak-ng", ["--voices"]).catch(() => ({stdout: ""}));
++    return stdout.split(/\r?\n/).slice(1).map(line => line.trim().split(/\s+/)).filter(parts => /^(en(?:-|$)|hi$)/.test(parts[1] ?? "")).map(parts => ({name: parts[1], description: `${parts[3]} · Linux eSpeak, basic synthetic voice, free`}));
++  }
+   const { stdout } = await run(SAY, ["-v", "?"], { maxBuffer: 4 * 1024 * 1024 }).catch(() => ({ stdout: "" }));
+   return stdout
+     .split("\n")
+@@ -102,7 +106,7 @@ export async function localVoices(): Promise<{ name: string; description: string
+ // Speaks a line with this computer's own voice. Free and instant, but only as good as the installed voice.
+ export async function speakLocally(text: string, voice: string, target: string): Promise<{ output: string; duration: number }> {
+   const stem = target.replace(/\.\w+$/, "");
+-  const raw = stem + (IS_WIN ? ".wav" : ".aiff");
++  const raw = stem + (IS_WIN || !IS_MAC ? ".wav" : ".aiff");
+   if (IS_WIN) {
+     // The line goes through a file, never the command line, so quotes or symbols in it cannot break the script.
+     const lineFile = stem + ".line.txt";
+@@ -115,6 +119,10 @@ export async function speakLocally(text: string, voice: string, target: string):
+     } finally {
+       rmSync(lineFile, { force: true });
+     }
++  } else if (!IS_MAC) {
++    const available = await localVoices();
++    if (!available.some(v => v.name === voice)) throw new Error("Choose a Linux local voice from flow_voices (for example en-us or hi).");
++    await run("espeak-ng", ["-v", voice, "-s", "168", "-w", raw, "--", text]);
+   } else {
+     await run(SAY, ["-v", voice, "-r", "168", "-o", raw, text]);
+   }
+diff --git a/src/core.ts b/src/core.ts
+index d8e9b4d..2f01f21 100644
+--- a/src/core.ts
++++ b/src/core.ts
+@@ -13,7 +13,12 @@ import { TECHNIQUES, techniqueById } from "./techniques.js";
+ export const OUTPUT_ROOT = process.env.FLOW_MCP_OUTPUT ?? join(homedir(), "flow-mcp-out");
+ const words = (s: string) => s.split(/[^a-z0-9]+/i).filter((w) => w.length > 3).map((w) => w.toLowerCase());
+ 
+-export const projectDir = (project: string) => resolve(OUTPUT_ROOT, project.replace(/[^\w.-]+/g, "_"));
++export const projectDir = (project: string) => {
++  const dir = resolve(OUTPUT_ROOT, project.replace(/[^\w.-]+/g, "_"));
++  const rel = relative(resolve(OUTPUT_ROOT), dir);
++  if (!rel || rel === ".." || rel.startsWith("../") || isAbsolute(rel)) throw new Error("Choose a real project folder name inside the account output root.");
++  return dir;
++};
+ 
+ const sceneSchema = z.object({
+   prompt: z.string().min(1).describe("Full English prompt for one clip: action, shot and camera move, location, style, light, sound."),
+@@ -93,10 +98,10 @@ export const shapes = {
+   narrate: {
+     project: z.string().min(1).describe("Folder for the narration audio."),
+     engine: z
+-      .enum(["gemini", "mac"])
++      .enum(["gemini", "mac", "local"])
+       .default("gemini")
+       .describe(
+-        "'gemini' uses Google AI Studio's text-to-speech - the same voices Flow has, free on the AI Studio tier, no length limit, needs a key in ~/.flow-mcp/gemini-key. 'mac' uses a voice installed on this computer (macOS voices on a Mac, the built-in speech voices on Windows): free, instant, no key.",
++        "'gemini' uses Google AI Studio's text-to-speech - the same voices Flow has, free on the AI Studio tier, no length limit, needs a key in ~/.flow-mcp/gemini-key. 'local' uses this computer's installed voice (Linux eSpeak on VPS); 'mac' is a legacy alias and uses a voice installed on this computer (macOS voices on a Mac, the built-in speech voices on Windows): free, instant, no key.",
+       ),
+     text: z.string().min(1).max(400).describe("The line to speak. About 20 words fits 8 s, 30 words fits 12 s; anything longer needs a longer take."),
+     voice: z.string().min(1).default("Charon").describe("Voice name from flow_voices, e.g. Charon (informative), Aoede (breezy), Gacrux (mature) for Google; Zoe or Samantha for macOS."),
+@@ -492,7 +497,7 @@ export class LocalCore implements Core {
+ 
+   async voices() {
+     // The panel words itself from these, so a PC never reads "this Mac".
+-    const place = { computer: COMPUTER, bin: BIN, local_engine: IS_MAC ? "macOS voice" : IS_WIN ? "Windows voice" : "System voice", platform: process.platform };
++    const place = { computer: COMPUTER, bin: BIN, local_engine: IS_MAC ? "macOS voice" : IS_WIN ? "Windows voice" : "Linux eSpeak (basic synthetic voice)", platform: process.platform };
+     return { gemini: GEMINI_VOICES, gemini_ready: Boolean(geminiKey()), mac: await localVoices(), place };
+   }
+ 
+@@ -500,7 +505,7 @@ export class LocalCore implements Core {
+     const output_dir = projectDir(project);
+     mkdirSync(output_dir, { recursive: true });
+     const target = join(output_dir, `${this.nextStem(output_dir, "narration")}.m4a`);
+-    const spoken = engine === "mac" ? await speakLocally(text.trim(), voice, target) : await speakWithGemini(text.trim(), voice, target, style);
++    const spoken = engine !== "gemini" ? await speakLocally(text.trim(), voice, target) : await speakWithGemini(text.trim(), voice, target, style);
+     return { output_dir, credits: 0, engine, voice, ...spoken };
+   }
+ 
+diff --git a/src/flow.ts b/src/flow.ts
+index 8b36c58..dabe7bc 100644
+--- a/src/flow.ts
++++ b/src/flow.ts
+@@ -254,6 +254,7 @@ async function openSettings(page: Page): Promise<void> {
+ async function pickRadio(page: Page, name: string | RegExp): Promise<void> {
+   const radio = page.getByRole("radio", { name, exact: typeof name === "string" }).first();
+   if (!(await radio.isVisible().catch(() => false))) {
++    if (typeof name === "string" && /^\d+s$/.test(name) && new RegExp(`\\b${name}\\b`).test(await settingsTrigger(page).innerText())) return;
+     throw new Error(`Flow has no "${name}" option for the current mode/model.`);
+   }
+   if (!(await radio.isChecked())) {
+@@ -274,19 +275,25 @@ async function pickModel(page: Page, model: string): Promise<void> {
+     await page.keyboard.press("Escape");
+     throw new Error(`Model "${model}" not found. Available here: ${names.join(", ")}`);
+   }
+-  await items.nth(index).click();
++  const selected = items.nth(index);
++  if (!(await selected.isEnabled())) throw new Error("Selected model is disabled");
++  await selected.evaluate((element) => (element as HTMLElement).click());
+   await pause(page, 700);
++  await openSettings(page);
++  if (!(await button.innerText()).toLowerCase().includes(model.toLowerCase())) throw new Error("Selected model could not be verified");
+ }
+ 
+ // Applies the scene settings and returns the credit cost Flow quotes for them.
+ async function applySettings(page: Page, job: Job): Promise<number> {
+   const s = job.params;
+-  const framesMode = Boolean(s.first_frame || s.last_frame);
++  await page.bringToFront();
++  const framesMode = Boolean(s.first_frame || s.last_frame) || !s.reference_images?.length;
+   await openSettings(page);
+   await pickRadio(page, s.type === "image" ? "Image" : "Video");
+   if (s.type === "video") await pickRadio(page, framesMode ? "Frames" : "Ingredients");
+   if (s.aspect_ratio) await pickRadio(page, s.aspect_ratio);
+   if (s.model) await pickModel(page, s.model);
++  await openSettings(page);
+   if (s.type === "video" && s.resolution) await pickRadio(page, new RegExp(`^${s.resolution}`));
+   if (s.type === "video" && s.duration) await pickRadio(page, `${s.duration}s`);
+   await pickRadio(page, `x${s.variants ?? 1}`);
+@@ -543,12 +550,12 @@ async function renameTile(page: Page, tile: Locator, title: string): Promise<boo
+       return false;
+     }
+     await rename.click();
+-    await pause(page, 1200);
+-    await page.keyboard.press("ControlOrMeta+a");
+-    await page.keyboard.type(title, { delay: 8 });
+-    await page.keyboard.press("Enter");
++    const editor = page.locator('input.editable-text-input.editing[aria-label="Editable text"]');
++    await editor.waitFor({ state: "visible", timeout: 5000 });
++    await editor.fill(title);
++    await editor.press("Enter");
+     await pause(page, 1500);
+-    return true;
++    return (await tile.getAttribute("aria-label")) === title;
+   } catch {
+     await page.keyboard.press("Escape").catch(() => {});
+     return false;
+diff --git a/src/queue.ts b/src/queue.ts
+index c7c0e10..774e2a0 100644
+--- a/src/queue.ts
++++ b/src/queue.ts
+@@ -1,4 +1,7 @@
+ import { randomUUID } from "node:crypto";
++import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
++import { dirname, join } from "node:path";
++import { homedir } from "node:os";
+ 
+ export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled";
+ 
+@@ -54,7 +57,29 @@ export class JobQueue {
+   private lastFinished = 0;
+   pausedReason: string | null = null;
+ 
+-  constructor(private runner: JobRunner) {}
++  private checkpoint = join(process.env.FLOW_MCP_HOME ?? join(homedir(), ".flow-mcp"), "queue.json");
++  constructor(private runner: JobRunner) {
++    if (existsSync(this.checkpoint)) {
++      const saved = JSON.parse(readFileSync(this.checkpoint, "utf8")) as {version: number; jobs: Job[]};
++      if (saved.version !== 1 || !Array.isArray(saved.jobs)) throw new Error("Invalid Flow queue checkpoint; preserve it and inspect before submitting jobs.");
++      for (const job of saved.jobs) {
++        if (!job.id || !job.params || !Array.isArray(job.files)) throw new Error("Invalid job in Flow checkpoint.");
++        if (job.status === "running" || job.status === "queued") {
++          job.status = "failed";
++          job.error = "Interrupted by owner restart. Inspect Flow project assets and credit balance before explicitly retrying; no automatic resubmission was made.";
++          job.finishedAt = new Date().toISOString();
++        }
++        this.jobs.set(job.id, job);
++      }
++      this.persist();
++    }
++  }
++  private persist(): void {
++    mkdirSync(dirname(this.checkpoint), { recursive: true });
++    const temporary = this.checkpoint + ".tmp";
++    writeFileSync(temporary, JSON.stringify({version: 1, jobs: this.list()}), {mode: 0o600});
++    renameSync(temporary, this.checkpoint);
++  }
+ 
+   add(params: SceneParams): Job {
+     const job: Job = {
+@@ -66,6 +91,7 @@ export class JobQueue {
+       createdAt: new Date().toISOString(),
+     };
+     this.jobs.set(job.id, job);
++    this.persist();
+     void this.work();
+     return job;
+   }
+@@ -89,6 +115,7 @@ export class JobQueue {
+       job.status = "queued";
+       job.error = undefined;
+       job.finishedAt = undefined;
++      this.persist();
+       void this.work();
+     }
+     return job;
+@@ -99,6 +126,7 @@ export class JobQueue {
+     if (job && job.status === "queued") {
+       job.status = "cancelled";
+       job.finishedAt = new Date().toISOString();
++      this.persist();
+     }
+     return job;
+   }
+@@ -122,6 +150,7 @@ export class JobQueue {
+         if (job.status !== "queued") continue;
+         job.status = "running";
+         job.attempts++;
++        this.persist();
+         try {
+           job.files = await this.runner(job);
+           job.status = "done";
+@@ -135,6 +164,7 @@ export class JobQueue {
+         }
+         job.finishedAt = new Date().toISOString();
+         this.lastFinished = Date.now();
++        this.persist();
+       }
+     } finally {
+       this.working = false;

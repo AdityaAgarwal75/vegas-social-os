@@ -40,6 +40,12 @@ def refresh(engine,account_id):
         if any(j.get('status') in ('queued','running') for j in state.get('jobs',[])):
             raise ValueError('Existing Flow service is busy; model menus were not changed')
     else:
+        from .flow_runtime import configured,ensure
+        if configured():
+            from .flow_service import request
+            state=request(ensure(engine,account_id),'status',{'detailed':False})
+            if any(j.get('status') in ('queued','running') for j in state.get('jobs',[])):
+                raise ValueError('Managed Flow engine is busy; model menus were not changed')
         try:port=json.loads((engine.store.root/'profiles'/account_id/'browser.json').read_text())['port']
         except (OSError,KeyError,json.JSONDecodeError):raise ValueError('Open this account’s Google browser first') from None
     if type(port) is not int or not 1024<=port<=65535:raise ValueError('Setup agent must configure this service’s private CDP port for model discovery')

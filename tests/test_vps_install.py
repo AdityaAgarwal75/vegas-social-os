@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class VPSBootstrapTests(unittest.TestCase):
     def test_install_shell_files_are_syntax_valid(self):
-        for filename in ("install-vps.sh", "bootstrap-ubuntu.sh", "new-setup-link.sh"):
+        for filename in ("install-vps.sh", "bootstrap-ubuntu.sh", "new-setup-link.sh", "install-flow-engine.sh"):
             with self.subTest(filename=filename):
                 script = ROOT / "scripts" / filename
                 self.assertTrue(script.exists())

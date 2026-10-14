@@ -21,11 +21,11 @@ while (( $# )); do
 done
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq ca-certificates curl gnupg tar xz-utils python3 python3-venv \
+apt-get install -y -qq ca-certificates curl gnupg git tar xz-utils python3 python3-venv \
   ffmpeg xvfb x11vnc websockify novnc caddy
 NEED_NODE=1
 if command -v node >/dev/null 2>&1; then
-  if (( $(node -v | sed 's/^v//' | cut -d. -f1) >= 22 )); then NEED_NODE=0; fi
+  if (( $(node -v | sed 's/^v//' | cut -d. -f1) >= 22 )) && command -v npm >/dev/null 2>&1; then NEED_NODE=0; fi
 fi
 if (( NEED_NODE )); then
   NODE_URL="https://nodejs.org/dist/latest-v22.x"
@@ -39,6 +39,8 @@ if (( NEED_NODE )); then
   install -d /opt/vegas-social-os-node
   tar -xJf "$TMP/$ARCHIVE" --strip-components=1 -C /opt/vegas-social-os-node
   ln -sfn /opt/vegas-social-os-node/bin/node /usr/local/bin/node
+  ln -sfn /opt/vegas-social-os-node/bin/npm /usr/local/bin/npm
+  ln -sfn /opt/vegas-social-os-node/bin/npx /usr/local/bin/npx
 fi
 if ! command -v google-chrome >/dev/null 2>&1 && ! command -v chromium >/dev/null 2>&1; then
   TMPKEY="$(mktemp)"

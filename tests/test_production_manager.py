@@ -53,6 +53,15 @@ class ProductionManagerTests(unittest.TestCase):
    self.assertEqual(payload['scenes'][0]['model'],'Veo 3.1 - Fast');self.assertNotIn('resolution',payload['scenes'][0]);return {'jobs':[{'id':'original'}]}
   with patch('vso.flow_service.binding',return_value=({},{})),patch('vso.flow_service.request',side_effect=response):
    r=video_service.submit(self.e,self.a,'A boat',video_service.settings('Veo 3.1 - Fast',4,'720p','9:16',0));self.assertEqual(r['backend_job_ids'],['original'])
+ def test_distinct_intentional_takes_never_overwrite_original_output_folder(self):
+  projects=[]
+  def response(config,method,payload):
+   if method=='status':return {'jobs':[]}
+   projects.append(payload['project']);return {'jobs':[{'id':'original'}]}
+  with patch('vso.flow_service.binding',return_value=({},{})),patch('vso.flow_service.request',side_effect=response):
+   for ident in ['take-one','take-two']:
+    video_service.submit(self.e,self.a,'Same boat',video_service.settings('Veo 3.1 - Fast',8,'720p','9:16',0),submission_id=ident)
+  self.assertNotEqual(projects[0],projects[1])
  def test_live_settings_override_documented_rollout_before_submission(self):
   import time
   self.e.store.put('flow-models',self.a,{'observed_at':time.time(),'video':['Veo 3.1 - Fast'],'video_settings':{'Veo 3.1 - Fast':{'durations':[8],'resolutions':['720p']}}})

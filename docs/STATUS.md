@@ -43,3 +43,9 @@ Verify reviewed Git commit, systemd, HTTPS `/health` returning 0.5.0, authentica
 The live server remains 0.5.0; 0.6 is an unmerged candidate on PR 5. The user requested product definition before further feature work/deployment. See PRODUCT-PLAN.md. The reviewed candidate passed 79 Python / 4 Node tests and 12-route disposable browser QA. Additional licensed skill/continuity work passes 81 Python / 4 Node tests locally; staged/live checks remain pending for those additions. Do not describe them as deployed.
 
 All four model zero-credit guards completed: Omni 7, Lite 10, Fast 20, Quality 100 quoted for the exact diagnostic combinations, zero spent. Account 1 remained at 951. Historical clip import decoded as 8s 1280x720 H.264/AAC; no new paid clip or post was made.
+
+## Accepted plan: complete engine checkpoint
+
+Direction accepted on 14 October 2026. Complete engine installation/compilation succeeded in an isolated candidate directory. Native profiles now use an attached full engine rather than the independent experimental submission algorithm. Native signed-out browser inspection, one engine owner, anonymous API denial, private token permissions and synthetic interrupted-queue recovery passed after initial page navigation settled. The same Chrome remained in use after the engine restart. These are infrastructure tests, not owner login or newly rendered video proof.
+
+33 real settings probes passed across five accounts: account 1 covered all Omni durations/resolutions, both aspects, all four video model families and compatible Frames/Ingredients mode selection; accounts 2–5 covered four model families each. No Generate was clicked and controls were restored. No image/reference attachment or new render follows from these probes. The current original suite passes 88 Python / 4 Node tests. Advanced edit/extend/upscale/voice features remain unwired. See FLOW-EXECUTION-CONTRACT.md.
