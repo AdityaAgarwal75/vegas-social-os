@@ -81,3 +81,28 @@ Use `flow_model_catalog` and refresh idle menus with `flow_models_refresh` befor
 ## Bundled premade Flow craft
 
 Read ../flow-production/SKILL.md for complex Flow productions, continuity, ads and chained scenes. It loads pinned licensed materials through the Vegas tool adapter. Current controls and owner authorization take precedence over old model/default/retry examples. Use continuity_frame on an exact downloaded imported MP4 for a continuation, review its PNG, then explicitly select that start frame; extraction is not another generation.
+
+## Vegas Creative Engine — first-party content operations
+
+Read [creative feature and provenance matrix](../../docs/CREATIVE-ENGINE.md).
+Use studio_catalog for 13 distinct production stage contracts and honest
+limits. Start with studio_brief for an idempotent, source-aware campaign; use
+studio_draft to save two ChatGPT-written ideas with distinct hooks and image/video
+prompts; then studio_select only after owner creative review. These operations
+do NOT call a paid provider or publish. Bridge to the existing native image
+handoff and Flow job tools once the actual assets and approvals are available.
+
+Use studio_quality, studio_caption_review, studio_copycheck, studio_carousel_outline,
+studio_story_sequence, studio_engagement_triage, studio_profile_audit,
+studio_repurpose and studio_outliers for individual editorial decisions. Never
+invent metric baselines, scrape private competitor data, mistake a heuristic
+for a quality guarantee, or send DMs/comments without the owner's review.
+
+When OpenMontage source is separately installed, studio_external_catalog lists
+its AGPL-preserved manifests. Do not claim its renderers run or copy its code
+into Vegas without complying with the license.
+
+Owner password setup is optional and requires a private interactive terminal
+running python -m vso owner-password. The secure password unlocks the owner's
+browser session only; the ChatGPT plugin requires OAuth/PKCE consent as well.
+Do not ask for or store the password in chat.

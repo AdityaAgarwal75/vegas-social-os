@@ -166,6 +166,35 @@ class Handler(BaseHTTPRequestHandler):
             with self.store.db() as db:db.execute('SELECT 1').fetchone()
             return self.send({'ready':True,'database':'sqlite','version':'0.7.0','flow_engine_installed':self.engine.doctor()['flow_engine_installed']})
         if path == "/health": return self.send({"ok": True, "version": "0.7.0"})
+        if path == "/password":
+            if not self.session():return self.page("Owner session required",
+                "<p>Use an authorized owner session or private setup link first.</p>",401)
+            from .owner_auth import configured
+            previous=('<label>Current password<input type="password" name="current" required autocomplete="current-password"></label>' if configured(self.store) else '')
+            return self.page("Set owner password",
+                "<p>Your password stays private and is stored as a salted hash.</p>"
+                '<form action="/password" method="post">'+previous+
+                '<label>New password<input type="password" name="password" minlength="14" required autocomplete="new-password"></label>'
+                '<label>Confirm password<input type="password" name="confirmation" minlength="14" required autocomplete="new-password"></label>'
+                '<button type="submit">Save owner password</button></form>')
+        if path == "/login":
+            from .owner_auth import configured, validate_return
+            next_url=q.get("next","/dashboard")
+            try:validate_return(next_url)
+            except ValueError:next_url="/dashboard"
+            if self.session():return self.redirect(next_url)
+            if not configured(self.store):
+                return self.page("Set an owner password",
+                    "<p>On your own private installation terminal, run <code>python -m vso owner-password</code> to enable browser password login. "
+                    "Until configured, use the one-use local setup link. Never paste the password into ChatGPT.</p>", 401)
+            import html as _html
+            return self.page("Owner sign-in",
+                "<p>Sign in to your own installation. ChatGPT's plugin connection still uses secure OAuth approval afterward.</p>"
+                '<form action="/login" method="post">'
+                '<input name="password" type="password" required minlength="14" autocomplete="current-password" aria-label="Owner password">'
+                '<input type="hidden" name="next" value="' + _html.escape(next_url,quote=True) + '">'
+                '<button type="submit">Sign in</button></form>')
+
         if path in ('/admin','/admin/enroll','/admin.js'):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
             file='admin.js' if path=='/admin.js' else 'admin.html'
@@ -241,7 +270,11 @@ class Handler(BaseHTTPRequestHandler):
                               "token_endpoint_auth_methods_supported": ["none"], "code_challenge_methods_supported": ["S256"],
                               "scopes_supported": sorted(auth.SCOPES)})
         if path == "/authorize":
-            if not self.session(): return self.page("Open your setup link first", "<p>Run <code>python -m vso setup</code> on the installation computer. Open the private setup link in this browser, then retry connecting the plugin.</p>", 401)
+            if not self.session():
+                from .owner_auth import configured
+                if configured(self.store):
+                    return self.redirect("/login?"+urllib.parse.urlencode({"next":self.path}))
+                return self.page("Owner sign-in required", "<p>Run <code>python -m vso owner-password</code> in a private terminal to enable password sign-in, or use the private one-use setup link, then retry connecting the plugin.</p>", 401)
             client = self.store.get("oauth-client", q.get("client_id", ""))
             if q.get("redirect_uri") not in client["redirect_uris"] or q.get("response_type") != "code" or q.get("code_challenge_method") != "S256" or len(q.get("code_challenge", "")) != 43 or q.get("resource") != self.base + "/mcp":
                 raise ValueError("Invalid OAuth client, PKCE challenge or resource")
@@ -371,11 +404,30 @@ class Handler(BaseHTTPRequestHandler):
         if not self.origin_ok(): return self.send({"error": "Origin rejected"}, 403)
         public=path in ('/register','/token','/revoke','/mcp')
         if path=='/flow/verify' and not self.flow_guard():return
-        if not public and not self.authorized() and path!='/flow/verify':
+        if not public and not self.authorized() and path not in ('/flow/verify','/login','/password'):
             return self.send({'error':'Authentication required'},401,headers={'WWW-Authenticate':auth.challenge(self.base)})
-        limit=16384 if path in ('/register','/token','/revoke','/consent') else (65536 if path=='/mcp' and not self.authorized() else 1048576)
+        limit=16384 if path in ('/register','/token','/revoke','/consent','/login','/password') else (65536 if path=='/mcp' and not self.authorized() else 1048576)
         body=self.body(limit)
         if not isinstance(body,dict):raise ValueError('Expected one JSON object')
+        if path == "/password":
+            if not self.session():return self.send({"error":"Owner session required"},401)
+            from .owner_auth import configured, password_check, password_set
+            if configured(self.store) and not password_check(self.store,body.get("current",""),self.client_address[0]):
+                return self.page("Current password incorrect","<p>Verify your current password.</p>",401)
+            if body.get("password")!=body.get("confirmation"):
+                return self.page("Passwords differ","<p>Enter matching passwords.</p>",400)
+            password_set(self.store,body.get("password",""))
+            return self.redirect("/login")
+        if path == "/login":
+            from .owner_auth import password_check, validate_return
+            next_url=validate_return(body.get("next","/dashboard"))
+            if not password_check(self.store,body.get("password",""),self.client_address[0]):
+                return self.page("Incorrect owner password",
+                                 '<p>Authentication failed. Return to <a href="/login">owner login</a>. Rate limits apply.</p>',401)
+            token=secrets.token_urlsafe(32)
+            self.store.put("session",self.store.digest(token),{"expires":time.time()+8*3600})
+            secure="; Secure" if self.base.startswith("https://") else ""
+            return self.redirect(next_url, {"Set-Cookie":"vso_session="+token+"; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800"+secure})
         if path == "/flow/verify":
             data = self.flow_guard()
             if not data: return

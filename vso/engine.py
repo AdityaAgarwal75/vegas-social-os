@@ -31,7 +31,7 @@ class Engine:
                 "facebook_oauth_configured": self.accounts.config.public("facebook")["configured"],
                 "instagram_oauth_configured": self.accounts.config.public("instagram")["configured"],
                 "supabase_sync_configured": all(os.getenv(x) for x in ("SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_USER_JWT")),
-                "live_integrations_verified": False}
+                "live_integrations_verified": False, "content_studio_tools": 14, "owner_password_configured": __import__("vso.owner_auth",fromlist=["configured"]).configured(self.store), "external_pipeline_catalog": __import__("vso.external_pipeline",fromlist=["status"]).status().get("source_present",False)}
 
     def channel_save(self, name, niche, language="English", account_ids=None):
         if not name.strip() or not niche.strip():

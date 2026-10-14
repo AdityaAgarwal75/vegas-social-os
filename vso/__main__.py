@@ -12,7 +12,7 @@ from .tools import rpc
 
 def main():
     parser = argparse.ArgumentParser(description="Vegas Social OS — self-hosted, ChatGPT-native content pipeline")
-    parser.add_argument("command", choices=("serve", "stdio", "setup", "doctor", "flow-login", "call"))
+    parser.add_argument("command", choices=("serve", "stdio", "setup", "doctor", "flow-login", "call", "owner-password"))
     parser.add_argument("--data-dir", default=os.getenv("VSO_DATA_DIR", str(Path.home() / ".local/share/vegas-social-os")))
     parser.add_argument("--port", type=int, default=int(os.getenv("VSO_PORT", os.getenv("PORT", "8787"))))
     parser.add_argument("--host", default="127.0.0.1")
@@ -35,6 +35,15 @@ def main():
         print("Private one-use setup link (expires in 10 minutes):")
         print(base + "/pair?ticket=" + ticket)
         print("Start the server with: python -m vso serve")
+    elif args.command == "owner-password":
+        import getpass
+        from .owner_auth import password_set
+        if not sys.stdin.isatty():
+            parser.error("Set your password in a private interactive terminal, not through chat, flags or automation logs")
+        first=getpass.getpass("New Vegas owner password (minimum 14 characters): ")
+        second=getpass.getpass("Confirm owner password: ")
+        if first!=second:parser.error("Passwords differ")
+        print(json.dumps(password_set(store,first)))
     elif args.command == "doctor": print(json.dumps(engine.doctor(), indent=2))
     elif args.command == "flow-login": print(json.dumps(engine.flow_login(args.account_id), indent=2))
     elif args.command == "call":

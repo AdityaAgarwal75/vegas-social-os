@@ -50,7 +50,24 @@ Generate a private ten-minute, one-use pairing link with:
 sudo bash /opt/vegas-social-os/scripts/new-setup-link.sh
 ```
 
-Current owner browser sessions last eight hours; issue a fresh link after expiry. Convenient persistent owner sign-in is planned. Never post pairing links publicly.
+Owner browser sessions last eight hours. For easier repeated sign-ins, the owner
+may visit https://YOUR-DOMAIN/password in their already-paired browser
+to set a private scrypt-protected password, or use
+python -m vso owner-password in a private interactive terminal.
+Subsequent visits use https://YOUR-DOMAIN/login. The password never replaces OAuth/PKCE consent for
+ChatGPT. Never post pairing links or passwords publicly.
+
+## Vegas Creative Engine
+
+See [the complete content capability, attribution and verification matrix](docs/CREATIVE-ENGINE.md).
+New first-party tools handle hooks, caption and writing QA, carousels,
+Stories, engagement triage, profile/competitor scoring, transcript repurposing
+and a source-aware two-concept creative brief lifecycle. 13 explicit
+video/story production pipelines specify gates before media spend or release.
+OpenMontage can be cloned separately as optional AGPL-preserved external source
+and discovered read-only; its renderers/providers are NOT auto-installed.
+This project does not scrape private platform data or claim unattended
+ChatGPT native image generation.
 
 ## Per-owner ChatGPT plugin
 

@@ -206,10 +206,51 @@ def registry(engine):
     def reel_review(script,hook,on_screen,target_seconds,words_per_minute=150):
         from .content import reel_review
         return reel_review(script,hook,on_screen,target_seconds,words_per_minute)
+    def studio_catalog():
+        from .studio import catalog
+        return catalog()
+    def studio_quality(hook,script,caption="",platform="instagram",target_seconds=30):
+        from .studio import quality
+        return quality(hook,script,caption,platform,target_seconds)
+    def studio_brief(channel_id,topic,platform,pipeline,objective,budget_credits,request_id,references=None):
+        from .studio import start
+        return start(engine,channel_id,topic,platform,pipeline,objective,budget_credits,request_id,references)
+    def studio_draft(brief_id,variants):
+        from .studio import draft
+        return draft(engine,brief_id,variants)
+    def studio_select(brief_id,variant_index):
+        from .studio import select
+        return select(engine,brief_id,variant_index)
+    def studio_outliers(observations):
+        from .studio import outliers
+        return outliers(observations)
+    def studio_repurpose(transcript,target_clips=4):
+        from .studio import repurpose
+        return repurpose(transcript,target_clips)
+    def studio_profile_audit(fields):
+        from .studio import profile
+        return profile(fields)
+    def studio_copycheck(text):
+        from .studio import copycheck
+        return copycheck(text)
+    def studio_caption_review(text,platform="instagram"):
+        from .studio import caption_review
+        return caption_review(text,platform)
+    def studio_carousel_outline(topic,points,platform="instagram"):
+        from .studio import carousel_outline
+        return carousel_outline(topic,points,platform)
+    def studio_story_sequence(topic,goal,frames):
+        from .studio import story_sequence
+        return story_sequence(topic,goal,frames)
+    def studio_engagement_triage(comments):
+        from .studio import engagement_triage
+        return engagement_triage(comments)
+    def studio_queue():
+        return s.all("creative-brief")
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -222,6 +263,21 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    "studio_catalog": "List native first-party pipelines, production governance stages and available services; plans are not generated media.",
+    "studio_quality": "Score submitted hook/script/caption with transparent timing and writing heuristics, not viral predictions.",
+    "studio_brief": "Create an idempotent, evidence-aware cross-platform production brief, cap allowed credits, and queue host drafting without generation or publishing.",
+    "studio_draft": "Store two host-written concepts with exact image/video scene instructions and honest research provenance for owner review.",
+    "studio_select": "Record a creative selection; does not approve native image handoff, paid Flow calls or posting.",
+    "studio_outliers": "Rank user-supplied observed competitor posts by relative views, explicitly unverified; no scraping, no fabricated metrics.",
+    "studio_repurpose": "Divide a supplied, rights-cleared transcript into rough segments for subsequent host review; no timestamps inferred.",
+    "studio_profile_audit": "Audit provided Instagram or creator profile field completeness with no account access and no reach claims.",
+    "studio_queue": "List active saved creative briefs for the ChatGPT-hosted strategist without initiating a host conversation.",
+    "studio_copycheck": "Inspect and clean only accidental invisible text characters and flag vague/promotional wording; does not claim AI detection.",
+    "studio_caption_review": "Check provided platform captions for opening truncation, hashtags, a single CTA and wording quality.",
+    "studio_carousel_outline": "Create original text-only slide/copy specs from supplied points with no generated media.",
+    "studio_story_sequence": "Create an original frame-by-frame story concept with optional poll idea; no posting.",
+    "studio_engagement_triage": "Rank owner-supplied comments for human reply drafts; never send automatic replies or expose private users.",
+
     'analytics_capture':'Persist only account statistics exposed by the already authorized provider read scopes. No paid API or retention/revenue claim.',
     'analytics_summary':'Read channel production/release history and observed account metrics for subsequent content planning; no provider call.',
     'channel_settings_save':'Save the channel audience, rules, continuity references, allowed Flow accounts, rolling credit ceiling and production/posting preferences.',
@@ -306,7 +362,7 @@ DESCRIPTIONS = {
 
 def schema(fn):
     properties, required = {}, []
-    types = {"retained_seconds":"integer", "size": "integer", "duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "arguments": "object", "settings":"object", "subtitles":"array", "width":"integer", "height":"integer", "fps":"integer", "fade_seconds":"number", "music_volume":"number", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
+    types = {"retained_seconds":"integer", "size": "integer", "duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "variants":"array", "observations":"array", "references":"array", "fields":"object", "budget_credits":"integer", "variant_index":"integer", "target_clips":"integer", "points":"array", "frames":"array", "comments":"array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "arguments": "object", "settings":"object", "subtitles":"array", "width":"integer", "height":"integer", "fps":"integer", "fade_seconds":"number", "music_volume":"number", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
     for name, p in inspect.signature(fn).parameters.items():
         item = {"type": types.get(name, "string")}
         if name == "file":item={"type":"object","properties":{k:{"type":"string"} for k in ("download_url","file_id","file_name","mime_type")},"required":["download_url","file_id"],"additionalProperties":False}
@@ -317,10 +373,10 @@ def schema(fn):
                     "image_prompt": {"type": "string"}, "video_prompt": {"type": "string"}, "continuity":{"type":"object","additionalProperties":True}, "scene_id":{"type":"string"}, "input_sha256":{"type":"string"}},
                     "required": ["image_prompt", "video_prompt"], "additionalProperties": False}}},
                 "required": ["title", "hook", "script", "scenes"], "additionalProperties": False}
-        if name in ("account_ids", "channel_ids", "asset_ids", "sources", "pillars", "reference_asset_ids"): item["items"] = {"type": "string"}
+        if name in ("account_ids", "channel_ids", "asset_ids", "sources", "pillars", "reference_asset_ids", "references", "points", "frames", "comments"): item["items"] = {"type": "string"}
         if name == "subtitles":item["items"]={"type":"object","properties":{"start":{"type":"number"},"end":{"type":"number"},"text":{"type":"string"}},"required":["start","end","text"],"additionalProperties":False}
-        if name == "items": item["items"] = {"type":"object", "additionalProperties":True}
-        if name in ("arguments", "capabilities", "receipt", "options", "settings"): item["additionalProperties"] = True
+        if name in ("items", "variants", "observations"): item["items"] = {"type":"object", "additionalProperties":True}
+        if name in ("arguments", "capabilities", "receipt", "options", "settings", "fields"): item["additionalProperties"] = True
         properties[name] = item
         if p.default is inspect.Parameter.empty: required.append(name)
     return {"type": "object", "properties": properties, "required": required, "additionalProperties": False}
