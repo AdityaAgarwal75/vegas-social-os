@@ -79,7 +79,7 @@ class OAuthOriginTests(unittest.TestCase):
                 self.assertTrue(e.exception.headers["Location"].startswith("https://example.org/callback?code="))
                 with self.assertRaises(urllib.error.HTTPError) as e:
                     no_redirect.open(submit(base))
-                self.assertEqual(e.exception.code, 400)
+                self.assertEqual(e.exception.code, 409)
             finally:
                 server.shutdown()
                 server.server_close()

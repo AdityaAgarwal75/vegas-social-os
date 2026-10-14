@@ -80,3 +80,17 @@ installer repairs only its marked Caddy route and saves a backup. When using
 --no-caddy or your own reverse proxy, configure a single Referrer-Policy: origin
 response header for Social OS. Do not append another no-referrer policy.
 Verify GET /authorize has that header and browser consent succeeds.
+
+### Already used pairing/authorization link
+
+Owner pairing tickets and OAuth approvals are intentionally single-use; do not
+bookmark or resubmit them. A paired browser that reopens its old pairing URL
+now returns to the dashboard instead of showing a generic OAuth error. Repeat
+consent submissions display a specific retry instruction and do not mint a
+second authorization code. The consent button disables during redirect.
+
+If a single authorized click returns you to ChatGPT but the connector does
+not finish, inspect whether the host exchanged the code at POST /token.
+A successful HTTP 303 from POST /consent proves approval/redirect only,
+not an installed or authorized ChatGPT plugin. Restart connection in ChatGPT
+to create a fresh authorization request; keep owner setup separate.
