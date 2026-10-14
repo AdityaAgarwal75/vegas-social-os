@@ -1,4 +1,4 @@
-// Original read-only model-menu discovery. No generation, token or cookie access.
+// Original model-menu discovery. No generation, tokens or cookie access.
 import {CDP} from './flow.mjs';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 export async function discover(port){
@@ -7,18 +7,33 @@ export async function discover(port){
  const matching=tabs.filter(t=>t.type==='page'&&/^https:\/\/(flow\.google\.com|labs\.google)\/.*project\//.test(t.url));
  if(matching.length!==1)throw Error('Keep one Flow project tab');
  const c=await CDP.connect(matching[0].webSocketDebuggerUrl);
- const escape=()=>c.call('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27}).then(()=>c.call('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27}));
- async function click(role,label){let box=await c.eval(`(()=>{const es=[...document.querySelectorAll(${JSON.stringify(role==='button'?'button':'[role="'+role+'"]')})].filter(e=>e.getBoundingClientRect().width>0);const e=es.find(e=>(e.getAttribute('aria-label')||'')===${JSON.stringify(label)}||(e.innerText||'').replace(/\\s+/g,' ').trim()===${JSON.stringify(label)}||(e.getAttribute('data-value')||'')===${JSON.stringify(label)});if(!e)return null;const b=e.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};})()`);if(!box&&label==='Select model family'){await click('button','Settings trigger');await pause(400);box=await c.eval(`(()=>{const e=document.querySelector('button[aria-label="Select model family"]');if(!e||!e.getBoundingClientRect().width)return null;const b=e.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};})()`);}if(!box)throw Error('Model control unavailable: '+label);await c.call('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...box});await c.call('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...box});await pause(250);}
- let original='Image';const out={image:[],video:[]};
+ const visible=`e=>!!(e.offsetWidth||e.offsetHeight||e.getClientRects().length)`;
+ const escape=async()=>{for(const type of ['keyDown','keyUp'])await c.call('Input.dispatchKeyEvent',{type,key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await pause(150);};
+ async function clickButton(label){
+  const clicked=await c.eval(`(()=>{const e=[...document.querySelectorAll('button')].filter(${visible}).find(e=>e.getAttribute('aria-label')===${JSON.stringify(label)});if(!e||e.disabled)return false;e.click();return true;})()`);
+  if(!clicked)throw Error('Model control unavailable: '+label);await pause(300);
+ }
+ async function openSettings(){
+  if(!await c.eval(`[...document.querySelectorAll('[role="radio"]')].filter(${visible}).some(e=>/(Image|Video)$/.test(e.innerText.trim()))`))await clickButton('Settings trigger');
+ }
+ async function mode(kind){
+  await openSettings();
+  const clicked=await c.eval(`(()=>{const e=[...document.querySelectorAll('[role="radio"]')].filter(${visible}).find(e=>e.innerText.trim().endsWith(${JSON.stringify(kind)}));if(!e)return false;if(e.getAttribute('aria-checked')!=='true')e.click();return true;})()`);
+  if(!clicked)throw Error('Mode unavailable');
+  for(let i=0;i<10;i++){await pause(150);if(await c.eval(`[...document.querySelectorAll('[role="radio"]')].filter(${visible}).some(e=>e.innerText.trim().endsWith(${JSON.stringify(kind)})&&e.getAttribute('aria-checked')==='true')`))return;}
+  throw Error('Mode change could not be verified');
+ }
+ let original;const out={image:[],video:[]};
  try{
-  await click('button','Settings trigger');original=await c.eval(`(()=>{const e=[...document.querySelectorAll('[role="radio"]')].find(e=>e.getAttribute('aria-checked')==='true'&&/Image|Video/.test(e.innerText));return e?.innerText.includes('Video')?'Video':'Image';})()`);
+  await c.call('Page.bringToFront');await openSettings();
+  original=await c.eval(`(()=>{const e=[...document.querySelectorAll('[role="radio"]')].filter(${visible}).find(e=>e.getAttribute('aria-checked')==='true'&&/(Image|Video)$/.test(e.innerText.trim()));return e?.innerText.trim().endsWith('Video')?'Video':e?'Image':null;})()`);
+  if(!original)throw Error('Current mode unavailable');
   for(const kind of ['Image','Video']){
-   // Icons contribute text; use accessible label through aria or final text suffix.
-   const radio=await c.eval(`(()=>{const e=[...document.querySelectorAll('[role="radio"]')].find(e=>e.getBoundingClientRect().width>0&&(e.innerText||'').endsWith(${JSON.stringify(kind)}));if(!e)return null;const b=e.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2,checked:e.getAttribute('aria-checked')==='true'};})()`);if(!radio)throw Error('Mode unavailable');
-   if(!radio.checked){await c.call('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,x:radio.x,y:radio.y});await c.call('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,x:radio.x,y:radio.y});}await pause(300);await click('button','Select model family');
-   out[kind.toLowerCase()]=await c.eval(`(()=>[...document.querySelectorAll('[role="menuitem"]')].filter(e=>e.getBoundingClientRect().width>0).map(e=>{const clone=e.cloneNode(true);clone.querySelectorAll('i,svg,mat-icon,[class*="material-symbol"]').forEach(x=>x.remove());return clone.textContent.replace(/\\s+/g,' ').trim().replace(/^volume_up/,'').replace(/^🍌\\s*/, '');}))()`);await escape();await pause(100);
+   await mode(kind);await clickButton('Select model family');
+   const labels=await c.eval(`(()=>[...document.querySelectorAll('[role="menuitem"]')].filter(${visible}).map(e=>{const clone=e.cloneNode(true);clone.querySelectorAll('i,svg,mat-icon,[class*="material-symbol"]').forEach(x=>x.remove());return clone.textContent.replace(/\\s+/g,' ').trim().replace(/^volume_up/,'').replace(/^🍌\\s*/, '');}))()`);
+   if(!labels.length)throw Error('Model menu empty');out[kind.toLowerCase()]=[...new Set(labels)];await escape();
   }
- }finally{try{const pos=await c.eval(`(()=>{const e=[...document.querySelectorAll('[role="radio"]')].find(e=>(e.innerText||'').endsWith(${JSON.stringify(original)}));if(!e||!e.getBoundingClientRect().width)return null;const b=e.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};})()`);if(pos){await c.call('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...pos});await c.call('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...pos});}await escape();}finally{c.close();}}
+ }finally{try{await escape();if(original)await mode(original);await escape();}finally{c.close();}}
  return out;
 }
 if(process.argv[1]?.endsWith('/models.mjs')){try{console.log(JSON.stringify(await discover(Number(process.argv[2]))));}catch(e){console.log(JSON.stringify({error:e.message}));process.exitCode=1;}}

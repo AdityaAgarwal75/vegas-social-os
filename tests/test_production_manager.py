@@ -47,5 +47,11 @@ class ProductionManagerTests(unittest.TestCase):
   with patch('vso.flow_service.binding',return_value=({'status':'workspace_ready'},{})),patch('vso.video_service.submit',return_value={'backend_job_ids':['private-exact']}):
    a=video_service.request(self.e,self.a,'A boat','Omni 1.1 Flash',4,'360p','9:16',0,'private')
    self.assertNotIn('worker',a);self.assertNotIn('private-exact',json.dumps(self.e.snapshot()))
+ def test_fixed_veo_resolution_does_not_click_absent_selector(self):
+  def response(config,method,payload):
+   if method=='status':return {'jobs':[]}
+   self.assertEqual(payload['scenes'][0]['model'],'Veo 3.1 - Fast');self.assertNotIn('resolution',payload['scenes'][0]);return {'jobs':[{'id':'original'}]}
+  with patch('vso.flow_service.binding',return_value=({},{})),patch('vso.flow_service.request',side_effect=response):
+   r=video_service.submit(self.e,self.a,'A boat',video_service.settings('Veo 3.1 - Fast',4,'720p','9:16',0));self.assertEqual(r['backend_job_ids'],['original'])
  def test_schema_exposes_real_manager_and_video_controls(self):
   defs={x['name']:x for x in tools.definitions(self.e)};self.assertEqual(defs['flow_video_request']['inputSchema']['properties']['duration']['type'],'integer');self.assertEqual(defs['content_plan_save']['inputSchema']['properties']['items']['type'],'array');self.assertIn('reel_review',defs)

@@ -1,20 +1,20 @@
 # Status — 0.6.0 community alpha
 
-Verified on 13 October 2026. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
+Updated on 14 October 2026; earlier 0.5 observations retain their original scope. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
 
 ## Observed checks
 
-- **74 Python tests pass**: state/permissions, OAuth state isolation, encrypted dashboard app settings, Page discovery/grants, exact-release idempotency, duplicate-upload suppression, unknown-write stops, carousel phases, cover-only failure/retry separation, original YouTube-session reconciliation/resume, scheduling/cancel/missed handling, robots/private-network research guards and AWS template boundaries.
-- **3 Node Flow worker tests pass**, plus Python compilation, JavaScript syntax, installer shell syntax and clean diff checks.
+- **78 Python tests pass**: state/permissions, OAuth state isolation, encrypted dashboard app settings, Page discovery/grants, exact-release idempotency, duplicate-upload suppression, unknown-write stops, carousel phases, cover-only failure/retry separation, original YouTube-session reconciliation/resume, scheduling/cancel/missed handling, robots/private-network research guards and AWS template boundaries.
+- **4 Node Flow worker tests pass**, plus Python compilation, JavaScript syntax, installer shell syntax and clean diff checks.
 - **CloudFormation schema lint passes** using cfn-lint 1.57.2. This is source/schema validation; no fresh AWS instance or billable resource was created by these tests. Live IAM/quota/change-set/SSM/bootstrap checks and cfn-guard validation remain separate deployment checks.
-- **Real sandboxed Google Chrome dashboard QA passes** on the founder's VPS, against disposable localhost data, separate from the live service. Profile → encrypted app configuration → channel brief → actual image import → exact composer draft → cancellation → daily schedule/pause all passed. Eleven workspace routes and 360/768/1440 layouts passed, with no JavaScript page exceptions.
+- **Real sandboxed Google Chrome dashboard QA passes** on the founder's VPS, against disposable localhost data, separate from the live service. Profile → encrypted app configuration → channel brief → actual image import → exact composer draft → cancellation → daily schedule/pause all passed. Twelve workspace routes and 360/768/1440 layouts passed, with no JavaScript page exceptions.
 - QA accounts are explicitly simulated local fixtures; they do not represent verified provider connections. Browser QA never submits a provider login, post or credit-consuming generation.
 - **Live authenticated dashboard QA passed** with the founder’s real account references, exact imported image queue, authenticated embedded existing desktop and 360/768/1440 layouts. A real WebSocket subprotocol mismatch was corrected and covered by a socket-level regression test.
 - The rebuilt 0.5 dashboard passed a separate staged localhost browser trial. The reviewed 0.5 runtime was deployed behind HTTPS; `/health` returned 0.5.0, Orbit remained HTTP 200, the scheduler was running, all five existing Flow services remained active, and anonymous `/api/state` and `/mcp` were denied.
 
 ## 0.6 audit extension
 
-Model-aware existing-service video jobs and production-scene selection, current documented/live model provenance, content strategy requests and weekly editorial calendar review, original Reel beat/timing checks and truthful workflow readiness. See AUDIT-0.6.md. These additions require staged/live checks before claiming deployment; paid rendering and social publication remain unverified.
+Model-aware existing-service video jobs and production-scene selection, current documented/live model provenance, content strategy requests and weekly editorial calendar review, original Reel beat/timing checks and truthful workflow readiness. See AUDIT-0.6.md. The candidate passed staged disposable browser QA across 12 routes, strategy/calendar/Reel/model controls and 360/768/1440 layouts. All five existing-account model menus were inspected live; paid rendering and social publication remain unverified.
 
 ## Implemented in this release
 

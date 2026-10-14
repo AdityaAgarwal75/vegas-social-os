@@ -197,12 +197,10 @@ class Engine:
         if type(max_credits) is not int or max_credits < 1 or type(scene) is not int:
             raise ValueError("Positive integer max_credits and integer scene are required")
         account=self.store.get('account',account_id)
-        if account.get('service_alias'):
+        if options or account.get('service_alias'):
             from .video_service import settings
             if not options: raise ValueError('Choose model, duration, resolution and aspect before generating')
             options=settings(options.get('model'),options.get('duration'),options.get('resolution'),options.get('aspect_ratio'),max_credits)
-        elif options:
-            raise ValueError('This independent experimental worker cannot apply dashboard settings yet; select and verify settings in the private Flow browser, then request through the agent without options')
         ident = self.store.digest("video:" + request_id)[:32]
         with self.store.db() as db:
             row = db.execute("SELECT body FROM records WHERE kind='job' AND id=?", (ident,)).fetchone()

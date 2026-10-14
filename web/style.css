@@ -4,3 +4,5 @@
 .flow-bottom{align-items:start}#image-job-list{max-height:420px;overflow:auto;padding-right:8px}.generation-panel{min-height:280px}
 
 #video-job-list{max-height:420px;overflow:auto}.calendar-entry{padding:16px 0;border-bottom:1px solid var(--line)}#video-reference-assets{display:flex;flex-wrap:wrap;gap:10px}.calendar-entry pre{white-space:pre-wrap;overflow-wrap:anywhere}
+
+#reel-review-form{display:grid;grid-template-columns:1fr 1fr;align-items:start}#reel-review-form>h2,#reel-review-form>.form-row,#reel-review-form>.review-result{grid-column:1/-1}#reel-review-form>button{justify-self:start}.review-result{font-size:12px;overflow-wrap:anywhere}.review-result h3{font-size:17px;margin:12px 0}.review-result ul{padding-left:20px;color:#e5b883}.calendar-entry pre{white-space:pre-wrap;font:12px/1.7 inherit;overflow-wrap:anywhere}@media(max-width:760px){#reel-review-form{grid-template-columns:1fr}}

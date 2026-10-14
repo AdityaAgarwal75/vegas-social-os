@@ -30,7 +30,11 @@ def refresh(engine,account_id):
     a=engine.store.get('account',account_id)
     if a['provider']!='flow':raise ValueError('Choose a Flow account')
     if a.get('service_alias'):
+        from .flow_service import request
         _,config=binding(engine,account_id);port=config.get('cdp_port')
+        state=request(config,'status',{'detailed':False})
+        if any(j.get('status') in ('queued','running') for j in state.get('jobs',[])):
+            raise ValueError('Existing Flow service is busy; model menus were not changed')
     else:
         try:port=json.loads((engine.store.root/'profiles'/account_id/'browser.json').read_text())['port']
         except (OSError,KeyError,json.JSONDecodeError):raise ValueError('Open this account’s Google browser first') from None

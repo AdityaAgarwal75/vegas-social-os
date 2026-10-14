@@ -27,6 +27,9 @@ def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',r
     validate_inputs(engine,options,first_frame_id,last_frame_id,reference_asset_ids)
     _,config=flow_service.binding(engine,account_id)
     scene={'type':'video','prompt':prompt,**options,'variants':1,'retries':0,'download_quality':'original'}
+    # Veo has fixed 720p output. The local service's resolution selector is
+    # explicitly Omni-only; asking it to click 720p for Veo fails unnecessarily.
+    if options['model'].startswith('Veo'):scene.pop('resolution')
     refs=reference_asset_ids or []
     if len(refs)>3 or (refs and (first_frame_id or last_frame_id)):raise ValueError('Use up to three references OR start/end frames')
     if last_frame_id and not first_frame_id:raise ValueError('An end frame requires a start frame')

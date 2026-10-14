@@ -126,8 +126,9 @@ export async function run(data) {
     if(data.operation==='submit') {
       const state=await c.eval(inspectExpression);
       if(!state.workspace_ready) throw new Error('Flow workspace unavailable. Complete normal sign-in/verification; do not switch accounts to bypass a refusal');
-      // The user selects the desired video model/duration in Flow. Discovery is
-      // returned by inspect; unsupported settings are never silently replaced.
+      if(data.options){const {applyVideoSettings}=await import('./settings.mjs');await applyVideoSettings(c,data.options,true);}
+      // Explicit options are applied and verified above. Legacy callers may
+      // still select their settings in the private browser.
       const settings=await c.eval(`(() => {
         const visible=e=>!!(e.offsetWidth||e.offsetHeight||e.getClientRects().length);
         const buttons=[...document.querySelectorAll('button')].filter(visible);
