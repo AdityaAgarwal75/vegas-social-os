@@ -4,7 +4,7 @@ set -Eeuo pipefail
 (( EUID == 0 )) || { echo "Run with sudo." >&2; exit 1; }
 [[ -r /etc/os-release ]] || { echo "Unsupported operating system" >&2; exit 1; }
 . /etc/os-release
-case "$ID" in ubuntu|debian) ;; *) echo "Ubuntu/Debian required" >&2; exit 1;; esac
+case "$ID:$VERSION_ID" in ubuntu:24.04|debian:12|debian:13) ;; *) echo "Ubuntu 24.04 or Debian 12+ required" >&2; exit 1;; esac
 [[ "$(uname -m)" = x86_64 ]] || { echo "Automatic Chrome install requires x86_64." >&2; exit 1; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DOMAIN=""
@@ -21,6 +21,16 @@ done
 export DEBIAN_FRONTEND=noninteractive
 export DPKG_DEB_THREADS_MAX=1
 apt-get update -qq
+# Minimal Ubuntu images may only enable main; noVNC/FFmpeg need the official universe component.
+if [[ "$ID" = ubuntu ]] && ! apt-cache show novnc >/dev/null 2>&1; then
+  apt-get install -y -qq ubuntu-keyring ca-certificates
+  cat > /etc/apt/sources.list.d/vegas-social-universe.list <<'APT'
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security universe
+APT
+  apt-get update -qq
+fi
 apt-get install -y -qq ca-certificates curl gnupg git tar xz-utils python3 python3-venv iproute2 util-linux \
   ffmpeg xvfb x11vnc websockify novnc
 if (( ! NO_CADDY )); then apt-get install -y -qq caddy; fi

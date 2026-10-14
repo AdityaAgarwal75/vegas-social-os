@@ -5,6 +5,12 @@ from . import auth
 
 def registry(engine):
     s = engine.store
+    def analytics_capture(account_id,request_id):
+        from .analytics import capture
+        return capture(engine,account_id,request_id)
+    def analytics_summary(channel_id):
+        from .analytics import summary
+        return summary(engine,channel_id)
     def channel_settings_save(channel_id,settings):
         from .production import channel_settings
         return channel_settings(engine,channel_id,settings)
@@ -203,7 +209,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -216,6 +222,8 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    'analytics_capture':'Persist only account statistics exposed by the already authorized provider read scopes. No paid API or retention/revenue claim.',
+    'analytics_summary':'Read channel production/release history and observed account metrics for subsequent content planning; no provider call.',
     'channel_settings_save':'Save the channel audience, rules, continuity references, allowed Flow accounts, rolling credit ceiling and production/posting preferences.',
     'production_status':'Read the authoritative storyboard, clips, revisions, editing jobs and releases for one production.',
     'video_edit':'Start one durable local FFmpeg edit of exact completed scene clips, with normalization, fade-to-black, optional authorized music and subtitles. Does not publish or render with a provider.',

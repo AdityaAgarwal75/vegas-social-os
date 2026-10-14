@@ -5,8 +5,16 @@ umask 077
 (( EUID == 0 )) || { echo 'Run the broker installer as root'; exit 1; }
 VSO_SOURCE=$(cd "$(dirname "$0")/.." && pwd)
 VSO_UID=$(id -u vegas-social)
+if [[ -f /var/lib/vegas-social-admin/broker.sqlite ]]; then
+  /usr/bin/python3 -I - <<'CHECK'
+import sqlite3
+with sqlite3.connect('file:/var/lib/vegas-social-admin/broker.sqlite?mode=ro',uri=True) as db:
+ assert not db.execute("SELECT 1 FROM records WHERE kind='job' AND json_extract(body,'$.status') IN ('starting','running','unknown')").fetchone(), 'Finish/reconcile administrator jobs before upgrading the broker'
+CHECK
+fi
 install -d -o root -g root -m 0755 /usr/local/lib/vegas-social-admin
-install -o root -g root -m 0644 "$VSO_SOURCE/vso/admin_broker.py" /usr/local/lib/vegas-social-admin/broker.py
+install -o root -g root -m 0644 "$VSO_SOURCE/vso/admin_broker.py" /usr/local/lib/vegas-social-admin/broker.py.next
+mv -Tf /usr/local/lib/vegas-social-admin/broker.py.next /usr/local/lib/vegas-social-admin/broker.py
 install -d -o root -g root -m 0700 /var/lib/vegas-social-admin
 cat > /etc/systemd/system/vegas-social-admin.service <<UNIT
 [Unit]

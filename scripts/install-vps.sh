@@ -84,6 +84,9 @@ printf '%s\n' "$OLD" > "$BACKUP/source-path"
 [[ -f "$UNIT" ]] && cp -a "$UNIT" "$BACKUP/service"
 [[ -f /etc/caddy/Caddyfile ]] && cp -a /etc/caddy/Caddyfile "$BACKUP/Caddyfile"
 WAS_ACTIVE=0; systemctl is-active --quiet vegas-social-os.service && WAS_ACTIVE=1
+BROKER_ACTIVE=0; systemctl is-active --quiet vegas-social-admin.service && BROKER_ACTIVE=1
+[[ -f /usr/local/lib/vegas-social-admin/broker.py ]] && cp -a /usr/local/lib/vegas-social-admin/broker.py "$BACKUP/broker.py"
+[[ -f /etc/systemd/system/vegas-social-admin.service ]] && cp -a /etc/systemd/system/vegas-social-admin.service "$BACKUP/broker-service"
 SWITCHED=0; COMMITTED=0
 rollback() {
   status=$?
@@ -94,7 +97,10 @@ rollback() {
       [[ -f "$BACKUP/environment" ]] && cp -a "$BACKUP/environment" "$ENV_FILE"
       [[ -f "$BACKUP/service" ]] && cp -a "$BACKUP/service" "$UNIT"
       [[ -f "$BACKUP/Caddyfile" ]] && cp -a "$BACKUP/Caddyfile" /etc/caddy/Caddyfile
+      if [[ -f "$BACKUP/broker.py" ]]; then cp -a "$BACKUP/broker.py" /usr/local/lib/vegas-social-admin/broker.py; fi
+      if [[ -f "$BACKUP/broker-service" ]]; then cp -a "$BACKUP/broker-service" /etc/systemd/system/vegas-social-admin.service; fi
       systemctl daemon-reload
+      if (( BROKER_ACTIVE )); then systemctl restart vegas-social-admin.service || true; else systemctl stop vegas-social-admin.service || true; fi
     fi
     if (( WAS_ACTIVE )); then systemctl restart vegas-social-os.service || true; else systemctl stop vegas-social-os.service || true; fi
   fi

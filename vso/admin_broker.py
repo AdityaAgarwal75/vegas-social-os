@@ -19,6 +19,7 @@ import subprocess
 import sys
 import threading
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 STATE=Path(os.getenv('VSO_ADMIN_STATE','/var/lib/vegas-social-admin'))
@@ -34,13 +35,22 @@ def redact(text):
     text=re.sub(r'(?im)(authorization\s*[:=]\s*bearer\s+|(?:password|passwd|secret|token|api[_-]?key|cookie|code_verifier)\s*[:=]\s*)[^\s,;]+',r'\1[REDACTED]',text)
     text=re.sub(r'-----BEGIN [^-]*PRIVATE KEY-----.*?-----END [^-]*PRIVATE KEY-----','[REDACTED PRIVATE KEY]',text,flags=re.S)
     text=re.sub(r'([?&](?:ticket|token|code|key)=)[^&\s]+',r'\1[REDACTED]',text)
+    text=re.sub(r'(?i)(aws_secret_access_key\s*[:=]\s*)[^\s,;]+',r'\1[REDACTED]',text)
+    text=re.sub(r'\b(?:AKIA|ASIA)[A-Z0-9]{16}\b','[REDACTED AWS KEY]',text)
     return text[:65536]
 
 
+@contextmanager
 def db():
     STATE.mkdir(mode=0o700,parents=True,exist_ok=True)
     conn=sqlite3.connect(STATE/'broker.sqlite',timeout=20);conn.row_factory=sqlite3.Row
-    conn.execute('PRAGMA journal_mode=WAL');conn.execute('CREATE TABLE IF NOT EXISTS records(kind TEXT,id TEXT,body TEXT,PRIMARY KEY(kind,id))');conn.execute('CREATE TABLE IF NOT EXISTS audit(at REAL,action TEXT,entity TEXT)');return conn
+    conn.execute('PRAGMA journal_mode=WAL');conn.execute('CREATE TABLE IF NOT EXISTS records(kind TEXT,id TEXT,body TEXT,PRIMARY KEY(kind,id))');conn.execute('CREATE TABLE IF NOT EXISTS audit(at REAL,action TEXT,entity TEXT)')
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback();raise
+    finally:conn.close()
 
 
 def get(kind,ident):
@@ -100,6 +110,7 @@ def process_matches(pid,ticks):
 def reconcile(ident):
     job=get('job',ident)
     alive=any(process_matches(job.get(k,0),job.get(t)) for k,t in [('runner_pid','runner_ticks'),('pgid','start_ticks')])
+    if job['status']=='starting' and time.time()-job['created_at']<10:return {**job,'original_process_alive':alive,'safe_to_repeat':False}
     if job['status'] in ('unknown','starting','running') and not alive:
         job.update(status='unknown',error='Original process ended without a durable result. Inspect effects before a new operation.');put('job',ident,job)
     return {**job,'original_process_alive':alive,'safe_to_repeat':False}

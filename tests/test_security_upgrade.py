@@ -113,6 +113,9 @@ class BrokerSecurity(unittest.TestCase):
         broker.approve(a['id'],broker.totp(secret,int(time.time()//30)))
         b=broker.request('command',{'command':'true'},'test2')
         with self.assertRaises(ValueError):broker.approve(b['id'],broker.totp(secret,int(time.time()//30)))
+    def test_new_child_start_is_not_reconciled_as_abandoned(self):
+        broker.put('job','new',{'id':'new','status':'starting','created_at':time.time()})
+        self.assertEqual(broker.reconcile('new')['status'],'starting')
     def test_argument_injection_and_protected_paths(self):
         for unit in ['--help.service','x;id.service','x.service\n']:
             with self.assertRaises(ValueError):broker.service(unit)
