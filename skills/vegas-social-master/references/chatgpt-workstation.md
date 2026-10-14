@@ -1,5 +1,7 @@
 # ChatGPT workstation workflow
 
+Use ChatGPT web Work as the primary host. Read the repository docs/CHATGPT-WEB.md for web connection setup. Do not require a desktop app, local computer access or laptop scripts. Execute Flow/media/admin work on the owner VPS through remote tools. Confirm actual web tool availability and native-byte transfer separately.
+
 Read the repository docs/CHATGPT-FIRST.md and docs/NEW-USER-JOURNEY.md when planning setup or automation. Treat ChatGPT as the creative workstation and the dashboard as sign-in/storyboard/clip/release review. Do not direct the owner to manual generation forms.
 
 Start with guide/doctor/account_list/onboarding_status. For feedback call review_queue, consume awaiting_agent items, read original plan, research/rewrite using owner feedback, save a new same-channel plan using `review:<request-id>` as stable request_id, and call review_complete with the new plan ID. Preserve original media/jobs; new revisions require new selection/image approval and release review. A queued feedback item is not a running agent.

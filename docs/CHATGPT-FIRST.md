@@ -1,5 +1,7 @@
 # ChatGPT-first product contract
 
+**Primary workstation: ChatGPT web (Work). No desktop app or local computer executor is required.** Read [web setup](CHATGPT-WEB.md).
+
 Accepted owner direction, 14 October 2026. This supersedes dashboard-as-production-studio descriptions. **A design contract is not evidence that every integration already works.**
 
 ## Purpose and positioning

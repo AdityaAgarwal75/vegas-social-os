@@ -1,5 +1,7 @@
 # BOOTSTRAP — instructions for ChatGPT/Codex setup agents
 
+**Primary workstation: ChatGPT web (Work). No desktop app or local computer executor is required.** Read [web setup](docs/CHATGPT-WEB.md) for connection steps and verification.
+
 A user who shares this repository link wants an independently installed Vegas Social OS. **Do not assume that their provider accounts, this project's maintainer server, Google Flow cookies or paid subscriptions are available.** Start by reading README.md, AGENTS.md, agent-manifest.json, docs/SELF-HOSTING.md and docs/STATUS.md.
 
 ## ChatGPT is the workstation

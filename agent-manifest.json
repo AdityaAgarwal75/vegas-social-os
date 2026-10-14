@@ -1,6 +1,6 @@
 {
   "name": "vegas-social-os",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "entrypoint": "BOOTSTRAP.md",
   "agent_setup_script": "scripts/bootstrap-ubuntu.sh",
   "runtime": {
@@ -39,7 +39,10 @@
   "plugin": {
     "manifest": "plugin.json",
     "master_skill": "skills/vegas-social-master/SKILL.md",
-    "remote_endpoint": "/mcp"
+    "remote_endpoint": "/mcp",
+    "primary_host": "ChatGPT web Work",
+    "requires_local_executor": false,
+    "web_guide": "docs/CHATGPT-WEB.md"
   },
   "image_policy": {
     "provider": "chatgpt-native-only",

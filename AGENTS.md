@@ -12,3 +12,5 @@ Read README.md, BOOTSTRAP.md, agent-manifest.json, docs/SELF-HOSTING.md, docs/CH
 - Flow UI controls are experimental. Unknown submissions are not retried blindly. Publisher records/approvals remain separate.
 - Keep original code/license and respect researched dependencies' licenses. Never commit private data, generated assets, token files or secrets.
 - Report observed vs not yet tested features and cost assumptions in docs/STATUS.md after changing behavior.
+
+- ChatGPT web Work is the primary workstation. Keep extensions.com.openai.requires_local_executor=false, remote HTTPS MCP/OAuth, and no mandatory local daemon/desktop launch. Read docs/CHATGPT-WEB.md and verify web registration/tools separately from ZIP generation.

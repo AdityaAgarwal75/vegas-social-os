@@ -13,7 +13,8 @@ def package(url, output):
     root = Path(__file__).resolve().parent.parent
     files = {"plugin.json": (root / "plugin.json").read_text(),
              "mcp.json": json.dumps({"$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
-                 "mcpServers": {"vegas-social-os": {"type": "streamable-http", "url": url}}}, indent=2)}
+                 "mcpServers": {"vegas-social-os": {"type": "streamable-http", "url": url,
+                     "extensions": {"com.openai": {"auth": {"type": "oauth", "client": {"mode": "dcr"}}}}}}}, indent=2)}
     # Skills reference the audited craft snapshots and product contracts. A
     # skills-only ZIP left those instructions/licenses dangling for new owners.
     for directory in ('skills', 'third_party'):

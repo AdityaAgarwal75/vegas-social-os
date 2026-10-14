@@ -1,5 +1,7 @@
 # Vegas Social OS — your social production team inside ChatGPT
 
+**Primary workstation: ChatGPT web (Work). No desktop app or local computer executor is required.** Read [web setup](docs/CHATGPT-WEB.md) for connection steps and verification.
+
 **Plan in ChatGPT. Execute on your own VPS. Sign in and review in the dashboard.** An open-source, independently self-hosted social production system for original research, scripts, scene images, Google Flow clips and reviewed publishing. Not affiliated with OpenAI, Google or Meta.
 
 ## The product
