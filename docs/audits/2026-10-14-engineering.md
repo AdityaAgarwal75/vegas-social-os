@@ -25,3 +25,10 @@ Baseline: GitHub main and deployed source `420c11421b05e223629132fdd19364e09e37a
 - Existing plugin identity must be preserved. Provider OAuth app registration is installation-specific and cannot be bypassed by an open-source package.
 
 Further test/deployment evidence is appended as checks complete. Unverified features must remain labeled in STATUS.md and the operator guide.
+
+## Verified candidate evidence
+
+- Feature PR #6; candidate f9186d64 passed CI run 38548673466, including Python 3.11/3.12 and actual browser checks. Current local suite: 112 Python / 5 Node tests.
+- Real ChatGPT-native image: 1,657,598 bytes, PNG 1254x1254, SHA-256 f785cbfe0d26ef59ca37e14282e08c8b222ccaa3dc2571efd00d5455731105ca. Connector-assisted byte transfer, actual raw HTTP PUT, FFmpeg decoding and exact disposable storyboard attachment passed. This does not establish installed-plugin fileParams delivery or paid Flow rendering.
+- Actual booted Debian 12 systemd-nspawn acceptance passed install, reinstall, private vault/SQLite preservation, non-root gateway, Unix broker, public metadata/private data checks and deliberate unhealthy-release rollback. The first package attempt was killed by its 800 MB test cgroup while unpacking Chrome; recovery with distro Chromium succeeded. No owner profile was reset.
+- Isolated tests do not cover public DNS/TLS/provider consent or real ChatGPT Work continuation. Those remain separately reported gates. No paid generation/public post/new cloud instance was used.

@@ -128,6 +128,7 @@ class BrokerSecurity(unittest.TestCase):
         self.assertEqual(broker.perform('file_read',{'path':str(f)})['content'],'hello')
     def test_bounded_output_and_breakglass_suppression(self):
         r=broker.run_command(['/usr/bin/printf','token=abc123'],2,track=False);self.assertNotIn('abc123',r['stdout'])
+        self.assertNotIn('private-cookie',broker.redact('{"cookie": "private-cookie"}'))
         r=broker.run_command(['/usr/bin/printf','privatevalue'],2,suppress=True,track=False);self.assertNotIn('privatevalue',r['stdout'])
 
 if __name__=='__main__':unittest.main()

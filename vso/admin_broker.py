@@ -357,7 +357,9 @@ class Handler(socketserver.StreamRequestHandler):
             else:raise ValueError('Unsupported broker action')
             audit('socket.'+action,str(message.get('request_id',message.get('job_id','read'))))
             self.wfile.write(json.dumps({'result':result}).encode()+b'\n')
-        except Exception as e:self.wfile.write(json.dumps({'error':redact(str(e))}).encode()+b'\n')
+        except Exception as e:
+            audit('socket.rejected','redacted-request')
+            self.wfile.write(json.dumps({'error':redact(str(e))}).encode()+b'\n')
 
 
 def main():

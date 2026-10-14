@@ -354,7 +354,9 @@ class Handler(BaseHTTPRequestHandler):
             path,_=self.parse()
             self.send({"error":"invalid_grant" if path=="/token" else "invalid_request","error_description":str(e)},400)
         except (BrokenPipeError,ConnectionResetError,ConnectionAbortedError,socket.timeout):pass
-        except Exception:self.send({"error":"server_error","error_description":"Operation failed; check installation settings"},500)
+        except Exception:
+            error_id=secrets.token_hex(6);self.store.log("http.failure",error_id)
+            self.send({"error":"server_error","error_description":"Operation failed; inspect the redacted audit record","error_id":error_id},500)
 
     def post(self):
         path, q = self.parse()
