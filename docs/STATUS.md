@@ -37,3 +37,9 @@ Daily creative brief queue and visible scheduler heartbeat; public bounded resea
 ## Deployment checks to repeat
 
 Verify reviewed Git commit, systemd, HTTPS `/health` returning 0.5.0, authenticated connection/automation state, unauthenticated `/api/state` and `/mcp` denial, Orbit health, existing Flow services and the live scheduler heartbeat. Preserve private data/key/profile directories across update. Run an isolated disposable signed-out browser check, then complete owner sign-in and one controlled generation/publishing trial only when its exact account/model/budget or destination/media/text is authorized.
+
+## Product planning checkpoint, 14 October 2026
+
+The live server remains 0.5.0; 0.6 is an unmerged candidate on PR 5. The user requested product definition before further feature work/deployment. See PRODUCT-PLAN.md. The reviewed candidate passed 79 Python / 4 Node tests and 12-route disposable browser QA. Additional licensed skill/continuity work passes 81 Python / 4 Node tests locally; staged/live checks remain pending for those additions. Do not describe them as deployed.
+
+All four model zero-credit guards completed: Omni 7, Lite 10, Fast 20, Quality 100 quoted for the exact diagnostic combinations, zero spent. Account 1 remained at 951. Historical clip import decoded as 8s 1280x720 H.264/AAC; no new paid clip or post was made.

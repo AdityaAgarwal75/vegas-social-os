@@ -4,6 +4,8 @@
 
 **Status (October 2026): 0.6.0 alpha.** The dashboard, local state, private remote-browser login, MCP tools, approval guards and offline tests exist. The founder's Ubuntu VPS deployment has passed HTTPS health and remote-browser startup tests. The optional existing-service adapter passed one free-only image trial on each of five founder accounts. The 0.6 content manager adds strategies, weekly calendars and labeled Reel timing checks. The independent video worker and live social publishing remain unverified. See [status](docs/STATUS.md).
 
+Product scope is being consolidated; read the [proposed product plan](docs/PRODUCT-PLAN.md) before treating this alpha as a finished automation platform.
+
 See the [0.6 production audit](docs/AUDIT-0.6.md) for model-aware clip controls, the original content strategy manager and verification limits.
 
 ## A complete independent control room

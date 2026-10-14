@@ -100,6 +100,9 @@ def registry(engine):
     def research_save(channel_id, title, summary, sources):
         from .research import save
         return save(engine, channel_id, title, summary, sources)
+    def continuity_frame(asset_id,retained_seconds=0):
+        from .continuity import extract
+        return extract(engine,asset_id,retained_seconds)
     def flow_model_catalog(account_id=''):
         from .flow_models import catalog
         return catalog(engine,account_id)
@@ -131,7 +134,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (account_start, account_list, account_disconnect, channel_list, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -144,6 +147,7 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    "continuity_frame":"Extract the last actual retained frame of a private imported MP4 for reviewed continuity. Local only; no generation, spend or source overwrite.",
     "flow_model_catalog":"Read model-specific settings with documentation/live provenance; availability is account-specific.",
     "flow_models_refresh":"Inspect idle private Flow model menus and restore mode. No generation or spend.",
     "flow_video_request":"Request one explicitly authorized clip with exact model/settings, references OR frames, stable ID and credit ceiling. 0 is free-only preflight.",
@@ -209,7 +213,7 @@ DESCRIPTIONS = {
 
 def schema(fn):
     properties, required = {}, []
-    types = {"duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
+    types = {"retained_seconds":"integer", "duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
     for name, p in inspect.signature(fn).parameters.items():
         item = {"type": types.get(name, "string")}
         if name == "concepts":
