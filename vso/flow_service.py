@@ -133,7 +133,7 @@ def image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, 
         except ValueError as e:
             if str(e)!='image-job not found':raise
         if a['status']!='workspace_ready':raise ValueError('Verify this signed-in Flow project before generation')
-        for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','job')"):
+        for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','job','video-job')"):
             other=json.loads(row[0])
             if other['status'] in ('submitting','processing','unknown'):raise ValueError('A browser operation is active or unresolved; finish it before another generation')
         job={**body,'id':ident,'status':'submitting','created_at':time.time(),'project':'SocialOS-'+ident[:16],'asset_ids':[]}

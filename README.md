@@ -2,7 +2,9 @@
 
 **An independent AI social production workspace.** Use your own VPS, Google Flow account(s), and authorized YouTube/Instagram/Facebook apps. ChatGPT or Codex can plan original video concepts, generate native images when supported, review clips, and prepare approved publishing actions. This project is **not affiliated with OpenAI, Google, or Meta**.
 
-**Status (October 2026): 0.5.0 alpha.** The dashboard, local state, private remote-browser login, MCP tools, approval guards and offline tests exist. The founder's Ubuntu VPS deployment has passed HTTPS health and remote-browser startup tests. The optional existing-service adapter passed one free-only image trial on each of five founder accounts. The independent video worker and live social publishing remain unverified. See [status](docs/STATUS.md).
+**Status (October 2026): 0.6.0 alpha.** The dashboard, local state, private remote-browser login, MCP tools, approval guards and offline tests exist. The founder's Ubuntu VPS deployment has passed HTTPS health and remote-browser startup tests. The optional existing-service adapter passed one free-only image trial on each of five founder accounts. The independent video worker and live social publishing remain unverified. See [status](docs/STATUS.md).
+
+See the [0.6 production audit](docs/AUDIT-0.6.md) for model-aware clip controls, the original content strategy manager and verification limits.
 
 ## A complete independent control room
 

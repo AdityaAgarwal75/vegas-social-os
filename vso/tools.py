@@ -100,7 +100,38 @@ def registry(engine):
     def research_save(channel_id, title, summary, sources):
         from .research import save
         return save(engine, channel_id, title, summary, sources)
-    methods = {f.__name__: f for f in (account_start, account_list, account_disconnect, channel_list,
+    def flow_model_catalog(account_id=''):
+        from .flow_models import catalog
+        return catalog(engine,account_id)
+    def flow_models_refresh(account_id):
+        from .flow_models import refresh
+        return refresh(engine,account_id)
+    def flow_video_request(account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id='',last_frame_id='',reference_asset_ids=None):
+        from .video_service import request
+        return request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id,last_frame_id,reference_asset_ids)
+    def flow_video_poll(job_id):
+        from .video_service import check
+        return check(engine,job_id)
+    def strategy_save(channel_id,audience,goal,voice,pillars):
+        from .content import strategy_save
+        return strategy_save(engine,channel_id,audience,goal,voice,pillars)
+    def content_request(channel_id,week_start,request_id):
+        from .content import content_request
+        return content_request(engine,channel_id,week_start,request_id)
+    def content_plan_save(request_id,items):
+        from .content import content_plan_save
+        return content_plan_save(engine,request_id,items)
+    def content_plan_approve(request_id):
+        from .content import content_plan_approve
+        return content_plan_approve(engine,request_id)
+    def content_queue(): return engine.store.all('content-request')
+    def reel_review(script,hook,on_screen,target_seconds,words_per_minute=150):
+        from .content import reel_review
+        return reel_review(script,hook,on_screen,target_seconds,words_per_minute)
+    def workflow_audit():
+        from .audit import status
+        return status(engine)
+    methods = {f.__name__: f for f in (account_start, account_list, account_disconnect, channel_list, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -113,6 +144,17 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    "flow_model_catalog":"Read model-specific settings with documentation/live provenance; availability is account-specific.",
+    "flow_models_refresh":"Inspect idle private Flow model menus and restore mode. No generation or spend.",
+    "flow_video_request":"Request one explicitly authorized clip with exact model/settings, references OR frames, stable ID and credit ceiling. 0 is free-only preflight.",
+    "flow_video_poll":"Poll original clip and import exact MP4 without resubmitting.",
+    "strategy_save":"Save channel audience, objective, brand voice and content pillars.",
+    "content_request":"Queue an evidence-backed content strategy brief for a real connected host agent; does not run ChatGPT.",
+    "content_plan_save":"Save agent-created weekly calendar/scripts with sources for exact review; does not publish.",
+    "content_plan_approve":"Freeze an explicitly reviewed editorial calendar; publishing needs separate approval.",
+    "content_queue":"Read pending strategy requests and reviewed editorial calendars.",
+    "reel_review":"Review hook, estimated speaking duration, beat length and on-screen text. Heuristics only, no performance guarantees.",
+    "workflow_audit":"Read truthful local prerequisites, account readiness and unresolved jobs; no publishing or spend.",
     "flow_services_sync": "Discover only administrator-configured local Flow services without copying browser sessions or exposing secrets.",
     "flow_image_request": "Generate one expressly requested diagnostic/standalone Flow image with exact account/model/credit cap and stable request ID. Not a substitute for native campaign keyframes.",
     "flow_image_poll": "Retrieve the original existing image job and import its verified downloaded bytes. Never resubmits.",
@@ -167,7 +209,7 @@ DESCRIPTIONS = {
 
 def schema(fn):
     properties, required = {}, []
-    types = {"scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
+    types = {"duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
     for name, p in inspect.signature(fn).parameters.items():
         item = {"type": types.get(name, "string")}
         if name == "concepts":
@@ -177,7 +219,8 @@ def schema(fn):
                     "image_prompt": {"type": "string"}, "video_prompt": {"type": "string"}},
                     "required": ["image_prompt", "video_prompt"], "additionalProperties": False}}},
                 "required": ["title", "hook", "script", "scenes"], "additionalProperties": False}
-        if name in ("account_ids", "channel_ids", "asset_ids", "sources"): item["items"] = {"type": "string"}
+        if name in ("account_ids", "channel_ids", "asset_ids", "sources", "pillars", "reference_asset_ids"): item["items"] = {"type": "string"}
+        if name == "items": item["items"] = {"type":"object", "additionalProperties":True}
         if name in ("capabilities", "receipt", "options"): item["additionalProperties"] = True
         properties[name] = item
         if p.default is inspect.Parameter.empty: required.append(name)
@@ -213,7 +256,7 @@ def rpc(engine, message):
     if method == "initialize":
         version = message.get("params", {}).get("protocolVersion", "2025-06-18")
         result = {"protocolVersion": version if version in ("2024-11-05", "2025-03-26", "2025-06-18") else "2025-06-18",
-                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.4.0"},
+                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.6.0"},
                   "instructions": "Use ChatGPT native images only. Tool availability does not grant publishing or spending approval. Read the repository master skill. Credentials stay server-side."}
     elif method == "ping": result = {}
     elif method == "tools/list": result = {"tools": definitions(engine)}

@@ -18,7 +18,7 @@ export function parseQuote(text) {
   return unique[0];
 }
 
-class CDP {
+export class CDP {
   constructor(ws) { this.ws = ws; this.next = 1; this.pending = new Map();
     ws.addEventListener('message', e => {
       const data = JSON.parse(String(e.data));

@@ -30,7 +30,7 @@ class HTTPServer(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VegasSocialOS/0.5"
+    server_version = "VegasSocialOS/0.6"
 
     @property
     def engine(self): return self.server.engine
@@ -142,7 +142,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def get(self):
         path, q = self.parse()
-        if path == "/health": return self.send({"ok": True, "version": "0.5.0"})
+        if path == "/health": return self.send({"ok": True, "version": "0.6.0"})
         if path in ("/", "/onboarding", "/dashboard", "/app.js", "/style.css", "/flow-login.js"):
             file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
