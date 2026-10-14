@@ -58,11 +58,11 @@ Social account connection can be an official sign-in/Allow flow after developer-
 
 ## Current checkpoint
 
-Live server remains 0.5.0. The 0.6 candidate is on PR 5; it is not merged/deployed. The candidate passed 79 Python / 4 Node tests and disposable browser QA across 12 routes. New continuity/skill additions pass 81 Python / 4 Node tests locally and still need final staged/live validation.
+The 0.6.0 alpha is merged and deployed. The complete pinned engine is included in the independent installer; legacy separate submission is disabled. 89 Python / 4 Node tests and GitHub CI passed. Disposable native browser/engine ownership and synthetic queue restart recovery passed; actual new-owner Google sign-in remains personal and not validated by a signed-out test.
 
-All five existing account menus were observed. Omni exposed 4/6/8/10s and 360p/720p; Veo controls exposed fixed 8s/720p during this audit. Model quote guards stopped Omni/Lite/Fast/Quality at zero cap (7/10/20/100 quoted credits for those exact diagnostic settings); account 1 stayed at 951 credits. No paid render or public post was created by this audit. A historical 8s 1280×720 H.264/AAC clip was recovered/imported and decoded; that proves download/import, not a new production run.
+33 real settings probes passed across the five existing accounts, including all four video families, Omni durations/resolutions, both aspects and compatible mode selection. Live account-specific menus and authenticated dashboard controls were checked; balances were unchanged. A real-data mobile reference-picker overflow was corrected. No paid render or public post was created by this audit. Historical clip recovery proves download/import, not newly packaged video production.
 
-Pinned Flow skill source packs have been reviewed and copied with licenses. The adapted active skill routes them through Vegas controls. Its last-retained-frame helper passed a synthetic two-color test and preserved the source. No claim that the full new product works follows from these partial checks.
+Advanced edit/extend/upscale/voice/character controls, actual frame/reference attachment and paid output acceptance, a complete Reel, live provider consent/publication, and independent fresh-AWS installation remain gates. See FLOW-EXECUTION-CONTRACT.md.
 
 ## Accepted direction checkpoint
 

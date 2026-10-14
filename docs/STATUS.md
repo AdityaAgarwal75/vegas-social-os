@@ -1,6 +1,6 @@
 # Status — 0.6.0 community alpha
 
-Updated on 14 October 2026; earlier 0.5 observations retain their original scope. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
+Updated on 14 October 2026. Live is 0.6.0 alpha, deployed from reviewed main 61dc2e786354a8f8a65f8b111b78e1c240f09e02; earlier observations below retain their historical scope. This is an independently self-hosted project; the maintainer's accounts and credentials are not distributed.
 
 ## Observed checks
 
@@ -36,7 +36,7 @@ Daily creative brief queue and visible scheduler heartbeat; public bounded resea
 
 ## Deployment checks to repeat
 
-Verify reviewed Git commit, systemd, HTTPS `/health` returning 0.5.0, authenticated connection/automation state, unauthenticated `/api/state` and `/mcp` denial, Orbit health, existing Flow services and the live scheduler heartbeat. Preserve private data/key/profile directories across update. Run an isolated disposable signed-out browser check, then complete owner sign-in and one controlled generation/publishing trial only when its exact account/model/budget or destination/media/text is authorized.
+Verify reviewed Git commit, systemd, HTTPS `/health` returning 0.6.0, authenticated connection/automation state, unauthenticated `/api/state` and `/mcp` denial, Orbit health, existing Flow services and the live scheduler heartbeat. Preserve private data/key/profile directories across update. Run an isolated disposable signed-out browser check, then complete owner sign-in and one controlled generation/publishing trial only when its exact account/model/budget or destination/media/text is authorized.
 
 ## Product planning checkpoint, 14 October 2026
 
@@ -55,3 +55,11 @@ Exact complete-engine candidate 59c278973f3b84f28f6a984640f00017cef58dc8 passed 
 Final menu discovery checks enabled/disabled choices in Frames mode before reading video families, restores the previous input mode, and the dashboard refreshes models after account verification. This avoids presenting account-disabled models as usable or treating Ingredients restrictions as account-wide model absence.
 
 Final native profile ownership hardening also rejects stale browser/CDP mappings that belong to another process or profile. The suite now passes 89 Python / 4 Node tests, including rejection before attachment or job reservation.
+
+## Live alpha deployment, 14 October 2026
+
+PR 5 was merged as main 61dc2e786354a8f8a65f8b111b78e1c240f09e02 and deployed with an atomic source pointer and a private source/environment/state rollback checkpoint. All six media records/files and existing Flow profiles were preserved. HTTPS health returned 0.6.0, dashboard and Orbit returned HTTP 200, authenticated state showed five ready Flow accounts and a complete installed engine, and anonymous API/MCP requests returned 401.
+
+Existing engine source was backed up, compiled with the tested settings/final-quote guards, and activated one idle service at a time. All five returned signed-in/project-ready at unchanged balances 951/443/50/50/50. The normal complete engine is installed separately for new native profiles; imported profiles keep their existing owner.
+
+Live authenticated Chrome verified all four model selectors and actual account-specific durations/resolutions with no page exceptions. A five-reference mobile layout overflow absent from the one-image fixtures was found and fixed with a bounded grid/fieldset layout. The correction passed actual-data 360px viewport checks without clipping controls. These UI checks did not submit generation. No paid video or public post was created by this audit. Newly rendered output, advanced operations and real end-to-end publication remain unverified.
