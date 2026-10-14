@@ -35,6 +35,14 @@ if (( CHECK )); then
   exit 0
 fi
 (( EUID == 0 )) || { echo 'Run with sudo.' >&2; exit 1; }
+python3 - <<'CAPACITY'
+import os,shutil
+from pathlib import Path
+info={line.split(':')[0]:int(line.split()[1]) for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith(('MemTotal:','MemAvailable:'))}
+if info['MemTotal']<2*1024**2:raise SystemExit('At least 2 GiB RAM required; 8 GiB or more is recommended for several browser profiles')
+if shutil.disk_usage('/opt').free<2*1024**3:raise SystemExit('At least 2 GiB free disk required before staging; existing private data is retained')
+print('Capacity preflight: CPUs',os.cpu_count(),'available RAM MiB',info['MemAvailable']//1024,'free disk GiB',shutil.disk_usage('/opt').free//1024**3)
+CAPACITY
 install -d -m 0755 /run/lock
 exec 9>/run/lock/vegas-social-os-install.lock
 flock -n 9 || { echo 'Another installation/upgrade is running.' >&2; exit 1; }
@@ -105,7 +113,7 @@ rollback() {
       if [[ -f "$BACKUP/broker.py" ]]; then cp -a "$BACKUP/broker.py" /usr/local/lib/vegas-social-admin/broker.py; fi
       if [[ -f "$BACKUP/broker-service" ]]; then cp -a "$BACKUP/broker-service" /etc/systemd/system/vegas-social-admin.service; fi
       systemctl daemon-reload
-      if (( BROKER_ACTIVE )); then systemctl restart vegas-social-admin.service || true; else systemctl stop vegas-social-admin.service || true; fi
+      if (( BROKER_ACTIVE )); then systemctl restart vegas-social-admin.service || true; else systemctl stop vegas-social-admin.service || true; if [[ ! -f "$BACKUP/broker-service" ]]; then systemctl disable vegas-social-admin.service >/dev/null 2>&1 || true; fi; fi
     fi
     if (( WAS_ACTIVE )); then systemctl restart vegas-social-os.service || true; else systemctl stop vegas-social-os.service || true; fi
   fi
