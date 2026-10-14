@@ -125,7 +125,8 @@ def youtube(engine, p, a, token):
     url = headers.get('Location') or headers.get('location')
     if not url: raise ValueError('Upload session missing')
     engine.store.secret('upload:' + p['id'], {'url': url})
-    result, _ = net.request(url, method='PUT', token=token, raw=file.read_bytes(), headers={'Content-Type': 'video/mp4'})
+    with file.open('rb') as source:
+        result, _ = net.request(url, method='PUT', token=token, raw=source, headers={'Content-Type':'video/mp4','Content-Length':str(file.stat().st_size)})
     p.update(status='published', remote_id=result['id'], url='https://www.youtube.com/watch?v=' + result['id'])
     save(engine, p)  # A failed cover cannot cause a second video upload.
     thumbnail(engine, p, token)
@@ -304,9 +305,10 @@ def resume(engine, publication_id):
         file = engine.asset_path(p['asset_ids'][0]); size = file.stat().st_size
         offset = p['uploaded_bytes']
         token = engine.accounts.token(p['account_id'])
-        with file.open('rb') as f: f.seek(offset); remaining = f.read()
-        result, _ = net.request(url, method='PUT', token=token, raw=remaining,
-            headers={'Content-Type': 'video/mp4', 'Content-Range': f'bytes {offset}-{size-1}/{size}'})
+        with file.open('rb') as source:
+            source.seek(offset)
+            result, _ = net.request(url, method='PUT', token=token, raw=source,
+                headers={'Content-Type':'video/mp4','Content-Length':str(size-offset),'Content-Range':f'bytes {offset}-{size-1}/{size}'})
         p.update(status='published', remote_id=result['id'], url='https://www.youtube.com/watch?v=' + result['id'])
         save(engine, p); thumbnail(engine, p, token)
     except Exception:

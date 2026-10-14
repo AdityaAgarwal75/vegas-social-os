@@ -7,7 +7,7 @@ DEST="${VSO_ENGINE_INSTALL_DEST:-/opt/vegas-social-os-flow-engine}"
 LOCK="$SOURCE/deploy/flow-engine/lock.json"
 REVISION="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["revision"])' "$LOCK")"
 REPOSITORY="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["repository"])' "$LOCK")"
-FINGERPRINT="$(cat "$LOCK" "$SOURCE/deploy/flow-engine/compatibility.patch" "$SOURCE/deploy/flow-engine/attach-only.py" | sha256sum | cut -d' ' -f1)"
+FINGERPRINT="$(cat "$LOCK" "$SOURCE/deploy/flow-engine/compatibility.patch" "$SOURCE/deploy/flow-engine/attach-only.py" "$SOURCE/deploy/flow-engine/sdk-security.patch" | sha256sum | cut -d' ' -f1)"
 if [[ -d "$DEST" ]]; then
   if [[ -f "$DEST/.vso-contract" ]] && [[ "$(cat "$DEST/.vso-contract")" = "$FINGERPRINT" ]] && [[ -f "$DEST/dist/server.js" ]]; then
     echo "Complete pinned Flow engine already installed."
@@ -26,6 +26,8 @@ git -C "$STAGE" remote add origin "$REPOSITORY"
 git -C "$STAGE" fetch --quiet --depth 1 origin "$REVISION"
 git -C "$STAGE" checkout --quiet --detach FETCH_HEAD
 [[ "$(git -C "$STAGE" rev-parse HEAD)" = "$REVISION" ]] || exit 1
+git -C "$STAGE" apply --check "$SOURCE/deploy/flow-engine/sdk-security.patch"
+git -C "$STAGE" apply "$SOURCE/deploy/flow-engine/sdk-security.patch"
 git -C "$STAGE" apply --check "$SOURCE/deploy/flow-engine/compatibility.patch"
 git -C "$STAGE" apply "$SOURCE/deploy/flow-engine/compatibility.patch"
 python3 "$SOURCE/deploy/flow-engine/attach-only.py" "$STAGE"

@@ -65,6 +65,7 @@ def register(store, body, peer):
     redirects=body.get('redirect_uris',[])
     if not isinstance(redirects,list) or not 1<=len(redirects)<=10 or any(not valid_redirect(x) for x in redirects):raise ValueError('Use exact HTTPS or loopback redirect URIs')
     if body.get('token_endpoint_auth_method','none')!='none':raise ValueError('Use public OAuth client authentication with PKCE')
+    if not isinstance(body.get('grant_types',['authorization_code','refresh_token']),list):raise ValueError('grant_types must be an array')
     if set(body.get('grant_types',['authorization_code','refresh_token']))-{'authorization_code','refresh_token'} or body.get('response_types',['code'])!=['code']:raise ValueError('Only authorization code and refresh grants are supported')
     ident=secrets.token_urlsafe(24)
     store.put('oauth-client',ident,{'id':ident,'redirect_uris':redirects,'name':str(body.get('client_name','MCP client'))[:100],'created_at':time.time()})
@@ -72,6 +73,7 @@ def register(store, body, peer):
 
 
 def token(store, base, body):
+    if 'scope' in body:body={**body,'scope':scopes(body['scope'])}
     if body.get('resource',base+'/mcp')!=base+'/mcp':raise ValueError('Resource mismatch')
     grant=body.get('grant_type');raw=body.get('code' if grant=='authorization_code' else 'refresh_token','')
     if not isinstance(raw,str) or len(raw)>256:raise ValueError('Invalid grant')
@@ -122,7 +124,9 @@ def validate(store, base, raw):
 
 
 def revoke(store, body):
-    raw=body.get('token','');digest=store.digest(raw)
+    raw=body.get('token','')
+    if not isinstance(raw,str) or len(raw)>256:raise ValueError('Invalid revocation token')
+    digest=store.digest(raw)
     with store.db() as db:
         record=db.execute("SELECT body FROM records WHERE kind='access' AND id=?",(digest,)).fetchone()
         ticket=db.execute("SELECT body FROM tickets WHERE hash=? AND kind='mcp-refresh'",(digest,)).fetchone()

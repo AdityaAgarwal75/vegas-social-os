@@ -64,7 +64,12 @@ python3 -m venv "$RELEASE/.venv"
 "$RELEASE/.venv/bin/python" -m pip install --disable-pip-version-check --quiet -r "$RELEASE/requirements.txt"
 chmod -R a+rX "$RELEASE/.venv"
 "$RELEASE/.venv/bin/python" -m compileall -q "$RELEASE/vso"
-bash "$RELEASE/scripts/install-flow-engine.sh"
+ENGINE_CONTRACT="$(cat "$RELEASE/deploy/flow-engine/lock.json" "$RELEASE/deploy/flow-engine/compatibility.patch" "$RELEASE/deploy/flow-engine/attach-only.py" "$RELEASE/deploy/flow-engine/sdk-security.patch" | sha256sum | cut -d' ' -f1)"
+ENGINE_ROOT=/opt/vegas-social-os-flow-engine
+if [[ -d "$ENGINE_ROOT" ]] && { [[ ! -f "$ENGINE_ROOT/.vso-contract" ]] || [[ "$(cat "$ENGINE_ROOT/.vso-contract")" != "$ENGINE_CONTRACT" ]]; }; then
+  ENGINE_ROOT="/opt/vegas-social-os-flow-engine-${ENGINE_CONTRACT:0:12}"
+fi
+VSO_ENGINE_INSTALL_DEST="$ENGINE_ROOT" bash "$RELEASE/scripts/install-flow-engine.sh"
 # Verify imports and a disposable store as the REAL service user, before cutover.
 runuser -u vegas-social -- env VSO_ACCEPT_SOURCE="$RELEASE" "$RELEASE/.venv/bin/python" - <<'PY'
 import os,sys,tempfile
@@ -128,11 +133,15 @@ VSO_REMOTE_BROWSER=1
 VSO_CHROME=$CHROME
 VSO_PYTHON=$DEST/.venv/bin/python
 VSO_NOVNC_ROOT=/usr/share/novnc
-VSO_FLOW_ENGINE_ROOT=/opt/vegas-social-os-flow-engine
+VSO_FLOW_ENGINE_ROOT=$ENGINE_ROOT
 CFG
   chmod 0600 "$ENV_FILE"
 fi
-if ! grep -q '^VSO_FLOW_ENGINE_ROOT=' "$ENV_FILE"; then echo 'VSO_FLOW_ENGINE_ROOT=/opt/vegas-social-os-flow-engine' >> "$ENV_FILE"; fi
+if grep -q '^VSO_FLOW_ENGINE_ROOT=' "$ENV_FILE"; then
+  sed -i "s|^VSO_FLOW_ENGINE_ROOT=.*|VSO_FLOW_ENGINE_ROOT=$ENGINE_ROOT|" "$ENV_FILE"
+else
+  echo "VSO_FLOW_ENGINE_ROOT=$ENGINE_ROOT" >> "$ENV_FILE"
+fi
 if [[ -d "$DEST" && ! -L "$DEST" ]]; then
   LEGACY="/opt/vegas-social-os-releases/legacy-$STAMP"
   mv "$DEST" "$LEGACY"; OLD="$LEGACY"; printf '%s\n' "$OLD" > "$BACKUP/source-path"

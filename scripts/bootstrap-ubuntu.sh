@@ -22,12 +22,12 @@ export DEBIAN_FRONTEND=noninteractive
 export DPKG_DEB_THREADS_MAX=1
 apt-get update -qq
 # Minimal Ubuntu images may only enable main; noVNC/FFmpeg need the official universe component.
-if [[ "$ID" = ubuntu ]] && ! apt-cache show novnc >/dev/null 2>&1; then
+if [[ "$ID" = ubuntu ]] && { [[ -f /etc/apt/sources.list.d/vegas-social-universe.list ]] || ! apt-get -s install ffmpeg novnc >/dev/null 2>&1; }; then
   apt-get install -y -qq ubuntu-keyring ca-certificates
   cat > /etc/apt/sources.list.d/vegas-social-universe.list <<'APT'
-deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble universe
-deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates universe
-deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble-updates main universe
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu noble-security main universe
 APT
   apt-get update -qq
 fi

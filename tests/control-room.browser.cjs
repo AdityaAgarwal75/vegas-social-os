@@ -12,7 +12,7 @@ from vso.engine import Engine
 s=Store(sys.argv[1]);e=Engine(s)
 with s.db() as db: db.execute("DELETE FROM records WHERE kind!='installation'")
 s.put('account','qa-facebook',{'id':'qa-facebook','provider':'facebook','remote_id':'qa-only','name':'Simulated test Page','status':'connected'})
-c=e.channel_save('Furniture stories','Small apartment buyers',['qa-facebook'])
+c=e.channel_save('Furniture stories','Small apartment buyers',account_ids=['qa-facebook'])
 concepts=[{'title':t,'hook':'Measure before you buy','script':'Measure the doorway and leave room to move.','scenes':[{'image_prompt':'A small room with a sofa','video_prompt':'Camera reveals the doorway'}]} for t in ['Make room for living','The doorway test']]
 p=e.plan_save(c['id'],concepts,'browser-review');e.concept_select(p['id'],0,0)
 a=e.asset_import('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6N7sAAAAASUVORK5CYII=','image/png');e.image_attach(p['id'],0,a['id'])

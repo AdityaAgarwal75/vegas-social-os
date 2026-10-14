@@ -259,7 +259,6 @@ class Handler(BaseHTTPRequestHandler):
             if not self.guard(): return
             return self.media(path.rsplit("/", 1)[1])
         if path == "/mcp":
-            if not self.guard(): return
             return self.send({"error": "SSE subscriptions not offered; use POST"}, 405, headers={"Allow": "POST"})
         self.send({"error": "Not found"}, 404)
 
