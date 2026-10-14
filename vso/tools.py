@@ -1,9 +1,51 @@
 import inspect
 import json
+from . import auth
 
 
 def registry(engine):
     s = engine.store
+    def admin_inventory():
+        from .admin import call
+        return call({'action':'inventory'})
+    def admin_metrics():
+        from .admin import call
+        return call({'action':'metrics'})
+    def admin_request(operation,arguments,request_id):
+        from .admin import request
+        return request(engine,operation,arguments,request_id)
+    def admin_execute(request_id):
+        from .admin import call
+        return call({'action':'execute','request_id':request_id})
+    def admin_request_status(request_id):
+        from .admin import call
+        return call({'action':'request_status','request_id':request_id})
+    def admin_job_status(job_id):
+        from .admin import call
+        return call({'action':'job_status','job_id':job_id})
+    def admin_job_cancel(job_id):
+        from .admin import call
+        return call({'action':'job_cancel','job_id':job_id})
+
+    def event_status():
+        from .events import status
+        return status(engine)
+    def media_transfer_prepare(filename, media_type, size, sha256, request_id):
+        from .media import prepare
+        return prepare(engine,filename,media_type,size,sha256,request_id)
+    def media_transfer_status(transfer_id):
+        from .media import public
+        return public(s.get('transfer',transfer_id))
+    def media_preview(asset_id):
+        from .media import preview
+        return preview(engine,asset_id)
+    def media_probe(asset_id):
+        from .media import probe
+        asset=s.get('asset',asset_id)
+        return probe(engine.asset_path(asset_id),asset['media_type'])
+    def get_profile():
+        return {'id':s.get('installation','identity')['id'],'name':'Vegas Social OS owner'}
+
     def storyboard_regenerate(plan_id, feedback, request_id):
         from .review import request
         return request(engine, plan_id, feedback, request_id)
@@ -141,7 +183,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -223,7 +265,7 @@ DESCRIPTIONS = {
 
 def schema(fn):
     properties, required = {}, []
-    types = {"retained_seconds":"integer", "duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
+    types = {"retained_seconds":"integer", "size": "integer", "duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "arguments": "object", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
     for name, p in inspect.signature(fn).parameters.items():
         item = {"type": types.get(name, "string")}
         if name == "concepts":
@@ -235,18 +277,32 @@ def schema(fn):
                 "required": ["title", "hook", "script", "scenes"], "additionalProperties": False}
         if name in ("account_ids", "channel_ids", "asset_ids", "sources", "pillars", "reference_asset_ids"): item["items"] = {"type": "string"}
         if name == "items": item["items"] = {"type":"object", "additionalProperties":True}
-        if name in ("capabilities", "receipt", "options"): item["additionalProperties"] = True
+        if name in ("arguments", "capabilities", "receipt", "options"): item["additionalProperties"] = True
         properties[name] = item
         if p.default is inspect.Parameter.empty: required.append(name)
     return {"type": "object", "properties": properties, "required": required, "additionalProperties": False}
 
 
 def definitions(engine):
-    return [{"name": name, "description": DESCRIPTIONS.get(name, "List saved " + name.removesuffix("_list") + " records."),
-             "inputSchema": schema(fn),
-             "annotations": {"readOnlyHint": name in {"guide", "doctor", "account_list", "channel_list", "plan_list", "job_list", "publication_list", "image_tasks", "account_info", "flow_inspect"},
-                             "destructiveHint": name == "account_disconnect", "openWorldHint": name.startswith(("flow_", "video_", "publish_", "account_"))}}
-            for name, fn in registry(engine).items()]
+    result=[]
+    for name,fn in registry(engine).items():
+        security=[{'type':'oauth2','scopes':[auth.tool_scope(name)]}]
+        result.append({'name':name,'title':name.replace('_',' ').title(),
+            'description':DESCRIPTIONS.get(name,'Read or operate '+name.replace('_',' ')+' on this installation.'),
+            'inputSchema':schema(fn),'securitySchemes':security,'_meta':{'securitySchemes':security},
+            'annotations':{'readOnlyHint':name in auth.READ_TOOLS,'destructiveHint':name not in auth.READ_TOOLS,
+                           'openWorldHint':name.startswith(('flow_','video_','publish_','post_','account_','research_','admin_'))}})
+    for item in result:
+        item['outputSchema']={'type':'object','additionalProperties':True}
+        if item['name']=='get_profile':
+            item['_meta']['openai/profile']=True
+            item['outputSchema']={'type':'object','properties':{'id':{'type':'string','minLength':1},'name':{'type':'string'}},'required':['id'],'additionalProperties':False}
+    return result
+
+
+def auth_error(engine,message,scope=None):
+    return {'jsonrpc':'2.0','id':message.get('id'),'result':{'content':[{'type':'text','text':'Connect or reauthorize this owner installation to use this tool.'}],
+        'isError':True,'_meta':{'mcp/www_authenticate':[auth.challenge(engine.base,'insufficient_scope' if scope else 'invalid_token',scope=scope)]}}}
 
 
 def call(engine, name, arguments):
@@ -262,23 +318,32 @@ def call(engine, name, arguments):
     return methods[name](**arguments)
 
 
-def rpc(engine, message):
+def rpc(engine, message, principal=None):
     ident = message.get("id")
     if "id" not in message: return None
     method = message.get("method")
     result = None
     if method == "initialize":
         version = message.get("params", {}).get("protocolVersion", "2025-06-18")
-        result = {"protocolVersion": version if version in ("2024-11-05", "2025-03-26", "2025-06-18") else "2025-06-18",
-                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.6.1"},
+        result = {"protocolVersion": version if version in ("2024-11-05", "2025-03-26", "2025-06-18", "2026-07-28") else "2025-06-18",
+                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.7.0"},
                   "instructions": "Use ChatGPT native images only. Tool availability does not grant publishing or spending approval. Read the repository master skill. Credentials stay server-side."}
+    elif method == 'server/discover': result={'resultType':'complete','supportedVersions':['2026-07-28','2025-06-18'],'capabilities':{'tools':{},'events':{}},'serverInfo':{'name':'vegas-social-os','version':'0.7.0'}}
     elif method == "ping": result = {}
+    elif method == 'events/list':
+        from .events import definitions as event_definitions
+        result={'events':event_definitions()}
+    elif method in ('events/subscribe','events/unsubscribe'):
+        if not principal:return {'jsonrpc':'2.0','id':ident,'error':{'code':-32001,'message':'Owner authorization required'}}
+        from .events import subscribe,unsubscribe
+        try:result=(subscribe if method=='events/subscribe' else unsubscribe)(engine,principal,message.get('params',{}))
+        except ValueError as e:return {'jsonrpc':'2.0','id':ident,'error':{'code':-32015 if 'Callback' in str(e) else -32602,'message':str(e)}}
     elif method == "tools/list": result = {"tools": definitions(engine)}
     elif method == "tools/call":
         try:
             params = message.get("params", {})
             output = call(engine, params.get("name"), params.get("arguments", {}))
-            result = {"content": [{"type": "text", "text": json.dumps(output)}], "isError": False}
+            result = {'content':[{'type':'text','text':json.dumps(output)}],'structuredContent':output if isinstance(output,dict) else {'items':output},'isError':False}
         except ValueError as e:
             result = {"content": [{"type": "text", "text": str(e)}], "isError": True}
         except Exception:

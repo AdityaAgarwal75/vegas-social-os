@@ -3,6 +3,8 @@ import hashlib
 import html
 import json
 import secrets
+import socket
+import re
 import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -11,15 +13,8 @@ from pathlib import Path
 from . import tools
 
 
-def pkce(verifier):
-    return base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
-
-
-def valid_redirect(url):
-    p = urllib.parse.urlsplit(url)
-    return not p.username and not p.password and not p.fragment and (
-        (p.scheme == "https" and bool(p.hostname)) or
-        (p.scheme == "http" and p.hostname in ("127.0.0.1", "localhost", "::1")))
+from .auth import pkce, valid_redirect
+from . import auth
 
 
 class HTTPServer(ThreadingHTTPServer):
@@ -30,7 +25,7 @@ class HTTPServer(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VegasSocialOS/0.6"
+    server_version = "VegasSocialOS/0.7"
 
     @property
     def engine(self): return self.server.engine
@@ -67,10 +62,16 @@ class Handler(BaseHTTPRequestHandler):
         parts = urllib.parse.urlsplit(self.path)
         return parts.path, {k: v[0] for k, v in urllib.parse.parse_qs(parts.query).items()}
 
-    def body(self):
+    def body(self, limit=1048576):
         length = int(self.headers.get("Content-Length", "0"))
-        if not 0 < length <= 90_000_000: raise ValueError("Missing or oversized request body")
+        if self.headers.get("Transfer-Encoding"): raise ValueError("Chunked RPC bodies are not supported; use media transfer")
+        if length>limit:
+            self.send({"error":"Request body too large; use media transfer"},413)
+            raise ConnectionAbortedError("oversized body")
+        if not 0 < length: raise ValueError("Missing request body")
+        self.connection.settimeout(20)
         data = self.rfile.read(length)
+        if len(data) != length: raise ValueError("Interrupted request body")
         if "application/x-www-form-urlencoded" in self.headers.get("Content-Type", ""):
             return {k: v[0] for k, v in urllib.parse.parse_qs(data.decode()).items()}
         return json.loads(data)
@@ -86,14 +87,13 @@ class Handler(BaseHTTPRequestHandler):
             return session if session["expires"] > time.time() else None
         except ValueError: return None
 
-    def authorized(self):
-        auth = self.headers.get("Authorization", "")
-        if auth.startswith("Bearer "):
-            try:
-                record = self.store.get("access", self.store.digest(auth[7:]))
-                return record["expires"] > time.time() and record["resource"] == self.base + "/mcp"
-            except ValueError: return False
-        return self.session() is not None
+    def principal(self):
+        value=self.headers.get('Authorization','')
+        if value.startswith('Bearer '): return auth.validate(self.store,self.base,value[7:])
+        if self.session(): return {'principal':'owner','scope':'social:manage events:subscribe vps:admin','dashboard':True}
+        return None
+
+    def authorized(self): return self.principal() is not None
 
     def flow_session(self):
         from http.cookies import SimpleCookie
@@ -117,14 +117,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def origin_ok(self):
         origin = self.headers.get("Origin")
-        return not origin or origin == self.base
+        return not origin or origin == self.base or (urllib.parse.urlsplit(self.path).path == '/mcp' and origin in ('https://chatgpt.com','https://chat.openai.com'))
 
-    def guard(self):
+    def guard(self, scope="social:read"):
         if not self.origin_ok():
             self.send({"error": "Origin rejected"}, 403); return False
         if not self.authorized():
             self.send({"error": "Authentication required"}, 401, headers={
-                "WWW-Authenticate": 'Bearer resource_metadata="' + self.base + '/.well-known/oauth-protected-resource/mcp"'})
+                "WWW-Authenticate": auth.challenge(self.base)})
+            return False
+        if not auth.permits(self.principal(),scope):
+            self.send({"error":"Insufficient scope"},403,headers={"WWW-Authenticate":auth.challenge(self.base,"insufficient_scope","Additional owner authorization required",scope)})
             return False
         return True
 
@@ -142,7 +145,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def get(self):
         path, q = self.parse()
-        if path == "/health": return self.send({"ok": True, "version": "0.6.1"})
+        if path == "/health": return self.send({"ok": True, "version": "0.7.0"})
+        if path in ('/admin','/admin/enroll','/admin.js'):
+            if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
+            file='admin.js' if path=='/admin.js' else 'admin.html'
+            return self.send((Path(__file__).parent.parent/'web'/file).read_bytes(),content_type='application/javascript' if file.endswith('.js') else 'text/html')
         if path in ("/", "/onboarding", "/dashboard", "/app.js", "/style.css", "/flow-login.js"):
             file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
@@ -199,27 +206,33 @@ class Handler(BaseHTTPRequestHandler):
             self.engine.accounts.callback(path.rsplit("/", 1)[1], q.get("state", ""), q.get("code", ""))
             return self.redirect(self.base + '/dashboard#accounts')
         if path in ("/.well-known/oauth-protected-resource", "/.well-known/oauth-protected-resource/mcp"):
-            return self.send({"resource": self.base + "/mcp", "authorization_servers": [self.base], "scopes_supported": ["social:manage"]})
+            return self.send({"resource": self.base + "/mcp", "authorization_servers": [self.base], "scopes_supported": sorted(auth.SCOPES)})
         if path == "/.well-known/oauth-authorization-server":
             return self.send({"issuer": self.base, "authorization_endpoint": self.base + "/authorize",
-                              "token_endpoint": self.base + "/token", "registration_endpoint": self.base + "/register",
+                              "token_endpoint": self.base + "/token", "registration_endpoint": self.base + "/register", "revocation_endpoint": self.base + "/revoke",
                               "response_types_supported": ["code"], "grant_types_supported": ["authorization_code", "refresh_token"],
                               "token_endpoint_auth_methods_supported": ["none"], "code_challenge_methods_supported": ["S256"],
-                              "scopes_supported": ["social:manage"]})
+                              "scopes_supported": sorted(auth.SCOPES)})
         if path == "/authorize":
             if not self.session(): return self.page("Open your setup link first", "<p>Run <code>python -m vso setup</code> on the installation computer. Open the private setup link in this browser, then retry connecting the plugin.</p>", 401)
             client = self.store.get("oauth-client", q.get("client_id", ""))
             if q.get("redirect_uri") not in client["redirect_uris"] or q.get("response_type") != "code" or q.get("code_challenge_method") != "S256" or len(q.get("code_challenge", "")) != 43 or q.get("resource") != self.base + "/mcp":
                 raise ValueError("Invalid OAuth client, PKCE challenge or resource")
-            if q.get("scope", "social:manage") != "social:manage": raise ValueError("Unsupported scope")
+            q['scope'] = auth.scopes(q.get('scope','social:read social:write'))
             ticket = self.store.ticket("consent", q)
-            return self.page("Authorize this plugin", "<p>This client can manage the accounts and productions in this installation. It does not receive provider passwords or tokens.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Social OS</button></form>')
+            return self.page("Authorize this plugin", "<p>Approve only a client you trust. Requested scopes: " + html.escape(q["scope"]) + ". VPS administration has additional per-operation approval. Provider passwords and tokens are not returned.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Social OS</button></form>')
         if path == "/api/state":
             if not self.guard(): return
             from .profile import status
             return self.send({"doctor": self.engine.doctor(), "onboarding": status(self.engine), "connections": self.engine.accounts.config.status(),
                               "automation": __import__("vso.automation", fromlist=["status"]).status(self.engine),
                               "research": self.store.all("research"), **self.engine.snapshot()})
+        if path=='/media-download':
+            digest=self.store.digest(q.get('ticket',''))
+            with self.store.db() as db:
+                row=db.execute("SELECT body,expires FROM tickets WHERE hash=? AND kind='media-download'",(digest,)).fetchone()
+            if not row or row['expires']<time.time():raise ValueError('Media preview expired')
+            return self.media(json.loads(row['body'])['asset_id'])
         if path == "/media":
             record = self.store.get("media-link", self.store.digest(q.get("ticket", "")))
             if record["expires"] < time.time(): raise ValueError("Media link expired")
@@ -247,9 +260,17 @@ class Handler(BaseHTTPRequestHandler):
             if start > end: return self.send("", 416, "text/plain", {"Content-Range": f"bytes */{size}"})
             status = 206
             headers["Content-Range"] = f"bytes {start}-{end}/{size}"
+        self.send_response(status)
+        for k,v in {"Content-Type":asset["media_type"],"Content-Length":str(end-start+1),"Cache-Control":"no-store","Referrer-Policy":"no-referrer","X-Content-Type-Options":"nosniff",**headers}.items():self.send_header(k,v)
+        self.end_headers()
+        if self.command=="HEAD":return
+        self.connection.settimeout(30)
         with file.open("rb") as f:
-            f.seek(start)
-            self.send(f.read(end - start + 1), status, asset["media_type"], headers)
+            f.seek(start);remaining=end-start+1
+            while remaining:
+                chunk=f.read(min(1024*1024,remaining))
+                if not chunk:break
+                self.wfile.write(chunk);remaining-=len(chunk)
 
     def proxy_browser(self, session):
         import socket
@@ -295,49 +316,58 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             upstream.close()
 
+    def do_PUT(self):
+        from . import media
+        try:
+            path,q=self.parse()
+            if not self.origin_ok() or not path.startswith('/transfer/'):return self.send({'error':'Transfer unavailable'},403)
+            if self.headers.get('Transfer-Encoding'):raise ValueError('Use bounded Content-Length chunks')
+            self.connection.settimeout(30)
+            result=media.receive(self.engine,path.rsplit('/',1)[1],q.get('ticket',''),self.rfile,int(self.headers.get('Content-Length','0')),self.headers.get('Content-Range'))
+            return self.send(result)
+        except PermissionError:return self.send({'error':'Transfer authorization required'},401)
+        except ValueError as e:return self.send({'error':str(e)},400)
+        except Exception:return self.send({'error':'Media transfer failed; inspect its offset before retrying'},400)
+
     def do_POST(self):
         try: self.post()
-        except ValueError as e: self.send({"error": str(e)}, 400)
-        except Exception: self.send({"error": "Operation failed; check installation settings"}, 400)
+        except auth.RateLimited as e:self.send({"error":"temporarily_unavailable","error_description":str(e)},429,headers={"Retry-After":"60"})
+        except ValueError as e:
+            path,_=self.parse()
+            self.send({"error":"invalid_grant" if path=="/token" else "invalid_request","error_description":str(e)},400)
+        except (BrokenPipeError,ConnectionResetError,ConnectionAbortedError,socket.timeout):pass
+        except Exception:self.send({"error":"server_error","error_description":"Operation failed; check installation settings"},500)
 
     def post(self):
         path, q = self.parse()
         if not self.origin_ok(): return self.send({"error": "Origin rejected"}, 403)
-        body = self.body()
+        public=path in ('/register','/token','/revoke','/mcp')
+        if path=='/flow/verify' and not self.flow_guard():return
+        if not public and not self.authorized() and path!='/flow/verify':
+            return self.send({'error':'Authentication required'},401,headers={'WWW-Authenticate':auth.challenge(self.base)})
+        limit=16384 if path in ('/register','/token','/revoke','/consent') else (65536 if path=='/mcp' and not self.authorized() else 1048576)
+        body=self.body(limit)
+        if not isinstance(body,dict):raise ValueError('Expected one JSON object')
         if path == "/flow/verify":
             data = self.flow_guard()
             if not data: return
             return self.send(self.engine.flow_inspect(data["account_id"]))
-        if path == "/register":
-            redirects = body.get("redirect_uris", [])
-            if not isinstance(redirects, list) or not 1 <= len(redirects) <= 10 or any(not isinstance(x, str) or not valid_redirect(x) for x in redirects):
-                raise ValueError("Use exact HTTPS or loopback redirect URIs")
-            if len(self.store.all("oauth-client")) >= 100: raise ValueError("Client registration limit reached")
-            ident = secrets.token_urlsafe(24)
-            self.store.put("oauth-client", ident, {"redirect_uris": redirects, "name": str(body.get("client_name", "MCP client"))[:100]})
-            return self.send({"client_id": ident, "redirect_uris": redirects, "token_endpoint_auth_method": "none",
-                              "grant_types": ["authorization_code", "refresh_token"], "response_types": ["code"]}, 201)
+        if path == '/register':
+            return self.send(auth.register(self.store,body,self.client_address[0]),201)
+        if path == '/revoke': return self.send(auth.revoke(self.store,body))
         if path == "/consent":
             if not self.session(): raise ValueError("Sign into this installation before consent")
             data = self.store.consume(body.get("ticket", ""), "consent")
             code = self.store.ticket("mcp-code", data, ttl=120)
             sep = "&" if "?" in data["redirect_uri"] else "?"
             return self.redirect(data["redirect_uri"] + sep + urllib.parse.urlencode({"code": code, "state": data.get("state", "")}))
-        if path == "/token":
-            grant = body.get("grant_type")
-            if grant == "authorization_code":
-                data = self.store.consume(body.get("code", ""), "mcp-code")
-                if data["client_id"] != body.get("client_id") or data["redirect_uri"] != body.get("redirect_uri") or pkce(body.get("code_verifier", "")) != data["code_challenge"]:
-                    raise ValueError("Invalid authorization code or PKCE verifier")
-            elif grant == "refresh_token":
-                data = self.store.consume(body.get("refresh_token", ""), "mcp-refresh")
-                if data["client_id"] != body.get("client_id"): raise ValueError("Client mismatch")
-            else: raise ValueError("Unsupported grant type")
-            if body.get("resource", self.base + "/mcp") != self.base + "/mcp": raise ValueError("Resource mismatch")
-            access = secrets.token_urlsafe(32)
-            self.store.put("access", self.store.digest(access), {"expires": time.time() + 3600, "resource": self.base + "/mcp", "client_id": data["client_id"]})
-            refresh = self.store.ticket("mcp-refresh", {"client_id": data["client_id"]}, ttl=30 * 86400)
-            return self.send({"access_token": access, "token_type": "Bearer", "expires_in": 3600, "refresh_token": refresh, "scope": "social:manage"})
+        if path == '/token': return self.send(auth.token(self.store,self.base,body))
+        if path in ('/api/admin-approve','/api/admin-enroll','/api/admin-request'):
+            if not self.session() or not self.guard():return self.send({'error':'Private owner browser session required'},401)
+            from .admin import call
+            if path=='/api/admin-request':return self.send(call({'action':'request_status','request_id':body.get('request_id','')}))
+            if path=='/api/admin-enroll':return self.send(call({'action':'enrollment','ticket':body.get('ticket',''),**({'code':body['code']} if 'code' in body else {})}))
+            return self.send(call({'action':'approve','request_id':body.get('request_id',''),'code':body.get('code','')}))
         if path == "/api/config":
             # Provider secrets may be supplied only in the owner's private dashboard session.
             # They are deliberately unavailable as MCP tools or returned values.
@@ -353,10 +383,20 @@ class Handler(BaseHTTPRequestHandler):
                 with self.store.db() as db:
                     db.execute("DELETE FROM records WHERE kind='session' AND id=?", (self.store.digest(c["vso_session"].value),))
             return self.send({"status": "signed_out"}, headers={"Set-Cookie": "vso_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0"})
-        if path in ("/mcp", "/api/tool"):
-            if not self.guard(): return
-            if path == "/api/tool":
-                return self.send(tools.call(self.engine, body.get("name"), body.get("arguments", {})))
-            result = tools.rpc(self.engine, body)
+        if path in ('/mcp','/api/tool'):
+            principal=self.principal()
+            if path=='/api/tool':
+                if not self.authorized():return self.send({'error':'Authentication required'},401)
+                name=body.get('name');required=auth.tool_scope(name)
+                if not auth.permits(principal,required):return self.send({'error':'Insufficient scope'},403)
+                return self.send(tools.call(self.engine,name,body.get('arguments',{})))
+            method=body.get('method')
+            if method not in auth.DISCOVERY_METHODS and not principal:
+                if method=='tools/call':return self.send(tools.auth_error(self.engine,body))
+                return self.send({'error':'Authentication required'},401,headers={'WWW-Authenticate':auth.challenge(self.base)})
+            if method=='tools/call' and principal:
+                required=auth.tool_scope(body.get('params',{}).get('name'))
+                if not auth.permits(principal,required):return self.send(tools.auth_error(self.engine,body,required))
+            result=tools.rpc(self.engine,body,principal=principal)
             return self.send(result) if result is not None else self.send("", 202, "text/plain")
         self.send({"error": "Not found"}, 404)

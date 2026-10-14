@@ -20,7 +20,7 @@ class Engine:
 
     def doctor(self):
         from . import flow_runtime
-        return {"version": "0.6.1-alpha", "image_provider": "chatgpt-native-only",
+        return {"version": "0.7.0-alpha", "image_provider": "chatgpt-native-only",
                 "state_backend": "supabase" if self.store.__class__.__name__ == "SupabaseStore" else "sqlite",
                 "agent_first": True, "remote_browser": os.getenv("VSO_REMOTE_BROWSER") == "1",
                 "native_images": "Host capability; unavailable hosts must pause, never substitute",
@@ -125,7 +125,8 @@ class Engine:
         path = (self.store.root / "media" / asset["file"]).resolve()
         if path.parent != self.store.root / "media" or not path.is_file():
             raise ValueError("Asset unavailable")
-        if hashlib.sha256(path.read_bytes()).hexdigest() != ident:
+        from .media import sha256_file
+        if sha256_file(path) != ident:
             raise ValueError("Asset checksum mismatch")
         return path
 
@@ -374,7 +375,7 @@ class Engine:
                 media_ticket = self.store.ticket("media", {"asset_id": p["asset_id"]}, ttl=3600)
                 # Media tokens are reusable for range/repeated fetches during processing.
                 self.store.put("media-link", self.store.digest(media_ticket), {"asset_id": p["asset_id"], "expires": time.time() + 3600})
-                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{a['remote_id']}/media", method="POST", token=token,
+                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version('instagram')}/{a['remote_id']}/media", method="POST", token=token,
                                         form={"media_type": "REELS", "video_url": self.base + "/media?ticket=" + media_ticket, "caption": p["caption"]})
                 p.update(status="processing", container_id=result["id"])
         except Exception:
@@ -390,7 +391,7 @@ class Engine:
         if p["provider"] != "instagram" or p["status"] != "processing":
             raise ValueError("This publication needs manual reconciliation")
         token = self.accounts.token(p["account_id"])
-        info, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{p['container_id']}?fields=status_code", token=token)
+        info, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version('instagram')}/{p['container_id']}?fields=status_code", token=token)
         if info.get("status_code") == "FINISHED":
             # Claim the write before network I/O; competing polls cannot publish twice.
             with self.store.db() as db:
@@ -401,7 +402,7 @@ class Engine:
                 self.store.write(db, "publication", publication_id, p)
             a = self.store.get("account", p["account_id"])
             try:
-                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version("instagram")}/{a['remote_id']}/media_publish", method="POST", token=token,
+                result, _ = net.request(f"https://graph.instagram.com/{self.accounts.config.version('instagram')}/{a['remote_id']}/media_publish", method="POST", token=token,
                                         form={"creation_id": p["container_id"]})
                 p.update(status="published", remote_id=result["id"])
             except Exception:

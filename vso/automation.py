@@ -33,6 +33,8 @@ def complete(engine, brief_id, plan_id):
 
 
 def tick(engine):
+    from .events import tick as event_tick
+    event_tick(engine)
     briefs = schedule.tick(engine)
     for post in engine.store.all('publication'):
         if post.get('kind') != 'composer': continue

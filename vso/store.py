@@ -45,6 +45,8 @@ class Store:
             CREATE TABLE IF NOT EXISTS audit (
                 at REAL NOT NULL, action TEXT NOT NULL, entity TEXT NOT NULL);
             """)
+        with self.db() as db:
+            db.execute("INSERT OR IGNORE INTO records VALUES('installation','identity',?)", (json.dumps({'id':secrets.token_hex(16)}),))
         os.chmod(self.root / "state.sqlite", 0o600)
 
     @contextmanager
@@ -74,6 +76,10 @@ class Store:
 
     @staticmethod
     def write(db, kind, ident, body):
+        if kind in ('brief','plan','review-request','job','video-job','publication'):
+            row=db.execute('SELECT body FROM records WHERE kind=? AND id=?',(kind,ident)).fetchone()
+            from .events import emit
+            emit(db,kind,ident,body,json.loads(row[0]) if row else None)
         db.execute("INSERT INTO records VALUES(?,?,?) ON CONFLICT(kind,id) DO UPDATE SET body=excluded.body",
                    (kind, ident, json.dumps(body)))
 
