@@ -21,7 +21,7 @@ Home presents actual host CPU/memory/disk observations, resource history, last o
 - Python/JS compilation, installer shell syntax and diff whitespace checks pass.
 - Real Chrome with the sandbox enabled on isolated VPS state passes fourteen control-panel routes at 360/768/1440/1920 widths in both themes. Project creation/scene assignment/search, theme persistence, storyboard approval/revision, provider setup gates and actual fixture schedule distinctions pass. External provider traffic is blocked.
 - The separate onboarding browser suite passes password error/recovery/save/login/logout, mobile navigation and real browser consent-to-PKCE exchange with an intercepted synthetic host callback. No real provider authorization is fabricated.
-- Light and dark desktop screenshots inspected; mobile overflow and navigation checked. Muted text contrast and single-sample chart visibility improved after inspection.
+- Light and dark desktop screenshots inspected; mobile overflow and navigation checked. Muted text contrast and single-sample chart visibility improved after inspection. CI exposed a mobile menu timing edge; sidebar links now close it synchronously, including a tap on the current route, with a browser regression check.
 
 ## Remaining acceptance boundaries
 
