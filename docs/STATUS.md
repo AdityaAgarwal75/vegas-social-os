@@ -8,7 +8,7 @@ See the [community-readiness audit](audits/2026-10-15-community-readiness.md), [
 - New branded login, browser password setup/recovery, visible help, useful failure/lockout states, mobile menu repair and consistent release versions.
 - Previous PR #7 is merged. Live authenticated `custom mcp vegas` doctor succeeded in this Work session; the connection is operational.
 - Actual browser consent redirect/PKCE exchange passes with a fully intercepted synthetic callback. Real host-native image handoff, generation, public publishing and unattended event continuation remain separate acceptance gates.
-- Full current change/deployment evidence is recorded in the 15 October audit. Do not infer deployment solely from this source file.
+- Version 0.7.1 deployed from `e6623c52b9f7e38665b477bfb81a1d1fbdd257bc` after green CI. Live HTTPS/private-API and authenticated MCP checks pass. Password, vault key, accounts and profile preserved; all five Flow services active. See the 15 October audit for the complete deployment receipt.
 
 ## Historical checkpoint — 15 October recovery repair
 

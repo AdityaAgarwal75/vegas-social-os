@@ -47,3 +47,16 @@ Scope: all remote branch histories/differences, repository-wide automated checks
 A new independent owner's DNS/TLS, Google sign-in/challenges, provider application approval, actual native image transfer through their host, capped paid rendering, exact public publishing, event-driven unattended continuation and private archive access remain installation-specific tests. No paid generation, public post or new cloud instance was created by this audit. An optional Docker/managed-host recipe is not equivalent to verified sandboxed VPS operation.
 
 Self-hosting support is for one trusted owner per installation. It is not multi-tenant SaaS, email-based account recovery, social platform approval or a promise of fully unattended production.
+
+
+## Deployment acceptance — 15 October 2026
+
+- PR #7 and PR #8 merged. Code deployed from pinned main revision `e6623c52b9f7e38665b477bfb81a1d1fbdd257bc`, version 0.7.1. [GitHub CI run 38694753012](https://github.com/AdityaAgarwal75/vegas-social-os/actions/runs/38694753012) passed Python 3.11, Python 3.12, both Chromium browser suites, Node checks and CloudFormation lint.
+- Atomic installer created complete private state/source/config backups and a rollback checkpoint. Existing pinned Flow engine was reused. No in-flight production jobs were present at preflight.
+- Live HTTPS health/login/help/recovery/logo checks pass; anonymous private API returns 401 and locked dashboard redirects to sign-in. Authenticated live custom MCP doctor reports 0.7.1.
+- Password record, vault key, account identities and owner profile match private predeployment fingerprints; SQLite integrity check passes. Gateway, isolated admin broker, Caddy and all five imported Flow services are active. No owner password was reset by this upgrade.
+- Subsequent documentation receipts may have a newer commit than the pinned deployed code; they do not imply an additional runtime deployment.
+
+### Design references
+
+The delivered layout is original framework-free HTML/CSS/JS with an original SVG mark under this repository’s MIT license. Consulted [shadcn login](https://github.com/shadcn-ui/ui/blob/c003e96852fa9534aee40b2cb85a96d8bd38732d/apps/v4/registry/bases/aria/blocks/login-01/components/login-form.tsx), [form semantics](https://github.com/shadcn-ui/ui/blob/c003e96852fa9534aee40b2cb85a96d8bd38732d/apps/v4/registry/new-york-v4/ui/form.tsx) and [Vercel interface guidelines](https://github.com/vercel-labs/web-interface-guidelines). No React, animation package or new UI runtime dependency was added.
