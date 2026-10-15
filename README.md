@@ -57,6 +57,8 @@ python -m vso owner-password in a private interactive terminal.
 Subsequent visits use https://YOUR-DOMAIN/login. The password never replaces OAuth/PKCE consent for
 ChatGPT. Never post pairing links or passwords publicly.
 
+Forgot your password? An authorized infrastructure agent can generate a private link with `sudo bash /opt/vegas-social-os/scripts/new-setup-link.sh --reset-password`; open it once to set a new password directly in your browser. See [recovery and OAuth troubleshooting](docs/SELF-HOSTING.md#forgotten-owner-password--agent-assisted-browser-recovery).
+
 ## Vegas Creative Engine
 
 See [the complete content capability, attribution and verification matrix](docs/CREATIVE-ENGINE.md).
