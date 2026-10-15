@@ -12,7 +12,7 @@ from .tools import rpc
 
 def main():
     parser = argparse.ArgumentParser(description="Vegas Social OS — self-hosted, ChatGPT-native content pipeline")
-    parser.add_argument("command", choices=("serve", "stdio", "setup", "doctor", "flow-login", "call", "owner-password"))
+    parser.add_argument("command", choices=("serve", "stdio", "setup", "doctor", "flow-login", "call", "owner-password", "owner-recovery"))
     parser.add_argument("--data-dir", default=os.getenv("VSO_DATA_DIR", str(Path.home() / ".local/share/vegas-social-os")))
     parser.add_argument("--port", type=int, default=int(os.getenv("VSO_PORT", os.getenv("PORT", "8787"))))
     parser.add_argument("--host", default="127.0.0.1")
@@ -35,6 +35,12 @@ def main():
         print("Private one-use setup link (expires in 10 minutes):")
         print(base + "/pair?ticket=" + ticket)
         print("Start the server with: python -m vso serve")
+    elif args.command == "owner-recovery":
+        # Administrator-only CLI; do not expose as a public or MCP tool.
+        ticket = store.ticket("owner-reset", {}, ttl=600)
+        print("Private one-use password recovery link (expires in 10 minutes):")
+        print(base + "/owner-recovery?ticket=" + ticket)
+        print("Open once; enter your new password in the browser. Keep this link private.")
     elif args.command == "owner-password":
         import getpass
         from .owner_auth import password_set

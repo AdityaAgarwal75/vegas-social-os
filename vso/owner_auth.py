@@ -19,7 +19,8 @@ def password_set(store, password):
     with store.db() as db:
         store.write(db,"owner-auth","password",{"algorithm":"scrypt-n16384-r8-p1",
             "salt":salt.hex(),"hash":hashed.hex(),"updated_at":time.time()})
-        db.execute("DELETE FROM records WHERE kind='session'")
+        db.execute("DELETE FROM records WHERE kind IN ('session','password-reset-session')")
+        db.execute("DELETE FROM tickets WHERE kind='owner-reset'")
     return {"configured":True,"sessions_revoked":True}
 
 

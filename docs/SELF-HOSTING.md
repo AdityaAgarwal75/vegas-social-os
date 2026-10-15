@@ -94,3 +94,19 @@ not finish, inspect whether the host exchanged the code at POST /token.
 A successful HTTP 303 from POST /consent proves approval/redirect only,
 not an installed or authorized ChatGPT plugin. Restart connection in ChatGPT
 to create a fresh authorization request; keep owner setup separate.
+
+### Forgotten owner password — agent-assisted browser recovery
+
+An authorized administrator or connected infrastructure agent runs:
+
+```bash
+sudo bash /opt/vegas-social-os/scripts/new-setup-link.sh --reset-password
+```
+
+Return the resulting private URL directly to the owner. Open it once within ten minutes; it redirects directly to the new-password form. Enter and confirm a password of 14–256 characters, then sign in again. No old password or owner terminal interaction is needed. The old password remains active until the replacement is saved. This recovery cookie cannot access dashboard APIs or MCP. Saving revokes owner browser sessions, recovery sessions and unused recovery tickets; provider accounts and media are preserved. OAuth reconnection remains a separate approval.
+
+Do not open/test the owner's one-use link on their behalf or include it in public logs, GitHub or documentation. If expired or already consumed, issue a fresh link; do not reuse an old URL. The ordinary setup link is for pairing and does not bypass an existing password. A recovery link must come from already-authorized infrastructure access, never a public unauthenticated reset endpoint.
+
+### Authorize button stays on “Redirecting to ChatGPT”
+
+A consent POST returning HTTP 303 alone is insufficient: browsers may block its cross-origin redirect when CSP contains only `form-action 'self'`. The authorize/consent routes now also permit `https://chatgpt.com/connector/oauth/`; other routes retain self-only forms. Exact registered callback, PKCE, owner session, CSRF and one-use ticket checks remain enforced. Custom reverse proxies must not add another, stricter CSP blocking that callback. After upgrading, close the stuck page, restart connection in ChatGPT and approve once. Confirm a real POST /token and authenticated tool call before claiming connection success. Other MCP hosts may require their own narrowly scoped callback policy.

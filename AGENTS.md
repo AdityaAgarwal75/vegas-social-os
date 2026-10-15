@@ -14,3 +14,7 @@ Read README.md, BOOTSTRAP.md, agent-manifest.json, docs/SELF-HOSTING.md, docs/CH
 - Report observed vs not yet tested features and cost assumptions in docs/STATUS.md after changing behavior.
 
 - ChatGPT web Work is the primary workstation. Keep extensions.com.openai.requires_local_executor=false, remote HTTPS MCP/OAuth, and no mandatory local daemon/desktop launch. Read docs/CHATGPT-WEB.md and verify web registration/tools separately from ZIP generation.
+
+## Maintainer bug-fix completion rule
+
+When the owner authorizes a bug fix, include the official repository update in the same task. A live-server hotfix is temporary: port the fix to current source, add relevant regression coverage, run required checks, update docs/STATUS.md and recovery instructions when behavior changes, then commit and push through authorized access. Verify the remote commit and report its link. Never report a deployed fix as an upstream fix. If pushing is blocked, preserve the tested patch and state the exact blocker; do not claim synchronization. Do not commit runtime data, setup/recovery URLs, credentials or release backups.

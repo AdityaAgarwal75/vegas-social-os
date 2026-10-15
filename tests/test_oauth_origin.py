@@ -12,7 +12,7 @@ import urllib.request
 from pathlib import Path
 
 from vso.engine import Engine
-from vso.server import HTTPServer, pkce
+from vso.server import HTTPServer, Handler, pkce
 from vso.store import Store
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -20,6 +20,22 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 class OAuthOriginTests(unittest.TestCase):
+    def test_callback_csp_is_limited_to_consent_routes(self):
+        for path in ('/authorize?client_id=test', '/consent', '/login', '/password', '/mcp', '/dashboard'):
+            with self.subTest(path=path):
+                handler = object.__new__(Handler)
+                handler.path, handler.command = path, 'HEAD'
+                headers = {}
+                handler.send_response = lambda status: None
+                handler.send_header = lambda key, value: headers.update({key: value})
+                handler.end_headers = lambda: None
+                handler.send('test', content_type='text/plain')
+                csp = headers['Content-Security-Policy']
+                self.assertIn("form-action 'self'", csp)
+                self.assertEqual('https://chatgpt.com/connector/oauth/' in csp,
+                                 path.split('?')[0] in ('/authorize', '/consent'))
+                self.assertNotIn('form-action *', csp)
+
     def test_caddy_repair(self):
         path = Path(__file__).resolve().parents[1] / "scripts/repair-caddy-referrer.py"
         spec = importlib.util.spec_from_file_location("oauth_caddy", path)

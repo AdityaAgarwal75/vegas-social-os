@@ -63,7 +63,7 @@ class Handler(BaseHTTPRequestHandler):
         # for normal HTML form submits, which fails the exact-Origin CSRF guard.
         self.send_header("Referrer-Policy", "origin")
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self'; frame-ancestors " + ("'self'" if urllib.parse.urlsplit(self.path).path.startswith("/flow/") else "'none'") + "; base-uri 'none'; form-action 'self'")
+        self.send_header("Content-Security-Policy", "default-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; frame-src 'self'; frame-ancestors " + ("'self'" if urllib.parse.urlsplit(self.path).path.startswith("/flow/") else "'none'") + "; base-uri 'none'; form-action 'self'" + (" https://chatgpt.com/connector/oauth/" if urllib.parse.urlsplit(self.path).path in ("/authorize", "/consent") else ""))
         for k, v in (headers or {}).items(): self.send_header(k, v)
         self.end_headers()
         if self.command != "HEAD": self.wfile.write(body)
@@ -102,6 +102,17 @@ class Handler(BaseHTTPRequestHandler):
             session = self.store.get("session", self.store.digest(c["vso_session"].value))
             return session if session["expires"] > time.time() else None
         except ValueError: return None
+
+    def password_recovery(self):
+        # This cookie grants password reset only, never dashboard/MCP access.
+        from http.cookies import SimpleCookie
+        cookie = SimpleCookie()
+        try:
+            cookie.load(self.headers.get("Cookie", ""))
+            record = self.store.get("password-reset-session", self.store.digest(cookie["vso_reset"].value))
+            return record if record["expires"] > time.time() else None
+        except (ValueError, KeyError):
+            return None
 
     def principal(self):
         value=self.headers.get('Authorization','')
@@ -167,10 +178,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.send({'ready':True,'database':'sqlite','version':'0.7.0','flow_engine_installed':self.engine.doctor()['flow_engine_installed']})
         if path == "/health": return self.send({"ok": True, "version": "0.7.0"})
         if path == "/password":
-            if not self.session():return self.page("Owner session required",
+            if not self.session() and not self.password_recovery():return self.page("Owner session required",
                 "<p>Use an authorized owner session or private setup link first.</p>",401)
             from .owner_auth import configured
-            previous=('<label>Current password<input type="password" name="current" required autocomplete="current-password"></label>' if configured(self.store) else '')
+            previous=('<label>Current password<input type="password" name="current" required autocomplete="current-password"></label>' if configured(self.store) and not self.password_recovery() else '')
             return self.page("Set owner password",
                 "<p>Your password stays private and is stored as a salted hash.</p>"
                 '<form action="/password" method="post">'+previous+
@@ -209,6 +220,16 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 text = "To remove an account, open Connections and choose Disconnect, then revoke the app in the provider's account settings. Browser profiles, media and backups require deletion by this installation's owner. Ask the owner to remove /var/lib/vegas-social-os only when decommissioning the entire installation. This page is a data-deletion instruction URL, not a signed Meta deletion webhook."
             return self.page("Privacy" if path == "/privacy" else "Data deletion", "<p>" + html.escape(text) + "</p><p>Contact this installation's owner for requests. Configure your own legal/contact details before inviting other users.</p>")
+        if path == "/owner-recovery":
+            try:
+                self.store.consume(q.get("ticket", ""), "owner-reset")
+            except ValueError:
+                return self.page("Recovery link expired or already used",
+                    '<p>Ask your authorized server administrator or connected infrastructure agent for a fresh password recovery link. Open it once in the browser where you will set your password.</p>', 410)
+            token = secrets.token_urlsafe(32)
+            self.store.put("password-reset-session", self.store.digest(token), {"expires": time.time() + 600})
+            secure = "; Secure" if self.base.startswith("https://") else ""
+            return self.redirect("/password", {"Set-Cookie": "vso_reset=" + token + "; HttpOnly; SameSite=Lax; Path=/password; Max-Age=600" + secure})
         if path == "/pair":
             # Pairing tickets are one-use; repeat visits from an already paired
             # browser should remain on the dashboard, not throw an invalid grant.
@@ -410,14 +431,14 @@ class Handler(BaseHTTPRequestHandler):
         body=self.body(limit)
         if not isinstance(body,dict):raise ValueError('Expected one JSON object')
         if path == "/password":
-            if not self.session():return self.send({"error":"Owner session required"},401)
+            if not self.session() and not self.password_recovery():return self.send({"error":"Owner session required"},401)
             from .owner_auth import configured, password_check, password_set
-            if configured(self.store) and not password_check(self.store,body.get("current",""),self.client_address[0]):
+            if configured(self.store) and not self.password_recovery() and not password_check(self.store,body.get("current",""),self.client_address[0]):
                 return self.page("Current password incorrect","<p>Verify your current password.</p>",401)
             if body.get("password")!=body.get("confirmation"):
                 return self.page("Passwords differ","<p>Enter matching passwords.</p>",400)
             password_set(self.store,body.get("password",""))
-            return self.redirect("/login")
+            return self.redirect("/login", {"Set-Cookie": "vso_reset=; HttpOnly; SameSite=Lax; Path=/password; Max-Age=0"})
         if path == "/login":
             from .owner_auth import password_check, validate_return
             next_url=validate_return(body.get("next","/dashboard"))
