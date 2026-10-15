@@ -20,8 +20,9 @@ def package(url, output):
     for directory in ('skills', 'third_party'):
         for f in (root / directory).rglob('*'):
             if f.is_file(): files[f.relative_to(root).as_posix()] = f.read_text()
-    for f in (root / 'docs').rglob('*.md'):
-        files[f.relative_to(root).as_posix()] = f.read_text()
+    for f in (root / 'docs').rglob('*'):
+        if f.is_file() and f.suffix in ('.md', '.svg', '.png'):
+            files[f.relative_to(root).as_posix()] = f.read_bytes()
     for name in ('BOOTSTRAP.md', 'AGENTS.md', 'README.md', 'agent-manifest.json'):
         files[name] = (root / name).read_text()
     output = Path(output).resolve()

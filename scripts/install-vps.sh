@@ -109,7 +109,11 @@ rollback() {
       if [[ -n "$OLD" && -d "$OLD" ]]; then ln -s "$OLD" "$DEST.rollback"; mv -Tf "$DEST.rollback" "$DEST"; fi
       [[ -f "$BACKUP/environment" ]] && cp -a "$BACKUP/environment" "$ENV_FILE"
       [[ -f "$BACKUP/service" ]] && cp -a "$BACKUP/service" "$UNIT"
-      [[ -f "$BACKUP/Caddyfile" ]] && cp -a "$BACKUP/Caddyfile" /etc/caddy/Caddyfile
+      if [[ -f "$BACKUP/Caddyfile" ]]; then
+        cp -a "$BACKUP/Caddyfile" /etc/caddy/Caddyfile
+        # Restore the running proxy too, not only its on-disk configuration.
+        if (( ! NO_CADDY )); then caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null && systemctl reload caddy || true; fi
+      fi
       if [[ -f "$BACKUP/broker.py" ]]; then cp -a "$BACKUP/broker.py" /usr/local/lib/vegas-social-admin/broker.py; fi
       if [[ -f "$BACKUP/broker-service" ]]; then cp -a "$BACKUP/broker-service" /etc/systemd/system/vegas-social-admin.service; fi
       systemctl daemon-reload

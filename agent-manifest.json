@@ -1,6 +1,6 @@
 {
   "name": "vegas-social-os",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "entrypoint": "BOOTSTRAP.md",
   "agent_setup_script": "scripts/bootstrap-ubuntu.sh",
   "runtime": {
