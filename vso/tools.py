@@ -1,3 +1,4 @@
+from . import __version__
 import inspect
 import json
 from . import auth
@@ -439,9 +440,9 @@ def rpc(engine, message, principal=None):
     if method == "initialize":
         version = message.get("params", {}).get("protocolVersion", "2025-06-18")
         result = {"protocolVersion": version if version in ("2024-11-05", "2025-03-26", "2025-06-18", "2026-07-28") else "2025-06-18",
-                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": "0.7.0"},
+                  "capabilities": {"tools": {}}, "serverInfo": {"name": "vegas-social-os", "version": __version__},
                   "instructions": "Use ChatGPT native images only. Tool availability does not grant publishing or spending approval. Read the repository master skill. Credentials stay server-side."}
-    elif method == 'server/discover': result={'resultType':'complete','supportedVersions':['2026-07-28','2025-06-18'],'capabilities':{'tools':{},'events':{}},'serverInfo':{'name':'vegas-social-os','version':'0.7.0'}}
+    elif method == 'server/discover': result={'resultType':'complete','supportedVersions':['2026-07-28','2025-06-18'],'capabilities':{'tools':{},'events':{}},'serverInfo':{'name':'vegas-social-os','version':__version__}}
     elif method == "ping": result = {}
     elif method == 'events/list':
         from .events import definitions as event_definitions

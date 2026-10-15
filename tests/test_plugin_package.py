@@ -11,7 +11,7 @@ class PluginPackageTests(unittest.TestCase):
             output=Path(directory)/'plugin.zip';package('https://own.example/mcp',output)
             with zipfile.ZipFile(output) as z:
                 names=set(z.namelist());prefix='vegas-social-os/'
-                for p in ['skills/vegas-social-master/references/chatgpt-workstation.md','docs/CHATGPT-FIRST.md','docs/NEW-USER-JOURNEY.md','docs/FLOW-SKILL-INTEGRATION.md','third_party/flow-scripting/core/flow-orchestrator.md','third_party/flow-video-producer/references/pipeline.md','third_party/flow-scripting/LICENSE','third_party/flow-video-producer/LICENSE','BOOTSTRAP.md']:
+                for p in ['skills/vegas-social-master/references/chatgpt-workstation.md','docs/CHATGPT-FIRST.md','docs/NEW-USER-JOURNEY.md','docs/FLOW-SKILL-INTEGRATION.md','third_party/flow-scripting/core/flow-orchestrator.md','third_party/flow-video-producer/references/pipeline.md','third_party/flow-scripting/LICENSE','third_party/flow-video-producer/LICENSE','BOOTSTRAP.md','docs/USER-GUIDE.md','docs/assets/banner.svg','docs/assets/logo.svg']:
                     self.assertIn(prefix+p,names)
                 mcp=json.loads(z.read(prefix+'mcp.json'));self.assertEqual(mcp['mcpServers']['vegas-social-os']['url'],'https://own.example/mcp')
                 manifest=json.loads(z.read(prefix+'plugin.json'));self.assertIs(manifest['extensions']['com.openai']['requires_local_executor'],False)

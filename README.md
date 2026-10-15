@@ -1,8 +1,24 @@
-# Vegas Social OS — your social production team inside ChatGPT
+# Vegas Social OS
+
+![Vegas Social OS — ideas in chat, production under control](docs/assets/banner.svg)
+
+[Start here](docs/USER-GUIDE.md) · [Self-host](docs/SELF-HOSTING.md) · [Current status](docs/STATUS.md) · [Security](SECURITY.md)
+
+Your social production team inside ChatGPT.
 
 **Primary workstation: ChatGPT web (Work). No desktop app or local computer executor is required.** Read [web setup](docs/CHATGPT-WEB.md) for connection steps and verification.
 
 **Plan in ChatGPT. Execute on your own VPS. Sign in and review in the dashboard.** An open-source, independently self-hosted social production system for original research, scripts, scene images, Google Flow clips and reviewed publishing. Not affiliated with OpenAI, Google or Meta.
+
+## Start in three steps
+
+1. **Install your own workspace.** Give this repo to a ChatGPT Work agent connected to your VPS or AWS. Follow the setup prompt below.
+2. **Sign in and connect.** Open the private setup link, set your owner password, connect the plugin and sign into your own accounts.
+3. **Review before release.** Choose a concept, approve actual storyboards and credits, then review the exact final post.
+
+Your installation includes branded login, Show/Hide password, forgotten-password guidance, direct private recovery links and a setup guide at `/help`. [Read the complete user guide →](docs/USER-GUIDE.md)
+
+**Release status:** a tested self-hosting candidate, not a guarantee of fully unattended production. Provider registration, personal login and real generation/publishing acceptance remain owner-specific.
 
 ## The product
 
@@ -10,7 +26,7 @@ ChatGPT is your main workstation. Its private plugin connects to your own instal
 
 Read [the accepted ChatGPT-first architecture](docs/CHATGPT-FIRST.md) and [the complete new-user journey](docs/NEW-USER-JOURNEY.md), including plugin structure, permissions, VPS administration boundaries, optional Drive storage and the unattended-work implementation gates.
 
-**0.7.0 engineering candidate:** founder VPS browser/settings checks and offline tests exist. Durable storyboard-feedback requests and review-focused navigation are implemented. Paid Flow rendering, fresh AWS onboarding, real publishing and event-driven ChatGPT continuation are not yet accepted end to end. [Current evidence](docs/STATUS.md) distinguishes source, menus, submitted jobs and usable outputs.
+**0.7.1 onboarding candidate:** founder VPS browser/settings checks and offline tests exist. Durable storyboard-feedback requests and review-focused navigation are implemented. Paid Flow rendering, fresh AWS onboarding, real publishing and event-driven ChatGPT continuation are not yet accepted end to end. [Current evidence](docs/STATUS.md) distinguishes source, menus, submitted jobs and usable outputs.
 
 ## Give this repository to your ChatGPT
 

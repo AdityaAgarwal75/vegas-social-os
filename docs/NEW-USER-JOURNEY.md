@@ -41,6 +41,6 @@ A shared verified OAuth registration could reduce setup, but requires a maintain
 
 ### Setup receipt and recovery
 
-Return dashboard URL, own MCP URL, installation/source revision, resource IDs/region, readiness table, owner-only remaining steps, costs and restore/offboarding instructions. Keep pairing URLs, keys and browser data out of GitHub, cloud logs and public outputs. Current owner sessions last eight hours; a new private pairing link is needed after expiry. Persistent passkey/owner sign-in is a planned UX improvement, not implemented.
+Return dashboard URL, own MCP URL, installation/source revision, resource IDs/region, readiness table, owner-only remaining steps, costs and restore/offboarding instructions. Keep pairing URLs, keys and browser data out of GitHub, cloud logs and public outputs. Owner sessions last eight hours. After initial pairing, set an owner password at /password and use /login on later visits. Forgotten passwords use an administrator-issued one-use recovery link; see USER-GUIDE.md and SELF-HOSTING.md. Passkeys are not implemented.
 
 On AWS timeouts inspect the original stack/resources. On rendering/upload timeouts poll/reconcile original jobs. On Google login challenges hand control to the owner. On missing custom-plugin/event/native-byte capability mark the appropriate mode blocked/pending, without changing to a paid API or another person's VPS. Schedule must be later than VPS startup, or explicitly authorize an always-on host.

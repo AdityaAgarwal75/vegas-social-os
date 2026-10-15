@@ -1,3 +1,4 @@
+from . import __version__
 import base64
 import hashlib
 import html
@@ -39,7 +40,7 @@ class HTTPServer(ThreadingHTTPServer):
         finally:self.slots.release()
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "VegasSocialOS/0.7"
+    server_version = "VegasSocialOS/" + __version__
 
     @property
     def engine(self): return self.server.engine
@@ -69,7 +70,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.command != "HEAD": self.wfile.write(body)
 
     def page(self, title, body, status=200):
-        self.send(f'<!doctype html><html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="stylesheet" href="/style.css"><title>{html.escape(title)}</title><main class="login"><p class="eyebrow">VEGAS / SOCIAL OS</p><h1>{html.escape(title)}</h1>{body}</main></html>', status, "text/html")
+        from .ui import shell
+        self.send(shell(title, body, status), status, "text/html")
 
     def redirect(self, url, headers=None):
         self.send("", 303, "text/plain", {"Location": url, **(headers or {})})
@@ -105,13 +107,13 @@ class Handler(BaseHTTPRequestHandler):
 
     def password_recovery(self):
         # This cookie grants password reset only, never dashboard/MCP access.
-        from http.cookies import SimpleCookie
+        from http.cookies import SimpleCookie, CookieError
         cookie = SimpleCookie()
         try:
             cookie.load(self.headers.get("Cookie", ""))
             record = self.store.get("password-reset-session", self.store.digest(cookie["vso_reset"].value))
             return record if record["expires"] > time.time() else None
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, CookieError):
             return None
 
     def principal(self):
@@ -175,19 +177,29 @@ class Handler(BaseHTTPRequestHandler):
         if path == '/ready':
             if not self.guard():return
             with self.store.db() as db:db.execute('SELECT 1').fetchone()
-            return self.send({'ready':True,'database':'sqlite','version':'0.7.0','flow_engine_installed':self.engine.doctor()['flow_engine_installed']})
-        if path == "/health": return self.send({"ok": True, "version": "0.7.0"})
+            return self.send({'ready':True,'database':'sqlite','version':__version__,'flow_engine_installed':self.engine.doctor()['flow_engine_installed']})
+        if path == "/health": return self.send({"ok": True, "version": __version__})
+        if path in ('/auth.css', '/auth.js', '/logo.svg', '/favicon.ico'):
+            file = {'/auth.css': 'auth.css', '/auth.js': 'auth.js', '/logo.svg': 'logo.svg', '/favicon.ico': 'logo.svg'}[path]
+            mime = 'text/css' if file.endswith('.css') else 'application/javascript' if file.endswith('.js') else 'image/svg+xml'
+            return self.send((Path(__file__).parent.parent / 'web' / file).read_bytes(), content_type=mime)
+        if path in ('/help', '/forgot-password'):
+            from .ui import guide, forgot
+            return self.page('Your setup guide' if path == '/help' else 'Reset your password', guide(self.base) if path == '/help' else forgot())
+        if path in ('/', '/dashboard', '/onboarding') and not self.session():
+            return self.redirect('/login')
         if path == "/password":
             if not self.session() and not self.password_recovery():return self.page("Owner session required",
-                "<p>Use an authorized owner session or private setup link first.</p>",401)
+                '<p>Sign in to change your password, or request a private recovery link if you forgot it.</p><div class="help-links"><a href="/login">Sign in →</a><a href="/forgot-password">Recover password →</a></div>',401)
             from .owner_auth import configured
             previous=('<label>Current password<input type="password" name="current" required autocomplete="current-password"></label>' if configured(self.store) and not self.password_recovery() else '')
             return self.page("Set owner password",
                 "<p>Your password stays private and is stored as a salted hash.</p>"
                 '<form action="/password" method="post">'+previous+
-                '<label>New password<input type="password" name="password" minlength="14" required autocomplete="new-password"></label>'
-                '<label>Confirm password<input type="password" name="confirmation" minlength="14" required autocomplete="new-password"></label>'
-                '<button type="submit">Save owner password</button></form>')
+                '<label>New password<input type="password" name="password" minlength="14" maxlength="256" required autocomplete="new-password"></label>'
+                '<label>Confirm password<input type="password" name="confirmation" minlength="14" maxlength="256" required autocomplete="new-password"></label>'
+                '<p class="field-hint">Use 14–256 characters. A password manager can save it for you. Saving signs out existing browser sessions.</p>'
+                '<button type="submit" data-pending="Saving password…">Save owner password</button></form><p class="auth-bottom"><a href="/login">Back to sign in</a> · <a href="/help">Setup guide</a></p>')
         if path == "/login":
             from .owner_auth import configured, validate_return
             next_url=q.get("next","/dashboard")
@@ -195,16 +207,10 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:next_url="/dashboard"
             if self.session():return self.redirect(next_url)
             if not configured(self.store):
-                return self.page("Set an owner password",
-                    "<p>On your own private installation terminal, run <code>python -m vso owner-password</code> to enable browser password login. "
-                    "Until configured, use the one-use local setup link. Never paste the password into ChatGPT.</p>", 401)
-            import html as _html
-            return self.page("Owner sign-in",
-                "<p>Sign in to your own installation. ChatGPT's plugin connection still uses secure OAuth approval afterward.</p>"
-                '<form action="/login" method="post">'
-                '<input name="password" type="password" required minlength="14" autocomplete="current-password" aria-label="Owner password">'
-                '<input type="hidden" name="next" value="' + _html.escape(next_url,quote=True) + '">'
-                '<button type="submit">Sign in</button></form>')
+                return self.page("Finish your setup",
+                    '<p class="auth-intro">Open the private setup link from your installation agent, then set your owner password. Each installation has one independent owner.</p><a class="primary auth-submit" href="/help">Open setup guide →</a><p class="auth-bottom">Already received a link? Open it once in this browser. Ask your authorized agent for a fresh link if it expired.</p>')
+            from .ui import login
+            return self.page("Owner sign-in", login(next_url))
 
         if path in ('/admin','/admin/enroll','/admin.js'):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
@@ -411,7 +417,13 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try: self.post()
-        except auth.RateLimited as e:self.send({"error":"temporarily_unavailable","error_description":str(e)},429,headers={"Retry-After":"60"})
+        except auth.RateLimited as e:
+            path, _ = self.parse()
+            if path in ('/login', '/password'):
+                from .ui import shell
+                self.send(shell("Too many sign-in attempts", '<p>Wait up to 15 minutes before trying your password again. If you forgot it, ask your authorized administrator for a private recovery link.</p><div class="help-links"><a href="/login">Back to sign in →</a><a href="/forgot-password">Recover password →</a></div>', 429), 429, "text/html", {"Retry-After": "900"})
+            else:
+                self.send({"error":"temporarily_unavailable","error_description":str(e)},429,headers={"Retry-After":"60"})
         except ValueError as e:
             path,_=self.parse()
             self.send({"error":"invalid_grant" if path=="/token" else "invalid_request","error_description":str(e)},400)
@@ -434,17 +446,20 @@ class Handler(BaseHTTPRequestHandler):
             if not self.session() and not self.password_recovery():return self.send({"error":"Owner session required"},401)
             from .owner_auth import configured, password_check, password_set
             if configured(self.store) and not self.password_recovery() and not password_check(self.store,body.get("current",""),self.client_address[0]):
-                return self.page("Current password incorrect","<p>Verify your current password.</p>",401)
+                return self.page("Current password incorrect",'<p>Verify your current password or request a recovery link.</p><div class="help-links"><a href="/password">Try again →</a><a href="/forgot-password">Recover password →</a></div>',401)
             if body.get("password")!=body.get("confirmation"):
-                return self.page("Passwords differ","<p>Enter matching passwords.</p>",400)
-            password_set(self.store,body.get("password",""))
+                return self.page("Passwords differ",'<p>Enter the same password in both fields.</p><a class="primary auth-submit" href="/password">Try again →</a>',400)
+            try:
+                password_set(self.store,body.get("password",""))
+            except ValueError:
+                return self.page("Choose a longer password", '<p>Use 14–256 characters.</p><a class="primary auth-submit" href="/password">Try again →</a>', 400)
             return self.redirect("/login", {"Set-Cookie": "vso_reset=; HttpOnly; SameSite=Lax; Path=/password; Max-Age=0"})
         if path == "/login":
             from .owner_auth import password_check, validate_return
             next_url=validate_return(body.get("next","/dashboard"))
             if not password_check(self.store,body.get("password",""),self.client_address[0]):
-                return self.page("Incorrect owner password",
-                                 '<p>Authentication failed. Return to <a href="/login">owner login</a>. Rate limits apply.</p>',401)
+                from .ui import login
+                return self.page("Owner sign-in", login(next_url, "That password did not match. Try again or recover your password. Rate limits apply."), 401)
             token=secrets.token_urlsafe(32)
             self.store.put("session",self.store.digest(token),{"expires":time.time()+8*3600})
             secure="; Secure" if self.base.startswith("https://") else ""

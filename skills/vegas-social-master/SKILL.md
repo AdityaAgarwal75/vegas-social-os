@@ -102,7 +102,4 @@ When OpenMontage source is separately installed, studio_external_catalog lists
 its AGPL-preserved manifests. Do not claim its renderers run or copy its code
 into Vegas without complying with the license.
 
-Owner password setup is optional and requires a private interactive terminal
-running python -m vso owner-password. The secure password unlocks the owner's
-browser session only; the ChatGPT plugin requires OAuth/PKCE consent as well.
-Do not ask for or store the password in chat.
+After initial pairing, direct the owner to /password to choose a password in their private browser, then /login. No owner terminal interaction is required when an authorized infrastructure agent is connected. For forgotten passwords, generate a one-use link with scripts/new-setup-link.sh --reset-password and return it privately; do not open it on the owner’s behalf or clear the old password. Point owners to /help and docs/USER-GUIDE.md. Browser login remains separate from MCP OAuth/PKCE consent. Never ask for or store passwords in chat.

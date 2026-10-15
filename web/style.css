@@ -16,3 +16,6 @@
 .review-workspace #flow .flow-bottom{display:none!important}
 
 .skip-link{position:fixed;top:-80px;left:16px;z-index:100;background:#fff;color:#111;padding:12px}.skip-link:focus{top:12px}
+
+/* Community onboarding and keyboard-accessible mobile navigation. */
+.app-brand-logo{flex-shrink:0;border-radius:10px}.onboarding-help{display:flex;align-items:center;gap:20px;padding:16px 18px;border:1px solid #4c435f;border-radius:10px;background:#201d2b;margin-bottom:20px}.onboarding-help b{font-size:12px}.onboarding-help p{font-size:11px;color:var(--muted);margin:3px 0 0}.onboarding-help>div{flex:1}.onboarding-help a{font-size:11px;white-space:nowrap}button,a{touch-action:manipulation}#notice{overflow-wrap:anywhere}#sidebar.open{transform:translateX(0)}@media(max-width:760px){.onboarding-help{flex-wrap:wrap;gap:12px}.onboarding-help>div{flex-basis:100%}.onboarding-help a{min-height:32px;display:flex;align-items:center}label,input,textarea,select{font-size:16px}body.nav-open #sidebar{transform:translateX(0)}nav a{min-height:44px}}

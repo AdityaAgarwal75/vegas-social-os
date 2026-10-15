@@ -30,7 +30,7 @@ A per-installation package contains `plugin.json`, generated `mcp.json`, `skills
 | Tool family | Existing interface | Planned addition / limitation |
 | --- | --- | --- |
 | Setup and health | guide, doctor, onboarding_status, setup_plan, profile_save | Full bootstrap uses AWS Core/SSM before this MCP exists |
-| Connections | account_start/list/info/disconnect, flow_account_add/login/inspect, connection_setup | Sequential first-login wizard; persistent convenient owner sign-in still pending |
+| Connections | account_start/list/info/disconnect, flow_account_add/login/inspect, connection_setup | Owner password sign-in, browser recovery and setup guide implemented; Google login remains personal |
 | Strategy and content | channel_save, strategy_save, research_fetch/save, plan_save, content_queue | Host provides web research/reasoning; no invented background execution |
 | Native images and assets | image_tasks, media_ingest / media_transfer_prepare, image_attach, images_approve | Actual host tool and transferable bytes required; no silent API substitute |
 | Google Flow | flow_model_catalog/models_refresh, video_request/poll, flow_video_request/poll | Use live account controls, caps, exact jobs. Edit/extend/upscale/voice/characters are not fully exposed |
@@ -54,7 +54,7 @@ A channel policy should record timezone, due time, two proposed videos, brand/re
 6. Default release mode is final review. The desired “approve storyboard, then upload automatically” mode requires an explicit persisted policy binding the destination, copy rules, visibility, time window and output QA requirements. **That policy engine is not implemented today.** Until then, exact release approval remains required.
 7. Regenerate persists feedback through `storyboard_regenerate`. ChatGPT reads `review_queue`, creates a new plan using a request-derived revision ID, transfers new images and calls `review_complete`. Old jobs/media/approvals remain intact; changed content needs fresh review. It never silently retries a previous paid job.
 
-Current runtime persists the feedback queue and approvals. It does not emit host callbacks or launch ChatGPT when a button is pressed. Show **Waiting for ChatGPT** rather than “generating” until an actual host run has begun.
+Current runtime persists the feedback queue and approvals and emits signed events for subscribed hosts. Successful event delivery does not prove the host launched ChatGPT. Show **Waiting for ChatGPT** rather than “generating” until an actual host run has begun.
 
 ## Event bridge: implemented protocol, host acceptance pending
 
