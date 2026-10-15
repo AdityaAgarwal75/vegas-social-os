@@ -216,8 +216,8 @@ class Handler(BaseHTTPRequestHandler):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
             file='admin.js' if path=='/admin.js' else 'admin.html'
             return self.send((Path(__file__).parent.parent/'web'/file).read_bytes(),content_type='application/javascript' if file.endswith('.js') else 'text/html')
-        if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js", "/oauth-consent.js"):
-            file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/sha256.js":"sha256.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js", "/oauth-consent.js": "oauth-consent.js"}[path]
+        if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js", "/oauth-consent.js", "/control.css", "/theme.js"):
+            file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/sha256.js":"sha256.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js", "/oauth-consent.js": "oauth-consent.js", "/control.css":"control.css", "/theme.js":"theme.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
             return self.send((Path(__file__).parent.parent / "web" / file).read_bytes(), content_type=mime)
         if path in ("/privacy", "/data-deletion"):
@@ -308,6 +308,10 @@ class Handler(BaseHTTPRequestHandler):
             q['scope'] = auth.scopes(q.get('scope','social:read social:write'))
             ticket = self.store.ticket("consent", q)
             return self.page("Authorize this plugin", "<p>Approve only a client you trust. Requested scopes: " + html.escape(q["scope"]) + ". VPS administration has additional per-operation approval. Provider passwords and tokens are not returned.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Social OS</button></form><script defer src="/oauth-consent.js"></script>')
+        if path == '/api/control':
+            if not self.guard():return
+            from .control import snapshot
+            return self.send(snapshot(self.engine))
         if path == "/api/state":
             if not self.guard(): return
             from .profile import status

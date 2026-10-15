@@ -55,6 +55,15 @@ class LocalFlowTests(unittest.TestCase):
     def test_operator_configuration_rejects_writable_file(self):
         self.config.chmod(0o666)
         with self.assertRaises(ValueError):flow_service.services()
+    def test_project_request_replay_keeps_original_membership(self):
+        from vso.projects import create
+        first=create(self.e,'First film','first')['id'];second=create(self.e,'Second film','second')['id']
+        with patch('vso.flow_service.request',side_effect=[{'jobs':[]},{'jobs':[{'id':'backend-one'}]}]) as request:
+            job=flow_service.image_request(self.e,self.account['id'],'A red paper boat','Nano Banana 2','1:1',0,'same-request',first)
+            self.assertEqual(self.submit()['project_id'],first)
+            with self.assertRaisesRegex(ValueError,'project'):
+                flow_service.image_request(self.e,self.account['id'],'A red paper boat','Nano Banana 2','1:1',0,'same-request',second)
+            self.assertEqual(job['project_id'],first);self.assertEqual(request.call_count,2)
 
 class OAuthRoutingTests(unittest.TestCase):
     def test_exact_operator_callback_and_wrong_provider_fail_closed(self):

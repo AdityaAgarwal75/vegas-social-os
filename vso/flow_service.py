@@ -126,19 +126,24 @@ def websocket_port(engine, account_id):
     return port
 
 
-def image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, request_id):
+def image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, request_id,project_id=''):
     if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>12000:raise ValueError('Enter an image prompt')
     if not isinstance(model,str) or not model.strip() or len(model)>120:raise ValueError('Choose an explicit image model')
     if aspect_ratio not in ('1:1','9:16','16:9','4:3','3:4') or type(max_credits) is not int or not 0<=max_credits<=1000:
         raise ValueError('Invalid aspect ratio or credit ceiling')
     if not request_id or len(request_id)>200:raise ValueError('A stable request ID is required')
+    from .projects import prepare_job
+    try:prior=engine.store.get('image-job',engine.store.digest('flow-image:'+request_id)[:32])
+    except ValueError:prior=None
+    if prior and not project_id:project_id=prior.get('project_id','')
+    project_id=prepare_job(engine,project_id,'Image study · '+prompt.strip()[:80],'flow-image:'+request_id) if not prior else project_id
     a,config=binding(engine,account_id)
     body={'account_id':account_id,'prompt':prompt,'model':model,'aspect_ratio':aspect_ratio,'max_credits':max_credits}
     ident=engine.store.digest('flow-image:'+request_id)[:32]
     with engine.store.db() as db:
         try:
             old=engine._load(db,'image-job',ident)
-            if any(old[k]!=v for k,v in body.items()):raise ValueError('Request ID belongs to a different image')
+            if any(old[k]!=v for k,v in body.items()) or (project_id and old.get('project_id')!=project_id):raise ValueError('Request ID belongs to a different image or project')
             return old
         except ValueError as e:
             if str(e)!='image-job not found':raise
@@ -146,7 +151,7 @@ def image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, 
         for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','job','video-job')"):
             other=json.loads(row[0])
             if other['status'] in ('submitting','processing','unknown'):raise ValueError('A browser operation is active or unresolved; finish it before another generation')
-        job={**body,'id':ident,'status':'submitting','created_at':time.time(),'project':'SocialOS-'+ident[:16],'asset_ids':[]}
+        job={**body,'project_id':project_id,'id':ident,'status':'submitting','created_at':time.time(),'project':'SocialOS-'+ident[:16],'asset_ids':[]}
         engine.store.write(db,'image-job',ident,job)
     try:
         before=request(config,'status',{'detailed':False})

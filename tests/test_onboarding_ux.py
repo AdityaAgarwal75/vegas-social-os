@@ -37,6 +37,8 @@ class OnboardingUXTests(unittest.TestCase):
                     with self.assertRaises(urllib.error.HTTPError) as response: browser.open(base + route)
                     self.assertEqual(response.exception.code, 303)
                     self.assertEqual(response.exception.headers['Location'], '/login')
+                with self.assertRaises(urllib.error.HTTPError) as response: browser.open(base+'/api/control')
+                self.assertEqual(response.exception.code,401)
                 for route in ('/login', '/help', '/forgot-password'):
                     with browser.open(base + route) as response:
                         page = response.read().decode()
@@ -45,7 +47,7 @@ class OnboardingUXTests(unittest.TestCase):
                         self.assertIn('Skip to content', page)
                         self.assertNotIn('undefined', page)
                 with browser.open(base + '/help') as response: self.assertIn(base + '/mcp', response.read().decode())
-                for route, mime in (('/logo.svg','image/svg+xml'),('/auth.css','text/css'),('/auth.js','javascript')):
+                for route, mime in (('/logo.svg','image/svg+xml'),('/auth.css','text/css'),('/auth.js','javascript'),('/control.css','text/css'),('/theme.js','javascript')):
                     with browser.open(base + route) as response: self.assertIn(mime, response.headers['Content-Type'])
                 password_set(store, 'a valid private test password')
                 request = urllib.request.Request(base+'/login', urllib.parse.urlencode({'password':'wrong','next':'/authorize?state=retained'}).encode(), {'Origin':base,'Content-Type':'application/x-www-form-urlencoded'})

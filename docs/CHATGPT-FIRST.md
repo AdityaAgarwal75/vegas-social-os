@@ -6,7 +6,7 @@ Accepted owner direction, 14 October 2026. This supersedes dashboard-as-producti
 
 ## Purpose and positioning
 
-**Your social production team inside ChatGPT, executing on your own server.** ChatGPT is the workstation for market research, strategy, two daily ideas, scripts, scene direction, native images, revisions, Flow direction and quality review. The independently owned VPS executes browser/render/edit/upload jobs and preserves state. The dashboard is the private sign-in and review surface.
+**Your social production team inside ChatGPT, executing on your own server.** ChatGPT is the workstation for market research, strategy, two daily ideas, scripts, scene direction, native images, revisions, Flow direction and quality review. The independently owned VPS executes browser/render/edit/upload jobs and preserves state. The dashboard is the private control panel for system health, credits, connected accounts, specialist activity, named projects, planned content, scheduled uploads and review. It supports light and dark themes. ChatGPT remains the production workstation.
 
 One owner, one installation, one plugin endpoint. Giving someone this repository gives them the software and instructions, never the maintainer's accounts or server. Google Drive is an optional archive, not a prerequisite or the authoritative job database.
 

@@ -6,6 +6,30 @@ from . import auth
 
 def registry(engine):
     s = engine.store
+    def control_snapshot():
+        from .control import snapshot
+        return snapshot(engine)
+    def control_refresh_accounts():
+        from .control import refresh_accounts
+        return refresh_accounts(engine)
+    def project_create(name,request_id,channel_id='',planned_for=''):
+        from .projects import create
+        return create(engine,name,request_id,channel_id,planned_for)
+    def project_rename(project_id,name,planned_for=''):
+        from .projects import rename
+        return rename(engine,project_id,name,planned_for)
+    def project_attach_asset(project_id,asset_id,kind='image',scene=-1):
+        from .projects import attach
+        return attach(engine,project_id,asset_id,kind,scene)
+    def project_list():
+        from .projects import collect
+        return collect(engine)
+    def project_detail(project_id):
+        from .projects import collect
+        return next((p for p in collect(engine)['projects'] if p['id']==project_id),None) or (_ for _ in ()).throw(ValueError('Project not found'))
+    def activity_report(role,label,request_id,status='running',project_id=''):
+        from .activity import report
+        return report(engine,role,label,request_id,status,project_id)
     def analytics_capture(account_id,request_id):
         from .analytics import capture
         return capture(engine,account_id,request_id)
@@ -124,9 +148,9 @@ def registry(engine):
     def flow_services_sync():
         from .flow_service import sync
         return sync(engine)
-    def flow_image_request(account_id, prompt, model, aspect_ratio, max_credits, request_id):
+    def flow_image_request(account_id, prompt, model, aspect_ratio, max_credits, request_id,project_id=''):
         from .flow_service import image_request
-        return image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, request_id)
+        return image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, request_id,project_id)
     def flow_image_poll(job_id):
         from .flow_service import image_poll
         return image_poll(engine, job_id)
@@ -179,9 +203,9 @@ def registry(engine):
     def flow_models_refresh(account_id):
         from .flow_models import refresh
         return refresh(engine,account_id)
-    def flow_video_request(account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id='',last_frame_id='',reference_asset_ids=None):
+    def flow_video_request(account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id='',last_frame_id='',reference_asset_ids=None,project_id=''):
         from .video_service import request
-        return request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id,last_frame_id,reference_asset_ids)
+        return request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id,last_frame_id,reference_asset_ids,project_id)
     def flow_job_reconcile(job_id):
         from .video_service import reconcile
         return reconcile(engine,job_id)
@@ -254,7 +278,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -267,6 +291,15 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    'control_snapshot':'Read control-panel resources, observed credits, project collections, schedules and real specialist tool activity. Never triggers provider generation.',
+    'control_refresh_accounts':'Refresh balances only through existing configured Flow services; no new browser or generation.',
+    'project_create':'Create a named video project before producing images/clips. Pass its ID to Flow requests and attach native assets to it. Planning dates do not schedule publication.',
+    'project_rename':'Rename an existing video project and set its editorial planning date without approving a post.',
+    'project_attach_asset':'Organize one existing immutable asset in a named project and scene. Never moves/deletes the shared original.',
+    'project_list':'List named productions with grouped storyboard images, clips, final exports and unassigned assets.',
+    'project_detail':'Read a single project and its assets, jobs and releases.',
+    'activity_report':'Report actual host-led specialist work and completion for the control panel. Running reports expire after 5 minutes without a heartbeat; never claim background work that is not happening.',
+
     "studio_external_catalog": "Read separately installed AGPL pipeline source manifests; no external execution or provider configured.",
     "studio_catalog": "List native first-party pipelines, production governance stages and available services; plans are not generated media.",
     "studio_quality": "Score submitted hook/script/caption with transparent timing and writing heuristics, not viral predictions.",
@@ -304,7 +337,7 @@ DESCRIPTIONS = {
     "continuity_frame":"Extract the last actual retained frame of a private imported MP4 for reviewed continuity. Local only; no generation, spend or source overwrite.",
     "flow_model_catalog":"Read model-specific settings with documentation/live provenance; availability is account-specific.",
     "flow_models_refresh":"Inspect idle private Flow model menus and restore mode. No generation or spend.",
-    "flow_video_request":"Request one explicitly authorized clip with exact model/settings, references OR frames, stable ID and credit ceiling. 0 is free-only preflight.",
+    "flow_video_request":"Request one explicitly authorized clip with exact model/settings, references OR frames, stable ID and credit ceiling. Reuse this video's project_id. 0 is free-only preflight.",
     "flow_video_poll":"Poll original clip and import exact MP4 without resubmitting.",
     "strategy_save":"Save channel audience, objective, brand voice and content pillars.",
     "content_request":"Queue an evidence-backed content strategy brief for a real connected host agent; does not run ChatGPT.",
@@ -346,10 +379,10 @@ DESCRIPTIONS = {
     "account_info": "Read current provider account profile and statistics.",
     "account_disconnect": "Remove stored credentials; provider revocation and Flow profile deletion are separate.",
     "channel_save": "Create a channel brief with explicit publishing destinations; never cross-post to unrelated accounts.",
-    "plan_save": "Save exactly two original concepts, each with hook, script and scene prompts. Use a stable request_id.",
+    "plan_save": "Save exactly two original concepts, each with hook, script and scene prompts. Use a stable request_id and reuse the video's project_id when one already exists.",
     "concept_select": "Record the user's concept selection (0 or 1) and total production credit cap.",
     "image_tasks": "Return native ChatGPT image-generation tasks. This tool does NOT generate images. Use the host's image tool and import actual outputs. Never use another provider.",
-    "asset_import": "Import actual PNG/JPEG/WebP/MP4 bytes as base64 into this installation. Returns checksum identity.",
+    "asset_import": "Import actual PNG/JPEG/WebP/MP4 bytes as base64 into this installation. Returns checksum identity. Pass project_id, kind and zero-based scene to keep this video organized.",
     "image_attach": "Attach an imported keyframe to a selected concept scene (zero-based).",
     "images_approve": "Record user review of all keyframes before video generation. Requires prior user authorization.",
     "flow_login": "Open an isolated browser on the WORKER computer for user Google sign-in; never handles passwords or cookies.",
@@ -429,7 +462,22 @@ def call(engine, name, arguments):
             if len(value)>1000:raise ValueError('Too many array items')
             for item in value:check(item,spec.get('items',{}),depth+1)
     check(arguments,spec)
-    return methods[name](**arguments)
+    from . import activity
+    role=activity.role_for(name)
+    run=None
+    if role:
+        pid=arguments.get('project_id','') or arguments.get('plan_id','')
+        if pid:
+            try:engine.store.get('project',pid)
+            except ValueError:pid=''
+        run=activity.start(engine,role,name.replace('_',' ').capitalize(),pid,tool=name)
+    try:
+        result=methods[name](**arguments)
+    except Exception:
+        if run:activity.finish(engine,run['id'],'failed')
+        raise
+    if run:activity.finish(engine,run['id'])
+    return result
 
 
 def rpc(engine, message, principal=None):

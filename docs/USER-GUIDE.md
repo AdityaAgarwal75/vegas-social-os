@@ -33,13 +33,23 @@ If the authorization page stays on “Redirecting,” close it and reconnect fro
 
 A “setup required” message means the installation’s provider application is missing; it is not a request to paste your provider password into ChatGPT. You enter passwords/2FA directly into the provider’s private screen.
 
-## 5. Review one production
+## 5. Your control panel
+
+The home page shows host CPU, memory and storage, last observed Flow balances, connected publishing identities, actual specialist activity, recent video projects and upcoming releases. Use the theme button in the top bar for light/dark mode; the choice stays on this device. Resource history begins when the dashboard is first observed, without invented historical samples. Refresh Flow balances explicitly to read existing imported services. Native Google profiles require your explicit browser sign-in/verification.
+
+Specialists are ChatGPT-led roles. Tool calls record real activity; work performed only inside ChatGPT appears when the agent reports it. Idle means no observed running task. A stale report becomes unconfirmed after five minutes. These cards do not create independent background model workers.
+
+Use **Projects → New project** to name each video, or ask ChatGPT to do it. Reuse its project ID for scene images, clips and final exports. Plan-based productions group their known media automatically. **Unassigned media** preserves older files whose project is unknown; choose **Assign to project** to organize them. Original bytes and downloads remain intact.
+
+**Schedule** shows the destination and local display time for each dated item. Editorial plans and draft release times are labeled separately from approved scheduled uploads. A project date never schedules publication.
+
+## 6. Review one production
 
 Tell ChatGPT your audience, language, references, objective and budget. Review its two concepts. Choose one, review actual transferred scene images and approve a credit ceiling. Watch the exact clips and assembled video. Approve the exact platform, account, media, copy and visibility before publishing.
 
 A queued brief is not an unattended generation. Events and schedules need a real supported host-continuation trial. Unknown generation or upload outcomes must be inspected before retrying, to avoid duplicate spending or posts.
 
-## 6. Sign out and return
+## 7. Sign out and return
 
 Use **Sign out** in the sidebar; return through `/login`. Sessions last eight hours. Mobile navigation opens from the menu button, closes after route selection and supports Escape.
 
