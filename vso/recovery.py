@@ -7,6 +7,9 @@ def alive(record):
     except (OSError,KeyError,IndexError):return False
 
 def startup(engine):
+    for run in engine.store.all('agent-run'):
+        if run['status']=='running':
+            run.update(status='interrupted',updated_at=time.time(),ended_at=time.time());engine.store.put('agent-run',run['id'],run)
     for kind in ('job','video-job','image-job'):
         for job in engine.store.all(kind):
             if job['status']=='submitting':

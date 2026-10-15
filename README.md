@@ -8,7 +8,7 @@ Your social production team inside ChatGPT.
 
 **Primary workstation: ChatGPT web (Work). No desktop app or local computer executor is required.** Read [web setup](docs/CHATGPT-WEB.md) for connection steps and verification.
 
-**Plan in ChatGPT. Execute on your own VPS. Sign in and review in the dashboard.** An open-source, independently self-hosted social production system for original research, scripts, scene images, Google Flow clips and reviewed publishing. Not affiliated with OpenAI, Google or Meta.
+**Plan in ChatGPT. Execute on your own VPS. Monitor and review in the dashboard.** An open-source, independently self-hosted social production system for original research, scripts, scene images, Google Flow clips and reviewed publishing. Not affiliated with OpenAI, Google or Meta.
 
 ## Start in three steps
 
@@ -22,11 +22,11 @@ Your installation includes branded login, Show/Hide password, forgotten-password
 
 ## The product
 
-ChatGPT is your main workstation. Its private plugin connects to your own installation. You discuss strategy and scenes in chat; ChatGPT uses native images and the VPS's Flow browser/execution engine. The dashboard is only for account onboarding, storyboard decisions, watching clips/final videos and reviewing releases. Manual generation forms are excluded from normal navigation.
+ChatGPT is your main workstation. Its private plugin connects to your own installation. You discuss strategy and scenes in chat; ChatGPT uses native images and the VPS's Flow browser/execution engine. The dashboard is your control panel: host resources, observed Flow balances, connected identities, actual specialist activity, named video projects and publishing schedules. Images, scene clips and final exports stay under each production. Light and dark themes work on desktop and mobile. Account onboarding and storyboard/release review are built in. Manual generation forms are excluded from normal navigation.
 
 Read [the accepted ChatGPT-first architecture](docs/CHATGPT-FIRST.md) and [the complete new-user journey](docs/NEW-USER-JOURNEY.md), including plugin structure, permissions, VPS administration boundaries, optional Drive storage and the unattended-work implementation gates.
 
-**0.7.1 onboarding candidate:** founder VPS browser/settings checks and offline tests exist. Durable storyboard-feedback requests and review-focused navigation are implemented. Paid Flow rendering, fresh AWS onboarding, real publishing and event-driven ChatGPT continuation are not yet accepted end to end. [Current evidence](docs/STATUS.md) distinguishes source, menus, submitted jobs and usable outputs.
+**0.8.0 control panel candidate:** light/dark layouts, named media projects, truthful specialist activity and calendar views pass isolated desktop/mobile browser checks. Durable storyboard-feedback requests and review-focused navigation are implemented. Paid Flow rendering, fresh AWS onboarding, real publishing and event-driven ChatGPT continuation are not yet accepted end to end. [Current evidence](docs/STATUS.md) distinguishes source, menus, submitted jobs and usable outputs.
 
 ## Give this repository to your ChatGPT
 

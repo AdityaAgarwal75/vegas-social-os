@@ -1,6 +1,6 @@
 {
   "name": "vegas-social-os",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "entrypoint": "BOOTSTRAP.md",
   "agent_setup_script": "scripts/bootstrap-ubuntu.sh",
   "runtime": {
@@ -54,7 +54,7 @@
     "dashboard": "/dashboard",
     "account_signin": "official OAuth or private isolated Flow browser",
     "provider_configuration": "private dashboard /api/config, encrypted server-side",
-    "purpose": "onboarding and storyboard/clip/release review; ChatGPT is the workstation"
+    "purpose": "VPS/account/activity control panel, named video projects, schedule and content review; ChatGPT is the workstation"
   },
   "capabilities": [
     "source_read",

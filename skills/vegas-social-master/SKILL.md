@@ -5,9 +5,17 @@ description: Set up and operate agent-first Vegas Social OS for a community user
 
 # Vegas Social OS
 
-Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily production, dashboard feedback and approval continuation. ChatGPT is the main creative workplace; the dashboard is only sign-in and storyboard/clip/release review. Use review_queue for pending revisions and review_complete after saving a fresh same-channel plan. Read [operations 0.7](../../docs/OPERATIONS-0.7.md) for web OAuth, native fileParams, raw transfers, events, editing and the isolated owner administrator broker. Do not claim host continuation until the subscribed Work chat actually responds.
+Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily production, dashboard feedback and approval continuation. ChatGPT is the main creative workplace; the dashboard is the system control panel for VPS health, observed credits, specialist activity, named projects, calendars, sign-in and content review. Use review_queue for pending revisions and review_complete after saving a fresh same-channel plan. Read [operations 0.7](../../docs/OPERATIONS-0.7.md) for web OAuth, native fileParams, raw transfers, events, editing and the isolated owner administrator broker. Do not claim host continuation until the subscribed Work chat actually responds.
 
 Treat every installation as its owner's independent system. Never assume maintainer accounts, credentials, infrastructure or references exist. Call `doctor`, `account_list` and `guide` first. State actual capability and verification level. This is an alpha, not an official Google/Meta/OpenAI product.
+
+## Projects and visible specialist work
+
+Before a new video, call `project_create` with a descriptive name, stable request ID and optional channel. Reuse that `project_id` throughout this video: pass it to `plan_save`, `flow_video_request`/standalone `flow_image_request`, and to `asset_import` with `kind` and zero-based `scene`. After `media_ingest` or a raw transfer returns the actual asset ID, call `project_attach_asset` (storyboard, reference, clip, final or audio). Use `project_list`/`project_detail` to verify membership. Separate videos get separate projects; reuse assets only intentionally. Plan-based productions appear automatically with proven scene/job relationships. Older media with no relationship stays Unassigned. Project dates are editorial plans and never upload approvals.
+
+`control_snapshot` exposes actual host observations, last observed Flow balances, unique publishing identities, project media and release schedules. A page refresh does not launch provider browsers. `control_refresh_accounts` reads only already configured imported Flow services; use explicit account login/verification for native profiles.
+
+Specialist **tool calls** record actual start/completion/failure automatically. For work performed inside ChatGPT (research, script drafting, caption writing or image direction), call `activity_report` immediately before doing it, with role `strategist`, `writer`, `caption`, `producer`, `publisher` or `operator`, a short non-sensitive task label, stable request ID and known project ID. Mark the same report `completed` or `failed` at the end. Renew running reports only while actually working; they become unconfirmed after five minutes without a heartbeat. Never fabricate autonomous agents, model workers, progress percentages or activity during idle time. A generation job running on the VPS remains a job, separate from the specialist tool call that submitted it.
 
 ## Onboard accounts
 

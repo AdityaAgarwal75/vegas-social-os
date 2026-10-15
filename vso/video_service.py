@@ -71,11 +71,16 @@ def poll(engine,account_id,worker):
     asset=engine.asset_import(base64.b64encode(raw).decode(),'video/mp4')
     return {'completed':True,'status':'completed','asset_id':asset['id'],'quoted_credits':j.get('credits')}
 
-def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id='',last_frame_id='',reference_asset_ids=None):
+def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id='',last_frame_id='',reference_asset_ids=None,project_id=''):
     if not prompt.strip() or len(prompt)>12000 or not request_id or len(request_id)>200:raise ValueError('Prompt and stable request ID required')
     opts=settings(model,duration,resolution,aspect_ratio,max_credits)
     flow_models.validate_observed(engine,account_id,opts)
     validate_inputs(engine,opts,first_frame_id,last_frame_id,reference_asset_ids)
+    from .projects import prepare_job
+    try:prior=engine.store.get('video-job',engine.store.digest('flow-video:'+request_id)[:32])
+    except ValueError:prior=None
+    if prior and not project_id:project_id=prior.get('project_id','')
+    project_id=prepare_job(engine,project_id,'Video · '+prompt.strip()[:80],'flow-video:'+request_id) if not prior else project_id
     a,_=flow_service.binding(engine,account_id)
     body=dict(account_id=account_id,prompt=prompt,**opts,first_frame_id=first_frame_id,last_frame_id=last_frame_id,reference_asset_ids=reference_asset_ids or [])
     ident=engine.store.digest('flow-video:'+request_id)[:32]
@@ -83,12 +88,12 @@ def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_
         row=db.execute("SELECT body FROM records WHERE kind='video-job' AND id=?",(ident,)).fetchone()
         if row:
             old=json.loads(row[0])
-            if any(old[k]!=v for k,v in body.items()):raise ValueError('Request ID belongs to a different clip')
+            if any(old[k]!=v for k,v in body.items()) or (project_id and old.get('project_id')!=project_id):raise ValueError('Request ID belongs to a different clip or project')
             return {k:v for k,v in old.items() if k!='worker'}
         if a['status']!='workspace_ready':raise ValueError('Verify this Flow workspace before generation')
         for row in db.execute("SELECT body FROM records WHERE kind IN ('job','image-job','video-job')"):
             if json.loads(row[0])['status'] in ('submitting','processing','unknown'):raise ValueError('Finish or reconcile active browser work first')
-        job={**body,'id':ident,'input_sha256':engine.store.digest(json.dumps(body,sort_keys=True)),'flow_project_url':a.get('project_url'),'status':'submitting','created_at':time.time(),'asset_ids':[]}
+        job={**body,'project_id':project_id,'id':ident,'input_sha256':engine.store.digest(json.dumps(body,sort_keys=True)),'flow_project_url':a.get('project_url'),'status':'submitting','created_at':time.time(),'asset_ids':[]}
         engine.store.write(db,'video-job',ident,job)
     try:job.update(status='processing',worker=submit(engine,account_id,prompt,opts,first_frame_id,last_frame_id,reference_asset_ids,submission_id=ident))
     except ValueError as e:job.update(status='unknown',error=str(e))

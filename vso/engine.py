@@ -47,7 +47,8 @@ class Engine:
         self.store.put("channel", ident, body)
         return body
 
-    def plan_save(self, channel_id, concepts, request_id):
+    def plan_save(self, channel_id, concepts, request_id, project_id=""):
+        if project_id:self.store.get("project",project_id)
         channel = self.store.get("channel", channel_id)
         if len(concepts) != 2:
             raise ValueError("Provide exactly two distinct concepts")
@@ -60,19 +61,31 @@ class Engine:
                 if not all(isinstance(s.get(k), str) and s[k].strip() for k in ("image_prompt", "video_prompt")):
                     raise ValueError("Each scene needs image_prompt and video_prompt")
         ident = self.store.digest("plan:" + channel_id + ":" + request_id)[:32]
+        if project_id:
+            project=self.store.get("project",project_id)
+            if project.get("plan_id") and project["plan_id"]!=ident:raise ValueError("Project already has a concept plan; create a separate revision project")
         from .production import scenes
         concepts=scenes(concepts,ident)
-        body = {"id": ident, "channel_id": channel_id, "channel_name": channel["name"],
+        body = {"id": ident, "project_id":project_id or ident, "channel_id": channel_id, "channel_name": channel["name"],
                 "concepts": concepts, "selected": None, "status": "concept_review", "images": {},
                 "video": None, "budget": 0, "reserved": 0, "created_at": time.time()}
         with self.store.db() as db:
+            if project_id:
+                project=self._load(db,'project',project_id)
+                if project.get('plan_id') and project['plan_id']!=ident:raise ValueError('Project already has a concept plan')
+                if project.get('channel_id') and project['channel_id']!=channel_id:raise ValueError('Project belongs to another channel')
             row = db.execute("SELECT body FROM records WHERE kind='plan' AND id=?", (ident,)).fetchone()
             if row:
                 old = json.loads(row[0])
-                if old["concepts"] != concepts:
+                if old["concepts"] != concepts or (old.get("project_id") or ident)!=(project_id or ident):
                     raise ValueError("Request ID already belongs to a different plan")
                 return old
             self.store.write(db, "plan", ident, body)
+            if project_id:
+                project.update(plan_id=ident,channel_id=channel_id)
+                self.store.write(db,'project',project_id,project)
+        from .projects import ensure_plan
+        ensure_plan(self,body)
         return body
 
     def concept_select(self, plan_id, concept, max_credits):
@@ -98,7 +111,12 @@ class Engine:
                 "tasks": [{"scene": i, "prompt": s["image_prompt"], "asset_id": p["images"].get(str(i))}
                           for i, s in enumerate(p["concepts"][p["selected"]]["scenes"])]}
 
-    def asset_import(self, data_base64, media_type):
+    def asset_import(self, data_base64, media_type, project_id="", kind="image", scene=-1):
+        if project_id:
+            from .projects import KINDS
+            self.store.get("project", project_id)
+            if kind not in KINDS or type(scene) is not int or not -1<=scene<=1000:raise ValueError("Invalid project category or scene")
+            if kind in ("clip","final") and not media_type.startswith("video/"):raise ValueError("Choose a video for clips/final")
         if media_type not in ("image/png", "image/jpeg", "image/webp", "video/mp4"):
             raise ValueError("Supported media: PNG, JPEG, WebP, MP4")
         if len(data_base64) > 90_000_000:
@@ -121,6 +139,9 @@ class Engine:
         file.write_bytes(data)
         asset = {"id": ident, "file": file.name, "media_type": media_type, "size": len(data)}
         self.store.put("asset", ident, asset)
+        if project_id:
+            from .projects import attach
+            attach(self,project_id,ident,kind,scene)
         return asset
 
     def asset_path(self, ident):
