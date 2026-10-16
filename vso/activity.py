@@ -6,7 +6,7 @@ import uuid
 _REPORT_LOCK=threading.Lock()
 
 ROLES=[('strategist','Strategy','Audience, research and content planning','ST'),('writer','Scripts & hooks','Reel scripts, story arcs and repurposing','WR'),('caption','Captions & copy','Captions, carousels and writing review','CP'),('producer','Production','Scene media, Flow generation and editing','PR'),('publisher','Publishing','Reviewed releases and scheduling','PB'),('operator','Operations','Workspace, connections and infrastructure','OP')]
-SKIP={'doctor','guide','get_profile','onboarding_status','account_list','channel_list','plan_list','job_list','publication_list','flow_model_catalog','workflow_audit','connection_setup','control_snapshot','project_list','project_detail','activity_report','event_status','automation_status','review_queue','studio_catalog','studio_queue','analytics_summary','admin_metrics','admin_inventory','project_attach_asset'}
+SKIP={'template_catalog','higgsfield_status','doctor','guide','get_profile','onboarding_status','account_list','channel_list','plan_list','job_list','publication_list','flow_model_catalog','workflow_audit','connection_setup','control_snapshot','project_list','project_detail','activity_report','event_status','automation_status','review_queue','studio_catalog','studio_queue','analytics_summary','admin_metrics','admin_inventory','project_attach_asset'}
 
 def role_for(name):
     if name in SKIP:return None
@@ -14,7 +14,7 @@ def role_for(name):
     if any(x in name for x in ('strategy','research','content_','studio_brief','studio_draft','studio_select','plan_save','channel_','brief_complete')):return 'strategist'
     if any(x in name for x in ('reel_review','quality','repurpose','outliers','profile_audit')):return 'writer'
     if name.startswith(('post_','publish_')):return 'publisher'
-    if name.startswith(('flow_','image_','video_','media_','asset_','continuity','edit_','storyboard_','images_','concept_')):return 'producer'
+    if name.startswith(('template_','higgsfield_','skill_reference','flow_','image_','video_','media_','asset_','continuity','edit_','storyboard_','images_','concept_')):return 'producer'
     return 'operator'
 
 def start(engine,role,label,project_id='',source='tool',tool=''):

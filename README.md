@@ -87,6 +87,14 @@ and discovered read-only; its renderers/providers are NOT auto-installed.
 This project does not scrape private platform data or claim unattended
 ChatGPT native image generation.
 
+## Cinematic Template Library and Higgsfield craft (0.9)
+
+Open **Template Library** in the dashboard. Browse 16 original Vegas recipes across product, fashion, creator and cinematic work, preview a subject study, adjust lens/lighting/motion, and save a direction to a new or existing named project. Related recipes share one of four clearly labeled illustrative previews; these are not rendered motion samples or Higgsfield private templates. Ask ChatGPT: **“Use my saved template selections for this project.”**
+
+The dashboard and plugin share `template_catalog`, `template_compile` and `template_select`. Compiled prompts preserve continuity and enter the existing two-concept/native-image/Flow approval path. Selecting a template starts no paid generation, publishing or background ChatGPT run.
+
+Pinned MIT [Higgsfield skills](https://github.com/higgsfield-ai/skills) and companion references are bundled with attribution and exposed through `skill_reference`. `higgsfield_status` checks optional setup; `higgsfield_discover` can read an explicitly configured owner CLI's live models/workflows/presets. Flow remains the default video execution path. **Automatic paid Higgsfield rendering is not implemented**; use an explicitly authorized operator handoff until its auth, cost, idempotency and media-recovery contract passes acceptance. [Integration, setup and limits →](docs/HIGGSFIELD-INTEGRATION.md)
+
 ## Per-owner ChatGPT plugin
 
 After verifying the owner's HTTPS endpoint, the setup agent packages it:

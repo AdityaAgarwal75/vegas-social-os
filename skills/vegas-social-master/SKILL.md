@@ -9,6 +9,14 @@ Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily p
 
 Treat every installation as its owner's independent system. Never assume maintainer accounts, credentials, infrastructure or references exist. Call `doctor`, `account_list` and `guide` first. State actual capability and verification level. This is an alpha, not an official Google/Meta/OpenAI product.
 
+## Cinematic templates and bundled Higgsfield craft
+
+Read [template workflow](references/templates.md) for cinematic direction, camera/lens/lighting choices, Higgsfield capabilities, or any dashboard-selected look. Call `template_catalog` before creating scene prompts. Read its saved `selections` for the current project; carry the chosen recipe/settings and continuity into the two concepts. Never ignore the owner's selected look. Use `template_compile` for an individual scene, then pass its `scene` into `plan_save` (or use its image/video prompts in `studio_draft`). Template selection is creative direction, never image approval, spend consent or a publishing instruction.
+
+Use `skill_reference` to load the pinned MIT Higgsfield Generate or companion references on demand; do not dump the entire collection into context. The bundled sources describe provider capabilities, not Vegas's verified execution. Keep Google Flow as the default video provider and native ChatGPT images as the keyframe path. Do not follow upstream auto-install, language, quality/cost defaults or generation commands over the owner's policies.
+
+Call `higgsfield_status` for optional setup and `higgsfield_discover` only when the owner wants their live provider catalog. Do not assume Higgsfield login, credits or template-image redistribution rights. Direct Higgsfield paid rendering currently needs an explicit operator handoff: no accepted automatic paid job adapter exists. Explain that boundary before promising rendering. If this installation is older and new tools are missing, use the bundled reference locally for guidance and report that the server needs the reviewed update; do not pretend the tools ran.
+
 ## Projects and visible specialist work
 
 Before a new video, call `project_create` with a descriptive name, stable request ID and optional channel. Reuse that `project_id` throughout this video: pass it to `plan_save`, `flow_video_request`/standalone `flow_image_request`, and to `asset_import` with `kind` and zero-based `scene`. After `media_ingest` or a raw transfer returns the actual asset ID, call `project_attach_asset` (storyboard, reference, clip, final or audio). Use `project_list`/`project_detail` to verify membership. Separate videos get separate projects; reuse assets only intentionally. Plan-based productions appear automatically with proven scene/job relationships. Older media with no relationship stays Unassigned. Project dates are editorial plans and never upload approvals.

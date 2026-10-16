@@ -1,0 +1,45 @@
+/* Disposable UI acceptance. Does not contact generation providers. */
+'use strict';
+const {chromium}=require(process.env.VSO_PLAYWRIGHT_MODULE||'playwright');
+const {execFileSync}=require('node:child_process');
+const assert=require('node:assert/strict');
+const base=process.env.VSO_QA_URL||'http://127.0.0.1:8898';
+const root=process.env.VSO_QA_DATA||'/tmp/vso-control-qa';
+const python=process.env.VSO_QA_PYTHON||'python';
+(async()=>{
+ const ticket=execFileSync(python,['-c',"import sys;from vso.store import Store;s=Store(sys.argv[1]);print(s.ticket('pair',{}))",root],{encoding:'utf8'}).trim();
+ const browser=await chromium.launch({headless:true,...(process.env.VSO_QA_CHROME?{executablePath:process.env.VSO_QA_CHROME,chromiumSandbox:true}:{})});
+ const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+ await page.goto(base+'/pair?ticket='+ticket);await page.locator('#page-root').waitFor();
+ await page.evaluate(()=>location.hash='templates');await page.locator('.template-card').first().waitFor();
+ assert.equal(await page.locator('.template-card').count(),16);
+ await page.evaluate(()=>document.querySelectorAll('.template-cover img').forEach(i=>i.loading='eager'));
+ await page.waitForFunction(()=>[...document.querySelectorAll('.template-cover img')].every(i=>i.complete&&i.naturalWidth>0));
+ await page.getByRole('button',{name:'Product',exact:true}).click();assert.equal(await page.locator('.template-card').count(),4);
+ await page.getByRole('searchbox',{name:'Search templates'}).fill('orbit');assert.equal(await page.locator('.template-card').count(),1);
+ await page.getByRole('searchbox',{name:'Search templates'}).fill('');
+ await page.getByRole('button',{name:'Explore Product hero',exact:true}).click();
+ await page.locator('[name=new_project]').fill('Template browser acceptance');
+ await page.locator('[name=subject]').fill('Exactly two supplied gold bangles');
+ await page.locator('[name=continuity]').fill('Keep exact count and alternating pattern');
+ await page.locator('[name=lens]').selectOption('100mm macro');
+ await page.getByRole('button',{name:'Preview prompts',exact:true}).click();await page.locator('.prompt-preview:not([hidden])').waitFor();
+ assert((await page.locator('.prompt-preview').textContent()).includes('exact count'));
+ await page.getByRole('button',{name:'Save to project',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('#connect-dialog').open);
+ await page.getByRole('link',{name:'Template browser acceptance',exact:true}).click();
+ await page.getByRole('heading',{name:'Saved creative direction'}).waitFor();
+ assert((await page.locator('#page-root').textContent()).includes('100mm macro'));
+ await page.reload();await page.getByRole('heading',{name:'Saved creative direction'}).waitFor();
+ await page.evaluate(()=>location.hash='templates');await page.locator('.template-card').first().waitFor();
+ await page.getByRole('button',{name:'Higgsfield status',exact:true}).click();
+ await page.getByRole('heading',{name:'Optional Higgsfield connection'}).waitFor();await page.getByRole('button',{name:'Close dialog'}).click();
+ await page.getByRole('button',{name:'Read Reframe / Draw To Edit',exact:true}).click();
+ await page.locator('.skill-reference').waitFor();assert((await page.locator('.skill-reference').textContent()).includes('Higgsfield'));await page.getByRole('button',{name:'Close dialog'}).click();
+ for(const theme of ['light','dark']){await page.evaluate(t=>document.documentElement.dataset.theme=t,theme);for(const width of [360,768,1440,1920]){await page.setViewportSize({width,height:1000});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Overflow '+theme+' '+width);await page.screenshot({path:'/tmp/vso-templates-'+theme+'-'+width+'.png',fullPage:true});}}
+ const state=await page.evaluate(()=>fetch('/api/state').then(r=>r.json()));
+ assert.equal(state.job.length,0);assert.equal(state.publication.filter(p=>p.status==='published').length,0);
+ assert.deepEqual(errors,[]);await browser.close();
+ console.log('PASS: 16 template cards, local previews, category/search, custom prompt preview, persistent project selection, provider status/reference dialog, responsive light/dark. No provider requests or generation jobs.');
+})().catch(e=>{console.error(e);process.exit(1);});

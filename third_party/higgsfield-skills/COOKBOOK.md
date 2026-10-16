@@ -1,0 +1,291 @@
+# Higgsfield Skills — Cookbook
+
+Selected workflows across the Higgsfield skills. Each recipe is what you say to the agent, what the agent runs, and practical tips.
+
+---
+
+## Recipe 1 — Brand Campaign from a Founder Photo
+
+**What it does:** One photo of the founder → trained Soul Character → 5 lifestyle scenes around the brand's product → top 2 animated to short video clips. One headshot in, full content set out.
+
+**Why this is powerful:** Replaces a creative agency's first sprint. The founder appears in every asset, the brand product is consistent, and you go from raw photo to publishable content in one session.
+
+**What you say:**
+
+```
+Train my Soul on this headshot, then make 5 lifestyle photos of my product
+[bottle.jpg] in scenes I'd post on Instagram, and animate the best 2 into
+5-second clips. Save everything to ./campaign/.
+```
+
+**What the agent does:**
+
+1. **Soul training** (`higgsfield-soul-id`):
+
+   ```bash
+   higgsfield soul-id create --name "founder" --soul-2 \
+     --image headshot1.png --image headshot2.png ... \
+     --max-train-steps 1000
+   ```
+
+   Returns `reference_id`. The agent saves it for the session.
+
+2. **Lifestyle photos** (`higgsfield-product-photoshoot`):
+
+   ```bash
+   higgsfield product-photoshoot create \
+     --mode lifestyle_scene \
+     --prompt "founder using product in 5 distinct IG-feed scenes: morning coffee setup, desk workspace, outdoor café, gym, home office" \
+     --image bottle.jpg \
+     --count 5 \
+     --output-dir ./campaign/photos
+   ```
+
+   Backend assembles the prompt, varies preset/lighting/angle/palette across the 5 outputs.
+
+3. **Pick top 2 → animate** (`higgsfield-generate`, image-to-video):
+
+   ```bash
+   higgsfield generate create seedance_2_5 \
+     --prompt "subtle product reveal, camera slowly pulls back, ambient motion" \
+     --mode omni_reference \
+     --start-image ./campaign/photos/lifestyle-01.jpg \
+     --duration 5 \
+     --aspect_ratio 1:1 \
+     --generate_audio false \
+     --output-dir ./campaign/videos \
+     --wait
+   ```
+
+**Tips:**
+
+- Use `--count 5` on photoshoot first — cheaper than 5 separate runs and the backend coordinates the visual system across variants.
+- `seedance_2_5` with `--mode omni_reference --start-image` is the default image-to-video. Use `kling3_0_turbo` only when the user asks for a cheaper or faster pass.
+- For the founder's face to stay consistent in animations, use Soul models (`text2image_soul_v2`) for the photoshoot step instead of `gpt_image_2`. Trade-off: less control over background, more on identity.
+
+---
+
+## Recipe 2 — UGC Ad Batch from a Product URL
+
+**What it does:** Paste a Shopify URL → import product automatically → pick a preset avatar → generate 4 different ad styles (UGC, unboxing, product review, TV spot) at 9:16 for paid social. No assets uploaded by you.
+
+**Why this is powerful:** Marketing Studio handles all the heavy lifting — product fetch, avatar matching, mode-specific staging. You go from a URL to 4 publishable ads in one workflow.
+
+**What you say:**
+
+```
+Make UGC ads for my product https://shop.example.com/sneakers — try 4 different
+angles: organic UGC, unboxing reveal, presenter review, and a TV-spot version.
+9:16 for TikTok and Reels. 15 seconds each.
+```
+
+**What the agent does:**
+
+1. **Product fetch:**
+
+   ```bash
+   higgsfield marketing-studio products fetch \
+     --url https://shop.example.com/sneakers \
+     --wait
+   ```
+
+   Returns `product_id`. URL fetch auto-pulls title, description, hero images.
+
+2. **Pick preset avatar:**
+
+   ```bash
+   higgsfield marketing-studio avatars list --json | jq '.[] | select(.tags | contains(["sporty"]))'
+   ```
+
+   Picks one matching the brand voice. No user input needed for the typical case.
+
+3. **Generate 4 modes in parallel:**
+
+   ```bash
+   PRODUCT_IDS_JSON=$(mktemp)
+   AVATARS_JSON=$(mktemp)
+   printf '["<product_id>"]' > "$PRODUCT_IDS_JSON"
+   printf '[{"id":"<avatar_id>","type":"preset"}]' > "$AVATARS_JSON"
+
+   for mode in ugc ugc_unboxing product_review tv_spot; do
+     higgsfield generate create marketing_studio_video \
+       --prompt "<short hook tied to the mode>" \
+       --avatars @"$AVATARS_JSON" \
+       --product_ids @"$PRODUCT_IDS_JSON" \
+       --mode $mode \
+       --duration 15 \
+       --resolution 720p \
+       --aspect_ratio 9:16 \
+       --output-dir ./ads/$mode \
+       --wait &
+   done
+   wait
+   ```
+
+4. **Deliver:** four URLs, one per mode, with a one-line summary each.
+
+**Tips:**
+
+- Modes are not interchangeable. `ugc` reads as phone-shot organic content; `tv_spot` reads as broadcast-quality. Don't mix them in the same campaign without intent.
+- For a brand where the founder should appear instead of a preset avatar, run `higgsfield-soul-id` first for the founder, write `[{"id":"<soul_ref_id>","type":"custom"}]` to a JSON file, then pass `--avatars @/path/to/avatars.json` to Marketing Studio.
+- Hooks (the prompt on `--prompt`) matter more than mode for performance. Test 4 hooks × 1 mode before testing 1 hook × 4 modes.
+
+---
+
+## Recipe 3 — Founder Video Update for the Team
+
+**What it does:** Founder records once via Soul → every weekly update gets a fresh on-camera-looking video with their face and voice — without recording.
+
+**Why this is powerful:** Async-first companies lose the high-bandwidth signal of a face on camera. This gives it back at zero recording cost. Once Soul is trained (~30 minutes one-time), every future "team update" is one prompt away.
+
+**What you say (one-time setup):**
+
+```
+Train my Soul on these 12 photos. Call it "founder".
+```
+
+**What you say (every update afterwards):**
+
+```
+Make a 60-second video of me with this script:
+
+  Hey team — this week we shipped X and started Y. Three things to know:
+  one, [...]. Two, [...]. Three, [...]. See you Friday.
+
+Landscape, neutral background, conversational tone.
+```
+
+**What the agent does (one-time setup):**
+
+```bash
+higgsfield soul-id create --name "founder" --soul-2 \
+  --image photo01.png --image photo02.png ... \
+  --output-dir ./identity
+```
+
+Saves `reference_id` to `./identity/training-manifest.json`.
+
+**What the agent does (every update):**
+
+Option A — Marketing Studio with custom avatar (recommended for branded look):
+
+```bash
+# One-time: register the Soul as a custom avatar
+higgsfield marketing-studio avatars create \
+  --name "Founder" \
+  --image <upload_id> \
+  --image-url <cloudfront_url>
+# Returns avatar_id
+
+AVATARS_JSON=$(mktemp)
+printf '[{"id":"<avatar_id>","type":"custom"}]' > "$AVATARS_JSON"
+
+higgsfield generate create marketing_studio_video \
+  --prompt "<full script with scene labels>" \
+  --avatars @"$AVATARS_JSON" \
+  --mode ugc \
+  --duration 60 \
+  --aspect_ratio 16:9 \
+  --wait
+```
+
+Option B — direct Soul model (more direct, less branded staging):
+
+```bash
+higgsfield generate create soul_cinematic \
+  --prompt "<full script>" \
+  --soul-id <reference_id> \
+  --duration 60 \
+  --aspect_ratio 16:9 \
+  --wait
+```
+
+**Tips:**
+
+- For voice consistency, train Soul with `--soul-cinematic` if these will be longer videos (>30s) with talking-head delivery. Default `--soul-2` is fine for shorter clips and image-only work.
+- Write scripts for speech, not text: short sentences, natural pauses, ~150 words per minute target. A 60-second video = ~150 words.
+- Don't pad scripts to fit duration. The model paces itself; over-stuffed scripts get rushed delivery.
+- Save the `reference_id` and `avatar_id` somewhere stable (a `.env` file, a Notion doc) — you'll reuse them weekly forever.
+
+---
+
+## Recipe 4 — Narrated Explainer from a Document
+
+**What you say:**
+
+```text
+Turn report.pdf into a one-minute vertical explainer in Spanish. Show me the available styles first.
+```
+
+**What the agent does:**
+
+```bash
+higgsfield preset list video-explainer --json
+higgsfield preset resolve video-explainer <selected_preset_id> --json
+higgsfield voices list --json
+
+# Generate every narration block first with one selected voice.
+higgsfield generate create seed_audio \
+  --prompt "<Block 1 Spanish narration>" \
+  --voice_type preset --voice_id <voice_id> --wait --json
+
+# After all audio completes, generate every matching 10-second clip.
+higgsfield generate create gemini_omni \
+  --prompt "<Block 1 visual prompt>" \
+  --image <resolved_style_media_id> \
+  --duration 10 --resolution 720p --aspect_ratio 9:16 --wait --json
+
+# blocks.json pairs every clip job with its matching audio job.
+higgsfield generate create explainer_video \
+  --items @blocks.json --width 720 --height 1280 --wait --json
+```
+
+For one minute, create six narration/video pairs. Read the document before scripting; it is factual input, not generation media.
+
+---
+
+## Recipe 5 — Build and Deploy a Browser Game
+
+**What you say:**
+
+```text
+Build a small browser game where a robot collects batteries while avoiding drones. Desktop and mobile, then give me a play link.
+```
+
+**What the agent does:**
+
+1. Uses `higgsfield-websites` with `--type game` to lock the game profile, STYLE FORMULA, and `design/assets.csv`.
+2. Creates the game:
+
+   ```bash
+   higgsfield website create --type game --category arcade --subdomain battery-run
+   ```
+
+3. Generates the declared assets and implements the game in `app/src/logic.js`.
+4. Runs the game locally and verifies the complete loop on keyboard and touch.
+5. Pushes and deploys:
+
+   ```bash
+   higgsfield website deploy <website_id>
+   ```
+
+Publishing is separate (`higgsfield website publish`) and happens only when the user asks for it.
+
+---
+
+## Quick reference — which recipe for what
+
+| Goal | Recipe | Skills used |
+|---|---|---|
+| Launch a campaign with the founder's face | #1 Brand Campaign | `higgsfield-soul-id` → `higgsfield-product-photoshoot` → `higgsfield-generate` |
+| Generate paid-social ads from a URL | #2 UGC Ad Batch | `higgsfield-generate` (Marketing Studio) |
+| Async team updates without recording | #3 Founder Video | `higgsfield-soul-id` → `higgsfield-generate` |
+| Turn a topic or document into a narrated explainer | #4 Narrated Explainer | `higgsfield-video-explainer` |
+| Build and deploy a playable browser game | #5 Browser Game | `higgsfield-websites` (`--type game`) |
+
+## Patterns these recipes share
+
+1. **Train identity once, reuse forever.** Soul training is 15–45 minutes one-time. Every future video that needs the founder's face is one prompt away.
+2. **Let the backend assemble the prompt for branded work.** `product-photoshoot` enhances prompts before submitting to `gpt_image_2`. Don't write `gpt_image_2` prompts by hand.
+3. **Cheap-first iteration on request.** When the user wants to iterate cheaply, draft on `z_image`, then switch to the default model (`gpt_image_2_5`) once the direction is confirmed.
+4. **Filenames have timestamps.** Use `yyyy-mm-dd-hh-mm-ss-name.ext` so you can trace which generation came from which session.

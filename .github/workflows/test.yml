@@ -47,6 +47,7 @@ jobs:
           done
           exit 1
       - run: node tests/control-room.browser.cjs
+      - run: node tests/templates.browser.cjs
       - run: node tests/onboarding.browser.cjs
       - uses: actions/upload-artifact@v4
         with:
@@ -60,3 +61,4 @@ jobs:
             /tmp/vso-login-qa.png
             /tmp/vso-help-qa.png
             /tmp/vso-recovery-qa.png
+            /tmp/vso-templates-*.png

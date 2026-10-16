@@ -1,4 +1,10 @@
-# Current engineering checkpoint — 0.8.0 control panel candidate
+# Current engineering checkpoint — 0.9.0 cinematic templates
+
+- Shared template catalog/compilation/project selection, visual dashboard library, pinned MIT Higgsfield skill references and optional read-only CLI discovery are implemented. Six tools expose the same direction to ChatGPT. Native keyframes and Flow remain the default execution path.
+- 145 Python tests and 5 Node tests pass, with Python/JavaScript/shell syntax and diff checks. Native preview generation and source/license hash checks pass. Local Chromium download succeeded but sandboxed launch is unavailable in this executor; browser acceptance is configured in CI and remains pending. No paid Higgsfield rendering adapter is claimed; provider login/live catalog, rendering and media recovery remain acceptance gates.
+- Live deployment is pending exact owner-admin approval through the newer broker. The previous VPS-control connector returns internal errors. Existing 0.8 remains live until the reviewed update is approved and health-checked.
+
+# Previous checkpoint — 0.8.0 control panel candidate
 
 See the [community-readiness audit](audits/2026-10-15-community-readiness.md), [user guide](USER-GUIDE.md), [earlier engineering audit](audits/2026-10-14-engineering.md) and [operations](OPERATIONS-0.7.md).
 

@@ -216,6 +216,12 @@ class Handler(BaseHTTPRequestHandler):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
             file='admin.js' if path=='/admin.js' else 'admin.html'
             return self.send((Path(__file__).parent.parent/'web'/file).read_bytes(),content_type='application/javascript' if file.endswith('.js') else 'text/html')
+        if path.startswith('/template-preview/'):
+            from .templates import ROWS
+            filename=path.removeprefix('/template-preview/')
+            allowed={r[3]+'.png' for r in ROWS}
+            if filename not in allowed:return self.send({'error':'Preview not found'},404)
+            return self.send((Path(__file__).parent.parent/'web/template-previews'/filename).read_bytes(),content_type='image/png')
         if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js", "/oauth-consent.js", "/control.css", "/theme.js"):
             file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/sha256.js":"sha256.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js", "/oauth-consent.js": "oauth-consent.js", "/control.css":"control.css", "/theme.js":"theme.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"
