@@ -13,7 +13,7 @@
     if (event.persisted) {
       sent = false;
       const button = form.querySelector('button[type="submit"]');
-      if (button) { button.disabled = false; button.textContent = 'Authorize Vegas Social OS'; }
+      if (button) { button.disabled = false; button.textContent = 'Authorize Vegas Studio'; }
     }
   });
 })();

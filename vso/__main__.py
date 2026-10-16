@@ -11,7 +11,7 @@ from .tools import rpc
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Vegas Social OS — self-hosted, ChatGPT-native content pipeline")
+    parser = argparse.ArgumentParser(description="Vegas Studio — self-hosted, ChatGPT-native content pipeline")
     parser.add_argument("command", choices=("serve", "stdio", "setup", "doctor", "flow-login", "call", "owner-password", "owner-recovery"))
     parser.add_argument("--data-dir", default=os.getenv("VSO_DATA_DIR", str(Path.home() / ".local/share/vegas-social-os")))
     parser.add_argument("--port", type=int, default=int(os.getenv("VSO_PORT", os.getenv("PORT", "8787"))))
@@ -67,7 +67,7 @@ def main():
         from .recovery import startup
         startup(engine)
         server = HTTPServer((args.host, args.port), engine)
-        print("Vegas Social OS listening at " + base + "; data stays outside the repository", file=sys.stderr)
+        print("Vegas Studio listening at " + base + "; data stays outside the repository", file=sys.stderr)
         from .automation import start
         stop = start(engine)
         try: server.serve_forever()

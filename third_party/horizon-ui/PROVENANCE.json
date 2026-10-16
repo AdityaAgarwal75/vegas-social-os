@@ -1,0 +1,18 @@
+{
+  "repository": "https://github.com/horizon-ui/horizon-ui-chakra",
+  "commit": "27a99f9fb391e9da126e91cf109b3afd953fb58b",
+  "license": "MIT",
+  "usage": "Source-derived CSS/HTML adaptation of the official free dashboard. No React/Chakra runtime required. Upstream source preserved for audit.",
+  "files": {
+    "LICENSE": "07fe65d8e50b8c706b382dde3f1e9a83b28e8017388ada0d7ef43e8b3f0738ae",
+    "src/theme/styles.js": "6c562670e2a0642df579c3e1bf6febf56ab7cdcdbca31911fb3545eecbf2cf99",
+    "src/theme/additions/card/card.js": "a73241f045e62a7626ad2894b7aae5bb825bcb3d72f741e4f3d10ee7b053ae60",
+    "src/components/navbar/NavbarAdmin.js": "9e1fc85e7dbf2bdf582f85bc2e8122ac1ed5e982389056ca8cd62352a4b862fc",
+    "src/components/navbar/NavbarLinksAdmin.js": "857e7ac048d3ffafcfa6b99987a92a45520e7e2436ffee8da411a3fd23c98018",
+    "src/components/sidebar/Sidebar.js": "1272e962e472d5582bdc643814bfd49d18d97e37270d4937aeb614925372f9d1",
+    "src/components/sidebar/components/Brand.js": "a2494b492cc9b8fb456176bb3319aab87e1a4f0a9482bf505cb52e3fc8e74f9e",
+    "src/components/card/MiniStatistics.js": "031c38b4f610bfca0ad5e586752588fc1f590a2e280df3aa2efee5c419cd2527",
+    "src/views/auth/signIn/index.jsx": "983dc80b0d1706d7960c4f8f1c307ef831a2321ec454a01117256185c2d3eb17",
+    "src/layouts/auth/Default.js": "e6cd405cc2b8605759f33b2d7c5358fe3ca80c1155622e06e6505bc3321d4215"
+  }
+}

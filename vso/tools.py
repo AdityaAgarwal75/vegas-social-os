@@ -107,7 +107,7 @@ def registry(engine):
         asset=s.get('asset',asset_id)
         return probe(engine.asset_path(asset_id),asset['media_type'])
     def get_profile():
-        return {'id':s.get('installation','identity')['id'],'name':'Vegas Social OS owner'}
+        return {'id':s.get('installation','identity')['id'],'name':'Vegas Studio owner'}
 
     def storyboard_regenerate(plan_id, feedback, request_id):
         from .review import request

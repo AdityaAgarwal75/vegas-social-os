@@ -7,3 +7,5 @@ for(const form of document.querySelectorAll('form')){
  for(const input of form.querySelectorAll('[name=password],[name=confirmation]'))input.addEventListener('input',()=>form.querySelector('[name=confirmation]')?.setCustomValidity(''));
 }
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
+
+for(const button of document.querySelectorAll('[data-theme-toggle]'))button.addEventListener('click',()=>{const value=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=value;try{localStorage.setItem('vso-theme',value);}catch{}});

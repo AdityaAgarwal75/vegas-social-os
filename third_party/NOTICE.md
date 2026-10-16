@@ -11,3 +11,7 @@ The complete browser execution dependency is installed separately from the exact
 ## Higgsfield skill source
 
 `higgsfield-skills/` preserves the eight Higgsfield skill folders plus supporting root documentation from https://github.com/higgsfield-ai/skills at f83af0bc1d937c8119099a11f8ebbf5e6fb99819. MIT, copyright 2026 Higgsfield AI. LICENSE and per-file SHA-256 provenance are included. These are reference snapshots, not auto-executed installers or a self-hosted Higgsfield service. Vegas recipes, dashboard, previews and adapter are original work. Provider images, branding and private templates were not copied.
+
+## Horizon UI visual system
+
+Vegas Studio's visual system adapts the official free Horizon UI source (https://github.com/horizon-ui/horizon-ui-chakra), pinned at 27a99f9fb391e9da126e91cf109b3afd953fb58b. MIT, copyright 2023 Horizon UI. The license and selected source files are byte-preserved under `horizon-ui/`, with SHA-256 provenance. The Python gateway and native JavaScript application keep their existing runtime; no third-party React/Chakra dependency is required. The Vegas Studio name and V mark are original branding. DM Sans is distributed under its SIL Open Font License at `web/fonts/OFL.txt`.

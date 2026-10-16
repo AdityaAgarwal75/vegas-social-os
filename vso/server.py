@@ -179,6 +179,10 @@ class Handler(BaseHTTPRequestHandler):
             with self.store.db() as db:db.execute('SELECT 1').fetchone()
             return self.send({'ready':True,'database':'sqlite','version':__version__,'flow_engine_installed':self.engine.doctor()['flow_engine_installed']})
         if path == "/health": return self.send({"ok": True, "version": __version__})
+        if path == '/fonts/dm-sans.ttf':
+            return self.send((Path(__file__).parent.parent/'web/fonts/dm-sans.ttf').read_bytes(),content_type='font/ttf',cache_control='public, max-age=86400')
+        if path == '/horizon.css':
+            return self.send((Path(__file__).parent.parent/'web/horizon.css').read_bytes(),content_type='text/css')
         if path in ('/auth.css', '/auth.js', '/logo.svg', '/favicon.ico'):
             file = {'/auth.css': 'auth.css', '/auth.js': 'auth.js', '/logo.svg': 'logo.svg', '/favicon.ico': 'logo.svg'}[path]
             mime = 'text/css' if file.endswith('.css') else 'application/javascript' if file.endswith('.js') else 'image/svg+xml'
@@ -313,7 +317,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Invalid OAuth client, PKCE challenge or resource")
             q['scope'] = auth.scopes(q.get('scope','social:read social:write'))
             ticket = self.store.ticket("consent", q)
-            return self.page("Authorize this plugin", "<p>Approve only a client you trust. Requested scopes: " + html.escape(q["scope"]) + ". VPS administration has additional per-operation approval. Provider passwords and tokens are not returned.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Social OS</button></form><script defer src="/oauth-consent.js"></script>')
+            return self.page("Authorize this plugin", "<p>Approve only a client you trust. Requested scopes: " + html.escape(q["scope"]) + ". VPS administration has additional per-operation approval. Provider passwords and tokens are not returned.</p><p>Client: " + html.escape(client["name"]) + "</p><p>Return address: " + html.escape(q["redirect_uri"]) + '</p><form action="/consent" method="post"><input type="hidden" name="ticket" value="' + ticket + '"><button type="submit">Authorize Vegas Studio</button></form><script defer src="/oauth-consent.js"></script>')
         if path == '/api/control':
             if not self.guard():return
             from .control import snapshot
@@ -487,7 +491,7 @@ class Handler(BaseHTTPRequestHandler):
                 data = self.store.consume(body.get("ticket", ""), "consent")
             except ValueError:
                 return self.page("Authorization request already submitted",
-                    "<p>This one-time approval has already been sent or expired. Return to ChatGPT and reconnect Vegas Social OS to start a fresh authorization request. If your dashboard opens, you do not need another owner setup link.</p>", 409)
+                    "<p>This one-time approval has already been sent or expired. Return to ChatGPT and reconnect Vegas Studio to start a fresh authorization request. If your dashboard opens, you do not need another owner setup link.</p>", 409)
             code = self.store.ticket("mcp-code", data, ttl=120)
             sep = "&" if "?" in data["redirect_uri"] else "?"
             return self.redirect(data["redirect_uri"] + sep + urllib.parse.urlencode({"code": code, "state": data.get("state", "")}))

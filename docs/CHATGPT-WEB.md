@@ -1,6 +1,6 @@
 # ChatGPT web is the primary workstation
 
-The owner requires Vegas Social OS to work in **ChatGPT on the web**, using a supported Work chat. Installing the ChatGPT desktop app, accessing the user's local machine or running a laptop daemon is not a product requirement. The owner's VPS runs Chrome/Flow/FFmpeg and stores state; ChatGPT connects remotely over authenticated HTTPS.
+The owner requires Vegas Studio to work in **ChatGPT on the web**, using a supported Work chat. Installing the ChatGPT desktop app, accessing the user's local machine or running a laptop daemon is not a product requirement. The owner's VPS runs Chrome/Flow/FFmpeg and stores state; ChatGPT connects remotely over authenticated HTTPS.
 
 ## Package contract
 
