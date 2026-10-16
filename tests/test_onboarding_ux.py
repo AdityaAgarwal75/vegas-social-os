@@ -24,6 +24,25 @@ class OnboardingUXTests(unittest.TestCase):
             self.assertEqual(json.loads((root/file).read_text())['version'], __version__)
         self.assertIn('version = "'+__version__+'"', (root/'pyproject.toml').read_text())
 
+    def test_facebook_login_business_configuration_input_is_visible(self):
+        root = Path(__file__).resolve().parents[1]
+        js = (root/'web/app.js').read_text()
+        self.assertIn("'config_id','Facebook Login for Business Configuration ID','text'",js)
+        self.assertIn("Facebook Login for Business → Configurations",js)
+        self.assertIn("f.onsubmit=async e=>",js)
+        from vso.engine import Engine
+        from vso.store import Store
+        with tempfile.TemporaryDirectory() as directory:
+            engine = Engine(Store(directory),"https://example.com")
+            result = engine.accounts.config.save('facebook',{
+                'client_id':'1234567890123456',
+                'client_secret':'private-test-only-secret',
+                'graph_version':'v25.0',
+                'config_id':'1650387526437553',
+            })
+            self.assertEqual(result['config_id'],'1650387526437553')
+            self.assertNotIn('private-test-only-secret',str(result))
+
     def test_public_help_locked_routes_and_failed_signin(self):
         with tempfile.TemporaryDirectory() as directory:
             store = Store(directory); engine = Engine(store)
