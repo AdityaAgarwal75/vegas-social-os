@@ -8,7 +8,7 @@ from html.parser import HTMLParser
 from urllib.parse import urlsplit, urljoin
 from urllib.robotparser import RobotFileParser
 
-USER_AGENT = 'VegasSocialOS/0.4 (+public research; no login)'
+USER_AGENT = 'VegasSocialOS/0.13 (+public research; no login)'
 
 
 def public_address(host):
@@ -28,13 +28,13 @@ class PinnedHTTPS(http.client.HTTPSConnection):
         self.sock = self._context.wrap_socket(socket.create_connection((self.address, 443), self.timeout), server_hostname=self.host)
 
 
-def get(url, limit=250000):
+def get(url, limit=250000, *, accept='text/html,text/plain'):
     p = urlsplit(url)
     if p.scheme != 'https' or not p.hostname or p.port not in (None, 443) or p.username or p.password:
         raise ValueError('Public research requires HTTPS without credentials')
     connection = PinnedHTTPS(p.hostname, public_address(p.hostname))
     try:
-        connection.request('GET', (p.path or '/') + ('?' + p.query if p.query else ''), headers={'User-Agent': USER_AGENT, 'Accept': 'text/html,text/plain'})
+        connection.request('GET', (p.path or '/') + ('?' + p.query if p.query else ''), headers={'User-Agent': USER_AGENT, 'Accept': accept})
         response = connection.getresponse()
         body = response.read(limit + 1)
         if len(body) > limit: raise ValueError('Research response exceeds size limit')

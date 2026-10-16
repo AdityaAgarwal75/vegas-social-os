@@ -22,13 +22,16 @@ class TemplateTests(unittest.TestCase):
 
     def test_catalog_preview_and_upstream_integrity(self):
         result=call(self.engine,'template_catalog',{})
-        self.assertEqual(len(result['templates']),16)
-        self.assertEqual(len({c['id'] for c in result['templates']}),16)
+        self.assertEqual(len(result['templates']),35)
+        self.assertEqual(len({c['id'] for c in result['templates']}),35)
         self.assertEqual(len(call(self.engine,'template_catalog',{'category':'Product'})['templates']),4)
-        self.assertEqual(len(call(self.engine,'template_catalog',{'query':'orbit'})['templates']),1)
+        self.assertEqual(len(call(self.engine,'template_catalog',{'query':'bullet'})['templates']),1)
         for card in result['templates']:
-            path=templates.ROOT/'web/template-previews'/Path(card['preview_url']).name
-            self.assertTrue(path.read_bytes().startswith(b'\x89PNG\r\n\x1a\n'))
+            self.assertIsNone(card['preview_url'])
+            self.assertTrue(card['reference_requirements'])
+            self.assertGreater(len(card['video_prompt']),300)
+            self.assertTrue(card['shots'])
+        self.assertEqual(sum(len(c['shots']) for c in result['templates']),65)
         source=templates.ROOT/'third_party/higgsfield-skills'
         manifest=json.loads((source/'PROVENANCE.json').read_text())
         for name,checksum in manifest['files'].items():
@@ -55,7 +58,7 @@ class TemplateTests(unittest.TestCase):
         concepts=[{'title':name,'hook':'Look at the embroidery','script':'Inspect the stitching.',
                    'scenes':[compiled['scene']]} for name in ['Walk','Detail']]
         result=call(self.engine,'plan_save',{'channel_id':channel['id'],'concepts':concepts,'request_id':'compiled','project_id':self.project['id']})
-        self.assertEqual(result['concepts'][0]['scenes'][0]['continuity']['template_id'],'fashion-walk')
+        self.assertEqual(result['concepts'][0]['scenes'][0]['continuity']['template_id'],'editorial-walk')
         for settings in ({'lens':'bad'},{'lighting':'invented'},{'motion':'explode'},{'aspect_ratio':'7:9'},{'command':'rm'}):
             with self.assertRaises(ValueError):templates.compile_prompt('product-hero','bottle',settings)
         with self.assertRaises(ValueError):templates.compile_prompt('missing','bottle')

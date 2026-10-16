@@ -1,3 +1,7 @@
+## Content engine 0.13
+
+35 text-first video recipes contain 65 editable per-shot prompts, first-frame requirements and failure checks. Pinned MIT Instagram/marketing craft and legitimate public research adapters support channel planning. Exact creative decisions and read-only post-performance observations persist on the owner's VPS; the next ChatGPT session retrieves that channel's evidence and proposes a reviewed experiment. No shared API keys or autonomous model training. See [content engine contracts and sources](docs/CONTENT-ENGINE-0.13.md).
+
 # Vegas Studio
 
 ![Vegas Studio — ideas in chat, production under control](docs/assets/banner.svg)

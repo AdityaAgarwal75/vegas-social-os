@@ -1,0 +1,1126 @@
+{
+  "version": 2,
+  "reviewed_at": "2026-10-16",
+  "recipes": [
+    {
+      "id": "dolly-approach",
+      "title": "The deliberate approach",
+      "category": "Camera",
+      "kind": "shot",
+      "description": "A physical camera approach that ends on a clear emotional or product detail.",
+      "reference_requirements": [
+        "One first-frame image; leave a clear straight camera path."
+      ],
+      "shots": [
+        {
+          "title": "Approach",
+          "seconds": 8,
+          "frame": "Medium-wide composition at eye level with foreground depth and a clear subject.",
+          "action": "Hold the initial composition for the opening beat. Move physically forward on a straight level path at an even walking pace; foreground objects separate through parallax. Ease to a stop on a tight medium composition, keeping the subject centered and its size believable. The lens stays fixed; the movement comes from camera travel, with a stable horizon and a final still hold.",
+          "audio": "Natural location ambience, a restrained rising tone, no dialogue."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "optical-crash-zoom",
+      "title": "Crash zoom to the detail",
+      "category": "Camera",
+      "kind": "shot",
+      "description": "Snap attention from the whole scene to one unmistakable detail.",
+      "reference_requirements": [
+        "One sharp first frame with the important detail visibly in frame."
+      ],
+      "shots": [
+        {
+          "title": "Crash zoom",
+          "seconds": 8,
+          "frame": "A wide view with the point of interest at the optical center.",
+          "action": "Start wide long enough to read the scene. With the camera body completely stationary, make one rapid optical zoom into the main visible detail. Decelerate cleanly, lock focus on that detail and hold. Keep the perspective and location unchanged: background compression changes from the lens, not forward camera travel. Preserve the original detail without inventing a new reveal.",
+          "audio": "One short lens whoosh ending in a dry click; quiet room ambience."
+        }
+      ],
+      "pitfalls": "Zoom may obscure the important subject if it is too small or not centered in the reference.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "dolly-zoom",
+      "title": "The vertigo reveal",
+      "category": "Camera",
+      "kind": "shot",
+      "description": "The subject stays the same size while the surrounding depth appears to stretch.",
+      "reference_requirements": [
+        "A centered medium first frame with a deep background and clear foreground separation."
+      ],
+      "shots": [
+        {
+          "title": "Dolly zoom",
+          "seconds": 8,
+          "frame": "Centered subject at chest-up or product-medium scale; long visible background.",
+          "action": "Keep the subject almost exactly the same size in frame. Move the camera steadily backward while optically zooming inward to compensate for that distance change. Let the background compress and its depth relationship change smoothly; keep the subject anchored and sharp. Finish the combined move before the last beat and hold. Keep the horizon level and the subject identity unchanged throughout.",
+          "audio": "Subtle low tension swell and a short resolving breath; no speech."
+        }
+      ],
+      "pitfalls": "Dolly zoom requires coordinated camera travel and zoom; a prompt alone cannot guarantee exact optics.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "bullet-time-arc",
+      "title": "Bullet-time arc",
+      "category": "Camera",
+      "kind": "shot",
+      "description": "A frozen action moment with a controlled camera sweep around it.",
+      "reference_requirements": [
+        "A first frame showing a balanced mid-action pose; avoid hidden limbs."
+      ],
+      "shots": [
+        {
+          "title": "Frozen arc",
+          "seconds": 8,
+          "frame": "A person or object paused at the peak of one clear action with foreground depth.",
+          "action": "Suspend the main action at its peak as if time has almost stopped. Trace one smooth 60-degree horizontal camera arc around that moment at constant subject distance and height. Keep airborne objects nearly frozen and maintain the same count and shapes. Preserve the subject pose and lighting direction. End with the subject readable in a three-quarter view and hold; the camera moves while the action stays suspended.",
+          "audio": "A brief time-stop hit followed by a quiet suspended ambience; no dialogue."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "fpv-flythrough",
+      "title": "FPV through the opening",
+      "category": "Camera",
+      "kind": "shot",
+      "description": "One legible flight through a real opening toward a destination.",
+      "reference_requirements": [
+        "Wide first frame with an unobstructed opening; an end frame is optional if supported."
+      ],
+      "shots": [
+        {
+          "title": "Flythrough",
+          "seconds": 8,
+          "frame": "A wide environment with a doorway or arch centered and a visible destination beyond.",
+          "action": "Accelerate gently toward the visible opening, pass through its center with safe clearance, then slow into a stable view of the destination. Keep the route continuous and the architecture rigid. The camera travels through open space rather than melting through walls. Use a mild bank only where the flight path turns; finish level and give the destination a clean final hold.",
+          "audio": "Air movement rises during travel, then settles into the destination ambience."
+        }
+      ],
+      "pitfalls": "Do not use a blocked route or expect the model to reconstruct unseen rooms accurately.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "overhead-to-hero",
+      "title": "Overhead to hero",
+      "category": "Camera",
+      "kind": "shot",
+      "description": "A single descending arc reveals depth from an overhead product arrangement.",
+      "reference_requirements": [
+        "One top-down arrangement with enough background around the subject."
+      ],
+      "shots": [
+        {
+          "title": "Descending arc",
+          "seconds": 8,
+          "frame": "A clean top-down product arrangement with a central hero object.",
+          "action": "Begin directly above the arrangement. Lower the camera and tilt gradually in one coordinated arc until the hero object is seen from a low three-quarter angle. Keep the product fixed on its surface while perspective changes naturally. Maintain the arrangement and product count, slow into the final angle and hold with clean surface reflections.",
+          "audio": "Soft room tone with one understated camera-move swell."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "whip-pan-cut",
+      "title": "Whip-pan transition",
+      "category": "Transitions",
+      "kind": "format",
+      "description": "Two separately generated matching pans cut together during motion blur.",
+      "reference_requirements": [
+        "Two start frames, one for each scene; match horizon and subject position."
+      ],
+      "shots": [
+        {
+          "title": "Exit pan",
+          "seconds": 8,
+          "frame": "Scene A composed with the subject near the center and open space to camera-right.",
+          "action": "Hold the main subject briefly, then rotate the camera rapidly to the right from a stationary position. Accelerate into horizontal motion blur and end while the whole frame is moving right. Keep the subject and set intact before the pan; create no morph into another location.",
+          "audio": "A fast rightward swish; carry the location ambience beneath it."
+        },
+        {
+          "title": "Entry pan",
+          "seconds": 8,
+          "frame": "Scene B at the destination composition, matching the original horizon and subject scale.",
+          "action": "Start with a rapid rightward horizontal camera rotation and strong directional motion blur, then decelerate smoothly until the destination subject is centered and sharp. Hold the final readable composition. Keep the destination fixed and make no transformation from another place.",
+          "audio": "Complete the same swish and settle into Scene B ambience."
+        }
+      ],
+      "pitfalls": "Join the two clips in the editor at matched blur; a single reference image does not define two different locations.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "snorricam",
+      "title": "Body-mounted intensity",
+      "category": "Camera",
+      "kind": "shot",
+      "description": "The face stays anchored while the surrounding world moves with the person.",
+      "reference_requirements": [
+        "A chest-up first frame of one person, with a clear background."
+      ],
+      "shots": [
+        {
+          "title": "Body-mounted walk",
+          "seconds": 8,
+          "frame": "One centered person from chest up with both shoulders visible.",
+          "action": "Anchor the camera rigidly to the subject at chest distance facing their face. The subject takes a few careful forward steps; the face stays at the same scale and center while the background shifts and bobs with their body. Keep movement plausible, with one directional path and no orbit. Finish with the subject stopping and the background settling.",
+          "audio": "Footsteps and clothing movement, close natural breathing; no imposed dialogue."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "smoke-reveal",
+      "title": "Smoke reveal",
+      "category": "Effects",
+      "kind": "shot",
+      "description": "Thin smoke clears to reveal an unchanged hero subject.",
+      "reference_requirements": [
+        "A fully visible subject frame; use a separate obscured start frame if the model supports start/end control."
+      ],
+      "shots": [
+        {
+          "title": "Reveal",
+          "seconds": 8,
+          "frame": "The hero subject centered on a restrained background, with space around its outline.",
+          "action": "At the opening, a thin foreground smoke curtain partially obscures the subject. Let the smoke drift sideways and upward under a light breeze, progressively exposing the same stationary subject. Keep the camera locked, lighting stable and subject geometry intact. By the final beat the important outline is fully readable; hold the clear reveal while the last smoke leaves the edges.",
+          "audio": "A soft air sweep and restrained reveal accent; no speech."
+        }
+      ],
+      "pitfalls": "Smoke should reveal the subject, not replace or reconstruct its product details.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "particle-assembly",
+      "title": "Particles into an object",
+      "category": "Effects",
+      "kind": "shot",
+      "description": "Small fragments converge into a stable final hero object.",
+      "reference_requirements": [
+        "A precise final object reference; optional matching particle start frame."
+      ],
+      "shots": [
+        {
+          "title": "Assembly",
+          "seconds": 8,
+          "frame": "The desired complete object centered against a simple contrasting background.",
+          "action": "Begin with small fragments hovering close to where the final object belongs. Draw them inward along short, coherent paths until they settle into the exact silhouette of the reference. Reduce movement as the object resolves and finish with the complete object motionless. Keep the camera locked and the background constant; avoid adding extra components or altering the final label and outline.",
+          "audio": "Fine granular ticks converge into a soft solid contact sound."
+        }
+      ],
+      "pitfalls": "A complex branded product may drift. Prefer a simple silhouette; approve the final frame separately.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "mirror-world",
+      "title": "Reflection becomes a world",
+      "category": "Effects",
+      "kind": "shot",
+      "description": "The camera approaches a reflection and lands in its matching scene.",
+      "reference_requirements": [
+        "A first image with a clean mirror reflection; a matching destination image is strongly recommended."
+      ],
+      "shots": [
+        {
+          "title": "Reflection approach",
+          "seconds": 8,
+          "frame": "A visible framed mirror reflecting the desired subject with no duplicate people outside it.",
+          "action": "Move slowly straight toward the center of the reflection. Keep the mirror frame rigid and the reflected subject aligned. As the camera reaches the reflective plane, let the frame edges leave view so the reflected scene fills the screen. End in a stable view of that scene. Preserve the subject and lighting; avoid growing extra mirrors or duplicating the person.",
+          "audio": "Room tone shifts subtly at the reflective plane; one quiet glass-like shimmer."
+        }
+      ],
+      "pitfalls": "Use start/end references when available; a text-only reflection cannot lock an unseen destination.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "freeze-world",
+      "title": "One subject, frozen world",
+      "category": "Effects",
+      "kind": "shot",
+      "description": "One living subject moves through a scene whose background action is suspended.",
+      "reference_requirements": [
+        "One start image with the moving subject clearly separated from a few background elements."
+      ],
+      "shots": [
+        {
+          "title": "Frozen world",
+          "seconds": 8,
+          "frame": "A centered subject in a scene with a small number of suspended background details.",
+          "action": "Keep the background scene frozen, including the positions of its visible objects. The main subject slowly turns their head toward camera and makes one small deliberate gesture. Use a locked camera so the contrast comes from motion inside a stationary world. Preserve anatomy and every suspended object. End with the subject facing the camera and hold that contrast.",
+          "audio": "A muffled ambient bed with the subject’s small movement clearly audible; no speech."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "portal-pass",
+      "title": "Portal handoff",
+      "category": "Transitions",
+      "kind": "format",
+      "description": "Approach a clear portal; create the destination as a separate matching clip.",
+      "reference_requirements": [
+        "A portal start frame and a destination start frame, both with matched opening geometry."
+      ],
+      "shots": [
+        {
+          "title": "Enter the threshold",
+          "seconds": 8,
+          "frame": "A subject approaching a single doorway or luminous opening centered in the scene.",
+          "action": "Track behind the subject on a straight path toward the opening. Let the doorway fill the frame until its interior occupies the whole screen, then end on that covered frame. Keep the person’s clothing and body proportions unchanged and the opening rigid. Avoid describing the unseen destination in this clip.",
+          "audio": "Footsteps approach a soft threshold hum."
+        },
+        {
+          "title": "Leave the threshold",
+          "seconds": 8,
+          "frame": "A matching doorway view into the destination; same subject, wardrobe and walking direction.",
+          "action": "Begin with the doorway covering the edges of frame, then continue forward behind the same subject into the destination. Move at the same walking pace, preserve the horizon and settle after a few steps. Reveal the new space through travel rather than morphing it into existence.",
+          "audio": "Carry the threshold hum across the cut and introduce the destination ambience."
+        }
+      ],
+      "pitfalls": "Cut at the covered frame; each destination needs its own reference.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "speed-ramp",
+      "title": "Fast-to-slow action",
+      "category": "Effects",
+      "kind": "shot",
+      "description": "A single physical action shifts speed at its most interesting point.",
+      "reference_requirements": [
+        "A first frame with one action ready to happen and its path visible."
+      ],
+      "shots": [
+        {
+          "title": "Speed ramp",
+          "seconds": 8,
+          "frame": "The subject at the start of one readable action, with uncluttered space for the motion.",
+          "action": "Begin the action at normal speed, accelerate briefly through its approach, then slow smoothly around its peak moment. Let fabric, particles or limbs follow consistent physical trajectories. Use one gentle tracking move to keep the subject framed. Return toward natural speed and finish with a short still hold. Keep the same action and subject throughout; no teleporting or new camera angle.",
+          "audio": "A short rising rush leading into a restrained low-speed impact, then natural ambience."
+        }
+      ],
+      "pitfalls": "Exact speed curves are more reliable in editing; inspect the generated action before retiming.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "seamless-loop",
+      "title": "The returning loop",
+      "category": "Effects",
+      "kind": "shot",
+      "description": "A small movement returns to the opening pose and framing.",
+      "reference_requirements": [
+        "A strong first frame; provide the same end frame only if the selected model supports it."
+      ],
+      "shots": [
+        {
+          "title": "Return to start",
+          "seconds": 8,
+          "frame": "A simple centered subject with a clear resting pose and stable background.",
+          "action": "From the supplied starting pose, perform one small cyclical movement: gently move away from the resting position, pause at the opposite point, then return along the same path. Match the opening silhouette, camera framing, light and object positions in the final beat. Keep the camera locked and motion smooth, with no scene cut. Leave a short clean hold at the return point.",
+          "audio": "A continuous quiet ambient bed with no sharp sound at the loop boundary."
+        }
+      ],
+      "pitfalls": "Compare first/last frames in the editor. Prompting alone does not guarantee a seamless loop.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "product-light-sweep",
+      "title": "Light travels across the product",
+      "category": "Product",
+      "kind": "shot",
+      "description": "A stationary product earns attention through a controlled highlight sweep.",
+      "reference_requirements": [
+        "A sharp product reference with exact branding and geometry."
+      ],
+      "shots": [
+        {
+          "title": "Highlight sweep",
+          "seconds": 8,
+          "frame": "A three-quarter product hero composition on a simple matte surface.",
+          "action": "Keep the object stationary and make a narrow soft reflection travel slowly across its front surface from left to right. Use a fixed camera and stable exposure so material texture becomes visible as the highlight passes. Preserve the outline, label, product count and surface details. End on a balanced illuminated hero view and hold with the complete object readable.",
+          "audio": "Quiet studio room tone and a subtle rising texture accent; no dialogue."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "exploded-assembly",
+      "title": "Exploded view to assembly",
+      "category": "Product",
+      "kind": "shot",
+      "description": "Visible components settle into their original positions around a locked center.",
+      "reference_requirements": [
+        "A reference showing the actual assembled object; accurate component references if available."
+      ],
+      "shots": [
+        {
+          "title": "Assemble",
+          "seconds": 8,
+          "frame": "A simple object centered with its known visible components separated slightly along one axis.",
+          "action": "Hold the separated components briefly, then slide each known part slowly along its original axis into its correct assembled position. Keep a locked camera and consistent object scale. Let the motion ease before contact; finish with the complete original object at rest. Preserve component count, proportions and materials without inventing inner engineering or new parts.",
+          "audio": "Small clean mechanical clicks as the known parts settle."
+        }
+      ],
+      "pitfalls": "Treat unknown internals as conceptual. Do not claim engineering accuracy from one exterior photo.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "liquid-product",
+      "title": "Liquid wraps the hero",
+      "category": "Product",
+      "kind": "shot",
+      "description": "One controlled liquid motion frames a stable product.",
+      "reference_requirements": [
+        "A complete product reference and a simple background with space for the liquid."
+      ],
+      "shots": [
+        {
+          "title": "Liquid arc",
+          "seconds": 8,
+          "frame": "The product centered upright, with clear space on both sides.",
+          "action": "Keep the product motionless. Send one thin arc of liquid from the left foreground around the product’s base toward camera-right. Let droplets follow the arc and fall naturally; keep the front label unobscured at the final hold. Maintain glass, metal and packaging geometry. Use a locked camera, controlled highlights and a restrained physical splash rather than an opaque flood.",
+          "audio": "A precise liquid swoosh and a few soft droplets; no speech."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://higgsfield.ai/camera-controls",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "texture-proof",
+      "title": "Texture, use, result",
+      "category": "Product",
+      "kind": "format",
+      "description": "Three short clips prove one visible product quality.",
+      "reference_requirements": [
+        "A macro detail frame, an honest use frame, and a final hero frame."
+      ],
+      "shots": [
+        {
+          "title": "Texture",
+          "seconds": 8,
+          "frame": "A macro view of the product’s actual material and edge detail.",
+          "action": "Hold attention on the visible material while the camera tracks laterally a short distance. Keep the real surface pattern sharp and unchanged; finish before leaving that detail.",
+          "audio": "Close material sound appropriate to the actual product."
+        },
+        {
+          "title": "Use",
+          "seconds": 8,
+          "frame": "A medium view of one simple, truthful use of the same product.",
+          "action": "Perform the one use action shown by the reference at a natural pace. Keep the camera steady, the hands anatomically plausible and the product unchanged. End with the use action complete and the benefit visible.",
+          "audio": "Natural contact sound; add narration separately if required."
+        },
+        {
+          "title": "Hero",
+          "seconds": 8,
+          "frame": "The original product in a complete, uncluttered hero composition.",
+          "action": "Keep the product still as the camera makes one gentle physical push closer. End with the product fully inside frame, stable, sharp and readable for an editor-added call to action.",
+          "audio": "A quiet resolving tone and a clean ambient tail."
+        }
+      ],
+      "pitfalls": "The use shot must show an honest function. Do not invent test results, health benefits or performance claims.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "editorial-walk",
+      "title": "Walk, then the detail",
+      "category": "Fashion",
+      "kind": "format",
+      "description": "An editorial full-body walk followed by an exact garment detail.",
+      "reference_requirements": [
+        "One full-body outfit reference and a separate close detail frame of the same garment."
+      ],
+      "shots": [
+        {
+          "title": "Walk",
+          "seconds": 8,
+          "frame": "Full-body model centered with feet visible and a clear short walking route.",
+          "action": "Track backward at the model’s walking pace as they take a few natural steps toward camera. Keep the complete outfit, face and hairstyle unchanged. Fabric moves with the steps; the model slows into a relaxed finish with feet still in frame.",
+          "audio": "Natural footsteps and fabric movement; no dialogue."
+        },
+        {
+          "title": "Garment detail",
+          "seconds": 8,
+          "frame": "A close view of the same garment’s real embroidery or stitching.",
+          "action": "Keep the model still while the camera tracks slowly across the visible fabric detail. Let a small fold move naturally without changing the pattern. Finish on the original stitching with clear texture and stable light.",
+          "audio": "Quiet cloth movement; maintain the previous ambience."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "outfit-match-cut",
+      "title": "Outfit change on a gesture",
+      "category": "Fashion",
+      "kind": "format",
+      "description": "Two matched gestures become a clean outfit-change edit.",
+      "reference_requirements": [
+        "Two same-person, same-room frames with different outfits and matched camera pose."
+      ],
+      "shots": [
+        {
+          "title": "Before gesture",
+          "seconds": 8,
+          "frame": "Full-body person in outfit A with one hand ready to sweep across the lens.",
+          "action": "The person performs one smooth hand sweep toward the lens until the palm covers the whole frame. Keep identity, room and outfit A unchanged until the occlusion. End with the frame covered; do not morph clothing inside this clip.",
+          "audio": "One crisp hand-sweep swish."
+        },
+        {
+          "title": "After gesture",
+          "seconds": 8,
+          "frame": "The same person in outfit B, same pose, room, framing and light.",
+          "action": "Begin with the palm covering the lens, then withdraw the hand along the matching path to reveal outfit B. Let the person make a small satisfied turn and settle. Preserve their identity and the exact new fabric pattern. Keep the camera fixed.",
+          "audio": "Continue the swish across the cut, then natural room ambience."
+        }
+      ],
+      "pitfalls": "The editor joins covered frames; separate outfit references are required.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "fabric-wind",
+      "title": "Fabric catches the air",
+      "category": "Fashion",
+      "kind": "shot",
+      "description": "A small controlled breeze reveals drape without redesigning the garment.",
+      "reference_requirements": [
+        "A sharp complete outfit reference with loose fabric visible."
+      ],
+      "shots": [
+        {
+          "title": "Drape",
+          "seconds": 8,
+          "frame": "A standing model in a calm three-quarter composition, with the garment hem fully visible.",
+          "action": "Keep the model in the same standing pose. Introduce a light breeze from camera-left so only the loose fabric lifts gently and falls back. Make one slow short push toward the garment while keeping the model’s face and the entire important hem inside frame. Settle the fabric by the last beat. Preserve embroidery, transparency, fit and the room geometry.",
+          "audio": "A soft breeze and realistic fabric rustle; no dialogue."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "ugc-unboxing",
+      "title": "UGC unbox, inspect, react",
+      "category": "Creator",
+      "kind": "format",
+      "description": "A three-clip phone-style unboxing with an actual reveal and reaction.",
+      "reference_requirements": [
+        "Reference frames for the unopened package, the actual product, and the same creator holding it."
+      ],
+      "shots": [
+        {
+          "title": "Open",
+          "seconds": 8,
+          "frame": "A casual creator holding the actual unopened package at chest height in the locked room.",
+          "action": "Using a steady phone-camera composition, the creator opens the package once and angles its opening toward camera. Stop before revealing unseen product details. Keep the face, hands, package label and room unchanged.",
+          "audio": "Close packaging rustle and quiet room tone."
+        },
+        {
+          "title": "Inspect",
+          "seconds": 8,
+          "frame": "The same creator holding the actual unboxed product with its important detail visible.",
+          "action": "The creator lifts the product slightly toward the lens, rotates it just enough to show the visible detail, then returns it to a comfortable holding position. Keep the phone camera gently handheld and the product exact.",
+          "audio": "Light product handling sounds; no invented testimonial."
+        },
+        {
+          "title": "Reaction",
+          "seconds": 8,
+          "frame": "The same creator holding the same product in the original room and wardrobe.",
+          "action": "The creator looks from the product back to the lens, gives one natural small smile and settles while keeping the product readable. Use subtle phone-camera sway and normal skin texture. Leave a clean ending for an editor-added CTA.",
+          "audio": "Quiet room tone; record any specific spoken reaction separately or provide an exact short line."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "ugc-demo",
+      "title": "Problem, demonstration, payoff",
+      "category": "Creator",
+      "kind": "format",
+      "description": "A clear UGC demonstration with a truthful visible result.",
+      "reference_requirements": [
+        "Three frames: a real small problem, the actual use action, and its honest result."
+      ],
+      "shots": [
+        {
+          "title": "Problem",
+          "seconds": 8,
+          "frame": "The creator and the visible everyday problem in one readable medium frame.",
+          "action": "Begin immediately on the specific problem. The creator notices it, makes one small frustrated gesture and looks toward the product just inside frame. Keep the issue concrete and visible rather than acting out a generic reaction.",
+          "audio": "Sound from the real problem and a small reaction; no forced music."
+        },
+        {
+          "title": "Demonstration",
+          "seconds": 8,
+          "frame": "The creator using the actual product in the locked environment.",
+          "action": "Perform one short, realistic use action at normal speed, keeping hands and the important contact point clearly in view. Keep the camera steady and the product unchanged. Finish when the demonstrated action is complete.",
+          "audio": "Real contact sounds; dialogue may be added from the approved script."
+        },
+        {
+          "title": "Payoff",
+          "seconds": 8,
+          "frame": "The creator beside the actual visible result with the same product.",
+          "action": "Show the real result, then let the creator turn to camera with a restrained satisfied expression. Hold the product and outcome inside the same composition; use no before/after exaggeration or unproven transformation.",
+          "audio": "A quiet resolving sound and normal room tone."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "talking-head",
+      "title": "One clear spoken point",
+      "category": "Creator",
+      "kind": "shot",
+      "description": "A natural single-speaker clip with room for an exact short approved line.",
+      "reference_requirements": [
+        "One consented speaker reference; supply the exact dialogue in production."
+      ],
+      "shots": [
+        {
+          "title": "Speak to camera",
+          "seconds": 8,
+          "frame": "A medium close-up of one speaker at eye level with natural skin texture.",
+          "action": "The speaker looks into the lens and delivers the approved short line once with restrained hand movement. Keep the camera gently handheld, shoulders visible and the mouth unobstructed. Pause naturally at the end and maintain eye contact. Preserve the voice identity only when an authorized voice source exists; otherwise add narration in editing.",
+          "audio": "Use the supplied exact short dialogue if supported; otherwise quiet room tone and add speech later."
+        }
+      ],
+      "pitfalls": "A still image does not specify a voice. Check model audio/lip-sync support and the spoken duration.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "animal-rescue",
+      "title": "Small rescue, earned payoff",
+      "category": "Story",
+      "kind": "format",
+      "description": "Four linked clips show a legible animal problem, effort, reversal and relief.",
+      "reference_requirements": [
+        "Consistent character sheet plus a separate reference frame for each story beat."
+      ],
+      "shots": [
+        {
+          "title": "The visible problem",
+          "seconds": 8,
+          "frame": "The same small animal facing one clear non-graphic obstacle, with destination and safe route readable.",
+          "action": "Start on the obstacle immediately. The animal leans forward, tries one small approach and stops when the obstacle blocks it. Keep the geography clear and the animal’s markings consistent; finish on its visible decision to try another route.",
+          "audio": "Location ambience and a small natural animal sound."
+        },
+        {
+          "title": "The effort",
+          "seconds": 8,
+          "frame": "Same animal, obstacle and light; a plausible helper or safe route already visible in the reference.",
+          "action": "Show one deliberate effort toward the safe route. Track slightly alongside the animal so the original obstacle stays visible. Maintain scale and distance; do not teleport the animal or resolve the problem yet.",
+          "audio": "Footsteps or paw contacts with a restrained rising tension bed."
+        },
+        {
+          "title": "The reversal",
+          "seconds": 8,
+          "frame": "A clear reference of the helping action at the exact obstacle in the same location.",
+          "action": "Carry out the one small helping action shown by the reference. Keep both characters’ identities, anatomy and positions coherent. Make the cause of the change visible and finish as the path becomes safe.",
+          "audio": "A brief contact sound and a soft resolving musical accent."
+        },
+        {
+          "title": "Relief",
+          "seconds": 8,
+          "frame": "The same characters together in the safe destination, with the former obstacle still recognizable.",
+          "action": "The rescued animal takes a few safe steps to the helper and settles beside them. Let their body language communicate relief. Hold a simple readable final composition, with no new threat or unrelated twist.",
+          "audio": "Calm ambience and gentle close foley."
+        }
+      ],
+      "pitfalls": "Use an original fictional scenario; do not present generated animal events as real rescues.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "tiny-kindness",
+      "title": "A small act comes back",
+      "category": "Story",
+      "kind": "format",
+      "description": "A visual kindness story with setup, sacrifice and a specific return.",
+      "reference_requirements": [
+        "Three consistent character/location beat frames."
+      ],
+      "shots": [
+        {
+          "title": "The choice",
+          "seconds": 8,
+          "frame": "A character noticing someone with a small concrete need, with the useful prop visible.",
+          "action": "The main character looks from the prop to the other character and hesitates briefly. Keep the camera at eye level and make the need visible in the same composition. End on a clear decision to help.",
+          "audio": "Specific location ambience with a restrained emotional bed."
+        },
+        {
+          "title": "The act",
+          "seconds": 8,
+          "frame": "The same characters, prop, wardrobe and place at the moment of giving.",
+          "action": "The main character passes the original prop to the other character in one clear physical action. Hold the exchange inside frame and preserve exact hands, prop count and character identities. Let the receiver react naturally.",
+          "audio": "Close contact sound and a small emotional lift."
+        },
+        {
+          "title": "The return",
+          "seconds": 8,
+          "frame": "The original helper now receives a small specific act of help from the other character.",
+          "action": "Show the returning act once, then settle on a shared reaction. Keep the payoff connected to the original need and leave a short ending hold that recalls the opening prop or gesture. Avoid unrelated rewards or a forced moral caption.",
+          "audio": "A quiet resolving musical phrase and natural scene sound."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "mystery-reveal",
+      "title": "Question, clue, reveal",
+      "category": "Story",
+      "kind": "format",
+      "description": "An opening visual question gets a clue and an explicit payoff.",
+      "reference_requirements": [
+        "Separate reference frames for the question, the clue and the actual answer."
+      ],
+      "shots": [
+        {
+          "title": "Question",
+          "seconds": 8,
+          "frame": "A visible unusual situation whose cause is outside the composition.",
+          "action": "Show the unusual situation immediately and let the main character notice it. Make a slow short push toward the specific unexplained detail; keep the answer outside frame. End on a clear look toward the next clue.",
+          "audio": "One distinctive mystery sound and quiet location ambience."
+        },
+        {
+          "title": "Clue",
+          "seconds": 8,
+          "frame": "A close reference of the real clue in the same visual world.",
+          "action": "Hold the clue long enough to read, then shift focus once from its foreground edge to the meaningful mark or object. Keep the clue exact; do not invent text or an extra object.",
+          "audio": "A small concrete contact sound and a restrained rising note."
+        },
+        {
+          "title": "Answer",
+          "seconds": 8,
+          "frame": "A reference revealing the actual cause in relation to the opening situation.",
+          "action": "Reveal the answer with one slow lateral camera move past the same foreground obstruction. Show the cause and the original subject in a coherent spatial relationship. Settle on the reaction and hold the complete answer.",
+          "audio": "A short release of tension and natural scene sound."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "fact-explainer",
+      "title": "One fact made visible",
+      "category": "Formats",
+      "kind": "format",
+      "description": "A verified claim, a concrete illustration and a clear takeaway.",
+      "reference_requirements": [
+        "Source-backed script plus three separate visual frames; add precise text in editing."
+      ],
+      "shots": [
+        {
+          "title": "The question",
+          "seconds": 8,
+          "frame": "One concrete subject that makes the approved factual question visually clear.",
+          "action": "Begin immediately on the subject doing one normal visible action. Keep camera movement restrained and leave clean safe space for editor-added question text. Do not generate scientific labels or numerical claims inside the image.",
+          "audio": "Quiet relevant ambience; add the verified narration in editing."
+        },
+        {
+          "title": "The mechanism",
+          "seconds": 8,
+          "frame": "An illustrative but non-misleading close view of the relevant mechanism.",
+          "action": "Show one simple cause-and-effect step from the approved script. Keep spatial relationships stable and the visual analogy clearly illustrative. Use a locked camera with one readable object movement.",
+          "audio": "One appropriate contact sound; leave space for narration."
+        },
+        {
+          "title": "The takeaway",
+          "seconds": 8,
+          "frame": "A final simple composition linking the original subject to the verified conclusion.",
+          "action": "Hold the relevant visual result, then make one gentle push closer to the detail that supports the takeaway. Keep the frame uncluttered and end on a readable hold for editor-added source and conclusion text.",
+          "audio": "A quiet resolving bed; preserve narration clarity."
+        }
+      ],
+      "pitfalls": "The template provides visual structure, not factual validation. Verify each claim and citation before production.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "myth-test",
+      "title": "Myth, test, evidence",
+      "category": "Formats",
+      "kind": "format",
+      "description": "A testable claim is challenged by visible, honestly described evidence.",
+      "reference_requirements": [
+        "A sourced claim and actual test/result references; no invented demonstration data."
+      ],
+      "shots": [
+        {
+          "title": "The claim",
+          "seconds": 8,
+          "frame": "A real object or situation tied to the claim, with the test area visible.",
+          "action": "Show the subject in a stable medium composition. Make one small setup action that points toward the upcoming test. Keep room for the editor’s exact claim; do not generate written numbers.",
+          "audio": "Natural setup foley and a brief question cue."
+        },
+        {
+          "title": "The test",
+          "seconds": 8,
+          "frame": "An accurate reference of the authorized test procedure.",
+          "action": "Perform the single procedure shown by the reference at normal speed. Keep the important contact and measurement area inside frame, with the camera fixed. Do not invent a passing result, hidden step or changed product.",
+          "audio": "Realistic procedure sounds; no celebratory score."
+        },
+        {
+          "title": "The evidence",
+          "seconds": 8,
+          "frame": "An actual result or clearly labelled illustrative reference approved by the owner.",
+          "action": "Hold on the evidence without changing its visible detail. Use a small steady push toward the result, then settle. Leave safe space for the editor’s factual conclusion and source.",
+          "audio": "Quiet neutral ambience to support the approved conclusion."
+        }
+      ],
+      "pitfalls": "Generated footage is not test evidence. Use real measurements or explicitly label the demonstration conceptual.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "three-step-tutorial",
+      "title": "Three-step tutorial",
+      "category": "Formats",
+      "kind": "format",
+      "description": "A short sequence with one visible action per step and a usable ending.",
+      "reference_requirements": [
+        "One reference frame for each actual step; preserve tools, product and room."
+      ],
+      "shots": [
+        {
+          "title": "Step one",
+          "seconds": 8,
+          "frame": "The workspace at the start of the first real step.",
+          "action": "Carry out only the first small action in the approved process. Keep the important hands and tool contact visible in a stable medium-close composition. End at a clean intermediate state.",
+          "audio": "Specific tool/contact sounds; add step labels in editing."
+        },
+        {
+          "title": "Step two",
+          "seconds": 8,
+          "frame": "The exact intermediate state left by step one.",
+          "action": "Continue from the reference state and perform only the second action. Keep the same tool, subject and lighting. Use a locked camera and finish on the next intermediate state without skipping a required operation.",
+          "audio": "Continue the same room tone with specific step-two foley."
+        },
+        {
+          "title": "Step three",
+          "seconds": 8,
+          "frame": "The state after step two, ready for the final approved action.",
+          "action": "Perform the final small action and place the completed result where the camera can read it. Let hands leave the important detail, settle and hold the useful result for the editor-added takeaway.",
+          "audio": "Final contact sound followed by quiet room tone."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "before-after",
+      "title": "Matched before and after",
+      "category": "Formats",
+      "kind": "format",
+      "description": "Two honest, matched views joined at a precise edit point.",
+      "reference_requirements": [
+        "Two genuine before/after references with identical camera, lighting and framing."
+      ],
+      "shots": [
+        {
+          "title": "Before",
+          "seconds": 8,
+          "frame": "The real before condition, composed to match the after frame.",
+          "action": "Keep a locked camera and the actual before state unchanged. Allow only small ambient movement. Near the end, move the approved foreground object across the lens until it covers the frame.",
+          "audio": "Natural ambience and one soft covering swish."
+        },
+        {
+          "title": "After",
+          "seconds": 8,
+          "frame": "The genuine after condition at exactly the same camera position, scale and light.",
+          "action": "Begin with the same foreground cover, then withdraw it to reveal the genuine after state. Keep camera position and lens unchanged and let the final condition remain still long enough to compare.",
+          "audio": "Continue the swish and settle into the same room tone."
+        }
+      ],
+      "pitfalls": "Do not invent health, beauty, money or product results. The source images must substantiate the comparison.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "travel-reveal",
+      "title": "Travel place, detail, feeling",
+      "category": "Formats",
+      "kind": "format",
+      "description": "A place earns attention through one reveal, one local detail and a human-scale ending.",
+      "reference_requirements": [
+        "Three location-consistent frames; verify place facts and imagery rights."
+      ],
+      "shots": [
+        {
+          "title": "Place",
+          "seconds": 8,
+          "frame": "A wide composition with a foreground obstruction and the destination partly visible.",
+          "action": "Track gently sideways past the obstruction to reveal the real destination. Keep architecture, horizon and light consistent, then settle on a clear complete view.",
+          "audio": "Authentic location ambience; no invented landmark narration."
+        },
+        {
+          "title": "Detail",
+          "seconds": 8,
+          "frame": "A close view of a real texture, craft or small activity from that place.",
+          "action": "Show one small local action or a restrained focus shift onto the actual detail. Keep the camera nearly still and preserve material texture without fabricating people or signage.",
+          "audio": "Close relevant foley over the continuing ambience."
+        },
+        {
+          "title": "Feeling",
+          "seconds": 8,
+          "frame": "A human-scale final view in the same place and time of day.",
+          "action": "Let the subject pause and take in the location while the camera makes a short slow pullback. Finish with both the person and place readable and a calm final hold.",
+          "audio": "A restrained musical resolution with authentic ambience."
+        }
+      ],
+      "pitfalls": "Review identity, geometry, motion and the final hold before accepting a clip.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "mini-documentary",
+      "title": "Micro documentary",
+      "category": "Formats",
+      "kind": "format",
+      "description": "A specific question, observed process and supported conclusion.",
+      "reference_requirements": [
+        "Rights-cleared subject/process references and a fact-checked script with source links."
+      ],
+      "shots": [
+        {
+          "title": "Question",
+          "seconds": 8,
+          "frame": "The documentary subject in its real context, with one meaningful detail visible.",
+          "action": "Observe a single ordinary action without an exaggerated reaction. Keep the camera at a believable observer’s height with subtle natural drift. End by drawing attention to the detail the narration will question.",
+          "audio": "Natural field ambience; narration is added from the sourced script."
+        },
+        {
+          "title": "Process",
+          "seconds": 8,
+          "frame": "A close reference of the real process or evidence being discussed.",
+          "action": "Follow one real step with a short lateral camera track. Keep the key contact point visible and preserve the actual object relationships. Do not invent supporting documents, labels or testimony.",
+          "audio": "Field-recording style process sounds with narration space."
+        },
+        {
+          "title": "Conclusion",
+          "seconds": 8,
+          "frame": "A context-consistent final composition of the original subject.",
+          "action": "Hold on the subject as the visible action reaches a natural stopping point. Let the camera settle and keep an uncluttered ending for the supported conclusion and source credit in editing.",
+          "audio": "Natural ambience continuing through the final hold."
+        }
+      ],
+      "pitfalls": "Generated reconstruction must be labelled; do not imply it is observed real documentary evidence.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    },
+    {
+      "id": "devotional-story",
+      "title": "Devotional visual story",
+      "category": "Story",
+      "kind": "format",
+      "description": "A respectful fictional devotional moment with need, help and a quiet resolution.",
+      "reference_requirements": [
+        "Consistent approved character references and one separate frame per beat."
+      ],
+      "shots": [
+        {
+          "title": "A small need",
+          "seconds": 8,
+          "frame": "The approved character in a respectful devotional setting with one clear small problem.",
+          "action": "Start on the small visible need rather than a long establishing view. Let the character look toward the important prop and make one gentle deliberate gesture. Preserve all approved iconography, garments, facial features and location details.",
+          "audio": "Soft temple or natural ambience; keep any chant or spoken line separately approved."
+        },
+        {
+          "title": "The helping moment",
+          "seconds": 8,
+          "frame": "The same character and prop at the moment of gentle help.",
+          "action": "Carry out one clear helping action with restrained motion. Use a slow short camera push and maintain the same sacred details, expressions and prop count. Keep the cause of the improvement visible; avoid spectacle that overwhelms the story.",
+          "audio": "A quiet appropriate bell accent and close natural foley."
+        },
+        {
+          "title": "The resolution",
+          "seconds": 8,
+          "frame": "The characters at peace in the same setting, with the original prop visible.",
+          "action": "Let the characters settle into a calm final pose. Hold the original prop and a shared expression in the composition so the payoff connects to the opening. Keep lighting continuous and leave room for an optional editor-added closing line.",
+          "audio": "A restrained devotional musical resolution with a clean ending."
+        }
+      ],
+      "pitfalls": "Present as an original fictional devotional story, not an event or scripture quotation unless sourced.",
+      "source_urls": [
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md",
+        "https://github.com/higgsfield-ai/skills/blob/main/higgsfield-generate/references/prompt-engineering.md"
+      ],
+      "origin": "Vegas original recipe; informed by the linked public guidance, not an official Higgsfield preset export",
+      "version": 2
+    }
+  ]
+}

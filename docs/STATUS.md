@@ -1,3 +1,13 @@
+# Current checkpoint — content engine 0.13
+
+- Replaced the old gallery with 35 text-first original recipes and 65 complete editable shot prompts; required references, clip boundaries, continuity, audio and pitfalls are visible before selection. Exact edits persist to project history.
+- Bundled pinned MIT Instagram/marketing craft and hashes; added four bounded no-key metadata adapters and a ten-source registry. No shared credentials.
+- Added private channel creative memory, immutable release snapshots, opt-in bounded provider observations and evidence-linked next experiments. Views are descriptive; missing retention/scopes and insufficient comparable samples remain explicit. ChatGPT reviews run in the actual host, not a fictional background agent.
+- Updated the blue/ink theme, vector logo and two generated photographic assets while retaining the accepted reference dashboard composition.
+- Validation: 165 Python tests, five Node tests, JS/Python/shell checks and all four Chromium suites pass locally. Additional focused browser checks verify three distinct shot editors, exact edited-prompt persistence, the channel-memory dialog and research registry. Desktop/dark/mobile gallery and landing/sign-in renders were inspected; a low-contrast photo overlay was corrected. A minimal-context skill forward test confirmed per-channel evidence and approval boundaries; its suggested studio→plan bridge and installation-wide observer scope were clarified. The first GitHub browser run exposed a save/refresh race; forced refreshes now await an in-flight refresh and successful dialogs close after the saved state renders. Live VPS metadata probes returned real Wikipedia and Hacker News results. Crossref rejected the HTML Accept header (406); API requests now explicitly request JSON. GDELT returned 429; backoff was recorded without a retry. Live deployment remains pending. No new paid generation, social publication or OAuth consent is part of this engineering release. See [contracts, provenance and rollback](CONTENT-ENGINE-0.13.md).
+
+---
+
 # Current checkpoint — reference dashboard correction
 
 - The owner rejected the previous 0.12 visual match. Replaced its wide labelled sidebar and stacked/two-column overview with the supplied reference's narrow icon rail, greeting/search header, four compact summary tiles and six-panel 2–1–1 composition. Added workspace/profile and explicitly labelled observed-balance panels; featured project, queue and actual specialist activity occupy the second row.

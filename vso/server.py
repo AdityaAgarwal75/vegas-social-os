@@ -222,10 +222,13 @@ class Handler(BaseHTTPRequestHandler):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
             file='admin.js' if path=='/admin.js' else 'admin.html'
             return self.send((Path(__file__).parent.parent/'web'/file).read_bytes(),content_type='application/javascript' if file.endswith('.js') else 'text/html')
+        if path.startswith('/brand/'):
+            filename=path.removeprefix('/brand/')
+            if filename not in ('studio-stage.webp','storyboard-desk.webp'):return self.send({'error':'Not found'},404)
+            return self.send((Path(__file__).parent.parent/'web/brand'/filename).read_bytes(),content_type='image/webp',cache_control='public, max-age=86400')
         if path.startswith('/template-preview/'):
-            from .templates import ROWS
             filename=path.removeprefix('/template-preview/')
-            allowed={r[3]+'.png' for r in ROWS}
+            allowed={'product.png','portrait.png','fashion.png','landscape.png'} # Legacy assets; no longer gallery previews.
             if filename not in allowed:return self.send({'error':'Preview not found'},404)
             return self.send((Path(__file__).parent.parent/'web/template-previews'/filename).read_bytes(),content_type='image/png',cache_control='public, max-age=3600')
         if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js", "/oauth-consent.js", "/control.css", "/theme.js"):

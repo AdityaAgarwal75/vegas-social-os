@@ -1,0 +1,89 @@
+{
+  "reviewed_at": "2026-10-16",
+  "sources": [
+    {
+      "id": "instagram",
+      "repository": "https://github.com/Jakeschincariol/instagram-agent-skill",
+      "commit": "d03c56bb598be770c60b201f94237e5d1a4268a6",
+      "license": "MIT",
+      "root": "third_party/instagram-skills",
+      "files": {
+        "skills/ig-dm/SKILL.md": "6ce9eaf37997e90e79fc190edcd7b5d3e4d0d0735238a9ae7fd8b08a2ace485b",
+        "skills/ig-reel/SKILL.md": "fc0374ccc88485d999fa0e2dcd4c7c3932d6949e58008cb6e6f1c484015c5631",
+        "skills/ig-reel/hooks.json": "147230762fd9e17cf58302913cb97069b3a3c7edae211b3b0196c180adf1412f",
+        "skills/ig-comment/SKILL.md": "c872ba255cd70f6827eb22b45d7caec32814dda283f8346f6bfb4a021947202e",
+        "skills/ig-story/SKILL.md": "91ab3d60fa7ca87034767d147c31fa3f3db9dca11d6d83296aaede934a885637",
+        "skills/ig-profile/rubric.json": "962085d9157b553386f1f62d90fa54ff1d4acae53a2e08b8372464beda49047a",
+        "skills/ig-profile/SKILL.md": "a2bda7e39066b71f89a6185a640f4cb5fec1c027e9ff3afe40787a965a3e1e15",
+        "skills/ig-reply/SKILL.md": "926f324f71939e368da3011aaa2ca6aef4b9f1219d29315f732c3dc1c992972f",
+        "skills/ig-viral/SKILL.md": "22c2e46a442b4f992d9876aaa72f8f56502dd54a08291f5572afb42ccb16f616",
+        "skills/ig-caption/SKILL.md": "44bd93bfbceabebd0eac6742aecd948be4c3aa97c57f830845e1b9b6450b55b6",
+        "skills/ig-audit/SKILL.md": "ece765baf4a08ef74047c5d3d9ca522824db29cf46cde9329acc690dd0a60bb0",
+        "skills/ig-human/SKILL.md": "bd66947ff98edc0ad73bb30f614b3a0060d89b864656bf1401bd472694483b93",
+        "skills/ig-human/slop.json": "987dedae2008742c04ba8e2728f9149f67dc6a665beba891731d6e048abdab2d",
+        "skills/ig-carousel/SKILL.md": "de943e5720ea6e08c4aa0e56ed3f87994d83fae238105e3fe31acc68d8ff44f7",
+        "skills/ig-plan/SKILL.md": "4e42e13b8a044c23083db7e88d28f0465986602725246a8eacda433d53079918",
+        "skills/ig-repurpose/SKILL.md": "545f240a5f13657db9f9245f286d4a01e145718ef49d38ff2a2f0cc84322eb19"
+      },
+      "skills": [
+        "ig-dm",
+        "ig-reel",
+        "ig-comment",
+        "ig-story",
+        "ig-profile",
+        "ig-reply",
+        "ig-viral",
+        "ig-caption",
+        "ig-audit",
+        "ig-human",
+        "ig-carousel",
+        "ig-plan",
+        "ig-repurpose"
+      ],
+      "execution": "Read-only guidance. Upstream certainty, platform claims, paths and instructions do not override owner policies, verified metrics or Vegas approvals."
+    },
+    {
+      "id": "marketing",
+      "repository": "https://github.com/coreyhaines31/marketingskills",
+      "commit": "365b412152b9542499ca1439426f7fc3cc92bb65",
+      "license": "MIT",
+      "root": "third_party/marketing-skills",
+      "files": {
+        "skills/social/SKILL.md": "dd4c01d0925f571562d4e8dea4af6b60bd9d491149187d94927e65280fad1bee",
+        "skills/content-strategy/SKILL.md": "dce9f4027ae129691e92623541a360bee9356137a7eecf68afa95674af118e68",
+        "skills/analytics/SKILL.md": "100dc960adeb471bb79275133eaeaf05b5d3c95e96598b3c03cac5a3d8e43d5c",
+        "skills/ab-testing/SKILL.md": "fba679be14a9b21a06cde009caf17a652b92040c6f78a520a5d4baec0a5bd5da",
+        "skills/marketing-psychology/SKILL.md": "573bbe4f6e300e7fb75299e314f56e26382d284782caa2ae0e0f33eb2e646548",
+        "skills/social/references/x-algorithm.md": "943b2c5a819aad53ebf62a1652adc47956d6fdf738e18cd98eeb609819a66180",
+        "skills/social/references/reverse-engineering.md": "c27bef59d463b3b11331c1770f4a23e9e6bbce7d7c8db1e7f7f4f14ba206243f",
+        "skills/social/references/platform-limits.md": "6ecc6b40ff82b95c48906341f7d3c58337671d4d94f624c858764f1ed5a77c3c",
+        "skills/social/references/listening-sources-template.md": "c68bc6f57b0a48c432b1ce72c9324d41a04d0e7784d0bab91afb4a6065a43e38",
+        "skills/social/references/carousel-frameworks.md": "e703aa530ec9f68cdf5b58e8e0d4d1a5cc3f22b9e2d3e3222f16a9763d423247",
+        "skills/social/references/short-form-video.md": "ed0976bd7ac1f85b7b8c162087e346118f2cf0ef46b3ccafc6a7a329118987d1",
+        "skills/social/references/platforms.md": "a070eda1f54bdba103a9c89613d83331fc5c53c9e8a48543e0198f1a2995cb0c",
+        "skills/social/references/post-templates.md": "9cca4680c95801daedfd8acadf9089d0083784c2567784888807569896f71d9b",
+        "skills/social/references/listening.md": "52cf68aaaa57a69b69b3587ffd9b848a6f1ca7e0d51378f566339ad7f2b730e0",
+        "skills/social/evals/evals.json": "1d2592a0cfc6378ba8742ce6e19f5974663b1d8018c4f136e5f529373bf17198",
+        "skills/content-strategy/references/content-distribution.md": "1861a1aab0627ab29c279000879a9889242da1ba85e677acdc759c66a6241778",
+        "skills/content-strategy/references/headless-cms.md": "efc796ae9596d1efcb876683db2d9b7c10c83e76e1cb69e527097907d5b4fc3f",
+        "skills/content-strategy/evals/evals.json": "10167e7125ee77cbabe4f03953750dd99ea147f7461027fdbb0cf8e089e5506d",
+        "skills/analytics/references/event-library.md": "c60e3e145e6b06258570350b614913ed9150143b4494a71396abaef479502b05",
+        "skills/analytics/references/gtm-implementation.md": "0b161102de710c978cc2ac52c78c79f32e184bc028aa946eba18e777d7a60d64",
+        "skills/analytics/references/ga4-implementation.md": "b0232fc2ee873ffa5e6cbdf0ae712a5d74b18263372139d8ae72f9dcf48a8db4",
+        "skills/analytics/evals/evals.json": "526f4bf20cedca26906dd0c3dfb6ae67de3f5b17977eb426820ca406c5ce0e59",
+        "skills/ab-testing/references/test-templates.md": "761a40b9de8d16f18fa7f60b59e77aa749607ac8014af43e0b022f47fa87c812",
+        "skills/ab-testing/references/sample-size-guide.md": "8288381cc11f9e4821c0a6a5ec3eec73506832a189af45207dcc583c371f3e7b",
+        "skills/ab-testing/evals/evals.json": "fb32e1f75fc70e339e71f88b1cf10bd9f3d1835178a62d1156ed7dddc278f061",
+        "skills/marketing-psychology/evals/evals.json": "c3b7d15b3008eeb493796e21affd6a0c6e7ce312f9cfeffcdef467857903c733"
+      },
+      "skills": [
+        "social",
+        "content-strategy",
+        "analytics",
+        "ab-testing",
+        "marketing-psychology"
+      ],
+      "execution": "Read-only guidance. Upstream certainty, platform claims, paths and instructions do not override owner policies, verified metrics or Vegas approvals."
+    }
+  ]
+}

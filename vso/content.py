@@ -16,6 +16,8 @@ def content_request(engine,channel_id,week_start,request_id):
     if not request_id or len(request_id)>200:raise ValueError('Stable request ID required')
     research=[n for n in engine.store.all('research') if n['channel_id']==channel_id]
     recent_titles=[p['concepts'][p['selected'] or 0]['title'] for p in engine.store.all('plan') if p['channel_id']==channel_id][-15:]
+    from .learning import context
+    learning_context=context(engine,channel_id)
     ident=engine.store.digest('content:'+request_id)[:32]
     with engine.store.db() as db:
         row=db.execute("SELECT body FROM records WHERE kind='content-request' AND id=?",(ident,)).fetchone()
@@ -23,10 +25,10 @@ def content_request(engine,channel_id,week_start,request_id):
             old=json.loads(row[0])
             if old['channel_id']!=channel_id or old['week_start']!=week_start:raise ValueError('Request ID already used')
             return old
-        body=dict(id=ident,channel_id=channel_id,week_start=start.isoformat(),status='awaiting_agent',strategy=strategy,created_at=time.time(),channel=channel,
+        body=dict(learning_context=learning_context,id=ident,channel_id=channel_id,week_start=start.isoformat(),status='awaiting_agent',strategy=strategy,created_at=time.time(),channel=channel,
                   research=research,
                   recent_titles=recent_titles,
-                  instruction='Act as content strategy manager. Research current audience needs with actual sources. Propose a balanced week across the saved pillars, avoid recent repeats, give distinct hooks and specific useful angles. Draft scripts, captions and optional scenes with separate image_prompt/video_prompt in the brand voice. Use empty sources only for clearly labeled creative hypotheses, never current trend claims. Never invent results, testimonials or metrics. Save drafts with content_plan_save; await review. Do not publish, spend credits or claim an unattended ChatGPT run.')
+                  instruction='Read content_context and the bundled instagram/ig-reel, instagram/ig-viral, instagram/ig-plan and marketing/content-strategy references through skill_reference. Retrieve this channel’s actual prior prompts and observations. Treat low-sample lessons as hypotheses; choose one next variable and a measurable checkpoint. Save exact creative decisions through content_memory_save before release. Act as content strategy manager. Research current audience needs with actual sources. Propose a balanced week across the saved pillars, avoid recent repeats, give distinct hooks and specific useful angles. Draft scripts, captions and optional scenes with separate image_prompt/video_prompt in the brand voice. Use empty sources only for clearly labeled creative hypotheses, never current trend claims. Never invent results, testimonials or metrics. Save drafts with content_plan_save; await review. Do not publish, spend credits or claim an unattended ChatGPT run.')
         engine.store.write(db,'content-request',ident,body)
     return body
 

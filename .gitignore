@@ -7,7 +7,10 @@ __pycache__/
 *.sqlite*
 *.db
 vault.key
-data/
+data/*
+!data/video-recipes.json
+!data/content-sources.json
+!data/research-sources.json
 profiles/
 media/
 node_modules/
