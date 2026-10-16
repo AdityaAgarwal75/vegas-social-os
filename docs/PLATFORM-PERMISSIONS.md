@@ -1,5 +1,7 @@
 # Provider permissions and supported operations
 
+**Practical installation-to-first-post instructions, tested delete workflow, and exact error remedies:** [Complete social setup runbook](COMPLETE-SOCIAL-SETUP.md). The table below lists platform OAuth families. **Permissions requested in an app are not automatically granted to a user or approved for unrelated public users.**
+
 Every operator owns their own registrations and credentials. The dashboard derives callback URLs from their installation's HTTPS origin and stores client secrets encrypted. Google Flow sign-in, Google YouTube OAuth, Instagram Login and Facebook Page login are separate connections.
 
 | Integration | Account type | Requested permissions | Composer operations |
@@ -9,6 +11,8 @@ Every operator owns their own registrations and credentials. The dashboard deriv
 | Instagram API with Instagram Login | Business or Creator | `instagram_business_basic`, `instagram_business_content_publish` | JPEG image, MP4 Reel, carousel up to ten items; captions; JPEG cover for a single Reel |
 | Facebook Pages | Page with create-content task | `pages_show_list`, `pages_read_engagement`, `pages_manage_posts` | Text/link posts, JPEG/PNG photos, photo sets, single MP4 Page video; personal timelines unsupported |
 | Google Drive (optional) | Owner-authorized archive account | `drive.file` | Archive imported generated media; no full-Drive scope required |
+
+**Additional Meta grant for Instagram media DELETE:** `pages_show_list`, `pages_read_engagement`, `instagram_basic`, `instagram_manage_contents` via **Facebook Login for Business**, on a Page verifiably linked to the exact Instagram Login account. This is not the same as Instagram Login's publishing grant. A provider-confirmed deletion was tested against one founder-owned Reel on 16 October 2026; it does not imply public Advanced Access approval.
 
 Facebook custom video thumbnails and dedicated Facebook Reel endpoints are not implemented in this release. Instagram/YouTube/Facebook analytics expansion, DMs, comments, Stories, TikTok, X, LinkedIn, Pinterest and other providers need separate tested adapters and permissions. Do not show them as connected or silently use login scraping to replace official APIs.
 
@@ -36,6 +40,11 @@ Primary references:
 - https://www.postman.com/meta/instagram/folder/1z5vxzu/instagram-api-with-instagram-login (Meta-maintained collection)
 
 ## Facebook
+
+**Two different permission sets:** the Page *publishing* composer expects `pages_show_list`, `pages_read_engagement` and **`pages_manage_posts`** plus eligible Page tasks; the tested Instagram *deletion* adapter uses **`pages_show_list`, `pages_read_engagement`, `instagram_basic`, `instagram_manage_contents`** and a numeric Page→Instagram association. A Page may connect successfully with the deletion scopes but still lack `pages_manage_posts`. The actual granted scopes must be inspected per Page. Do not claim the Page's photos/videos are writable merely because its login succeeded.
+
+Facebook Login for Business **Configuration ID** selects a configured permission grant; it is not the **Meta developer App ID** or the **App Secret**. Valid OAuth Redirect URIs are entered in Login **Settings**, not in the **Configurations** list. One consent may import multiple Facebook Pages with the same user-provided label; inspect all returned Page IDs and linked professional Instagram IDs.
+
 
 Register a Meta app with the appropriate Facebook Login for Business/use-case configuration. Use its own app ID/secret and a **configuration ID** if required by that app setup. Register **/callback/facebook** and request the three Page scopes above. The connector checks granted permissions, discovers `/me/accounts`, and saves eligible Page identities/tokens separately. The operator needs a Page content-management task; a personal account login alone does not permit Page publication.
 

@@ -26,6 +26,10 @@ If the authorization page stays on “Redirecting,” close it and reconnect fro
 
 ## 4. Connect your accounts
 
+**Follow the [full community social onboarding guide](COMPLETE-SOCIAL-SETUP.md)** for exact credential names, requested permissions, per-installation redirect URI registration, safe multi-Page Meta consent, Reels, YouTube thumbnails and Instagram deletion. A configured developer app is **not** a connected provider user. For Instagram publishing and Facebook Page-linked deletion, **Instagram Login and Facebook Login for Business are separate OAuth grants**. Do not expect one login to provide both capabilities.
+
+
+
 - **Google Flow:** Open Connections → Google account login. Add a label, open the private browser, sign into Google yourself, complete verification, open a Flow project, then verify access. Repeat for your own profiles. The browser runs on your server; laptop Chrome sign-in does not connect it.
 - **YouTube:** Configure your own official Google OAuth application through the agent/operator setup, then sign in and approve upload/read scopes. Flow login alone does not authorize YouTube publishing.
 - **Instagram:** Use an eligible professional account and your installation’s official app registration and callback. Required review/permissions remain provider-controlled.
@@ -75,7 +79,9 @@ No email service is required. If no authorized infrastructure connection is avai
 | Connection service needs setup | Ask the installation agent to configure the provider’s official application. |
 | Google sign-in challenge | Complete the provider challenge personally; do not bypass it. |
 | Flow project not ready | Open a signed-in Flow project in the VPS browser and verify again. |
-| Plugin tools unavailable | Reconnect in a supported ChatGPT host; verify an authenticated harmless tool call. |
+| Plugin tools unavailable or old list persists | Compare the authenticated server MCP `tools/list` with ChatGPT's exposed actions. Refresh the plugin release **and host-side tool discovery**, then start a new connected chat. VPS changes alone do not refresh the client snapshot. |
+| Instagram Reel delete reports missing Facebook Page | In `account_list`, verify a Facebook Page linked to the exact Instagram **numeric ID** and actual `instagram_manage_contents` grant. Complete separate Facebook Login consent as needed. |
+| Facebook Page connected but Instagram not listed for upload | Sign in to Instagram Login separately **for that Instagram profile**; Page-linked identities are not Instagram publishing connections. |
 | Unknown rendering/upload outcome | Ask the agent to inspect the original job; do not start a duplicate. |
 
 See [self-hosting](SELF-HOSTING.md), [current evidence](STATUS.md), [platform permissions](PLATFORM-PERMISSIONS.md) and [security](../SECURITY.md). Keep passwords, recovery links, browser profiles and backups private.

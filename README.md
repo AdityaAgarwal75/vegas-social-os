@@ -2,6 +2,8 @@
 
 ![Vegas Studio — ideas in chat, production under control](docs/assets/banner.svg)
 
+**[Complete Instagram / Facebook / YouTube setup (scopes, redirects, uploads, deletion, thumbnails)](docs/COMPLETE-SOCIAL-SETUP.md)**
+
 [Start here](docs/USER-GUIDE.md) · [Self-host](docs/SELF-HOSTING.md) · [Current status](docs/STATUS.md) · [Security](SECURITY.md)
 
 Your social production team inside ChatGPT.
@@ -41,6 +43,14 @@ Your agent uses the [AWS setup recipe](docs/AWS-ONBOARDING.md), scoped AWS tools
 Vegas Social OS provides a read-only `meta_mcp_setup` tool and a **Workspace settings → Meta developer setup** panel. New users are guided to connect the official Meta Social Technologies MCP at `https://mcp.facebook.com/devtools` in their own ChatGPT/IDE client. That integration helps the agent inspect app roles and App Review grants, detect OAuth callback mismatches, check compliance, and manage explicitly approved webhooks. See **[Meta MCP setup and exact capabilities](docs/META-MCP-ONBOARDING.md)**. Users without beta access can follow the manual Meta Developer setup path.
 
 Meta MCP's developer-app **Manage** access does NOT grant Instagram/Facebook Page OAuth privileges or approval to delete Reels. The app-creation and use-case tools advertised in Meta's documentation are **coming soon** and cannot be required or claimed as operational until the connected Meta MCP actually exposes them.
+
+## Complete community social onboarding: 2026 verified steps
+
+Follow the **[step-by-step social setup runbook](docs/COMPLETE-SOCIAL-SETUP.md)** before connecting platforms. It includes a capability/permissions matrix, separate Meta Instagram Login versus Facebook Login for Business, the distinction between the Facebook **App Secret and Configuration ID**, **Valid OAuth Redirect URIs** setup, exact per-installation callbacks, owner-only OAuth consent, Page-to-Instagram identity verification, YouTube MP4 and thumbnail behavior, the approved provider-confirmed Instagram media deletion sequence, and the errors actually encountered during founder testing.
+
+**Verified 16 October 2026:** owner-authenticated Instagram publishing, a YouTube private upload with thumbnail, and an explicit approval-gated **Meta-confirmed deletion of one test Instagram Reel** using a matching authorized Facebook Page. This proves a particular owner grant and media ID worked—not blanket permission for other users or a universal App Review approval. Facebook Page publication still requires its separate posting permission and live acceptance; YouTube deletion and post-publication Instagram cover edits are not implemented.
+
+Multi-page Facebook consent can import more than one Page under the same connection label. Every Page must be checked by **Page ID and linked Instagram ID**. A linked Page is not automatically an Instagram Login publishing connection for that Instagram profile. Never post or delete just because an account appears after a bulk Meta consent.
 
 ## Google accounts and social connections
 
@@ -120,7 +130,7 @@ The ZIP includes the master workflow, Flow craft and setup/review references. In
 | Flow models/settings | Account-specific menu/settings probes; advanced operations and paid render acceptance pending |
 | Native ChatGPT keyframes | Requires actual host image tool and transferable bytes; prompts alone are not images |
 | Storyboard revisions | Durable idempotent feedback, immutable originals, fresh approvals on new plans |
-| Social publishing | Implemented adapters/offline guards; real provider consent and release trials pending |
+| Social publishing | Owner-verified Instagram publishing and Meta-confirmed test Reel deletion; single-channel YouTube private upload and thumbnail tested. Independent accounts and Facebook Page publishing need their own consent/trials |
 | Daily briefs/approved schedules | VPS queues briefs and schedules exact approved posts while running |
 | ChatGPT event continuation | Protocol and signed delivery implemented; actual Web host continuation not accepted |
 | Full VPS admin in same plugin | Isolated root-owned Unix broker implemented; owner approval/enrollment required |

@@ -1,3 +1,14 @@
+# Current documentation checkpoint — 16 October 2026 social onboarding and founder trials
+
+- New **[complete social setup runbook](COMPLETE-SOCIAL-SETUP.md)** covers developer app and private App Secret setup; Login Configuration ID vs registered Valid OAuth Redirect URIs; Instagram Login versus Facebook Login for Business, their separate permission families and user consents; YouTube and Drive scopes; cover/thumbnail behavior; safe multi-Page import and exact Page→Instagram matching; review-gated provider-confirmed Instagram Reel deletion; actionable troubleshooting.
+- **Live evidence from founder's installation:** the Facebook developer app callback and App Secret were configured; a real owner OAuth consent imported four separately identified Facebook Pages. The Page linked to the previously authorized Instagram professional account had the actual requested `instagram_manage_contents` grant. A single previously Vegas-published, owner-approved 10-second test Reel was deleted via Meta Graph, and both Vegas deletion status and original publication status returned `deleted` with provider confirmation.
+- The **official Meta developer MCP** still reported the specific app's required permissions as rejected/not live for public Advanced Access; this status did **not** negate the successful owner/app-role OAuth grant. The result is not a promise for unrelated users, unsupported media, or any other app.
+- **Connection boundary:** imported Facebook Pages are **not** automatic Instagram Login publishing accounts. Facebook Page publishing needs a separate `pages_manage_posts` grant and acceptance; custom after-publish Instagram Reel cover editing, Facebook Reel publishing, Facebook post delete, and YouTube video delete are **not** accepted features of the primary plugin.
+- **MCP client discovery recovery:** the server advertised 126 tools while a stale ChatGPT client exposed only 107. After the app releases were refreshed and the host's tool discovery updated, all four Instagram deletion tools appeared and were callable. Updating repository/host alone does not necessarily update client tool lists.
+- This checkpoint documents **observed evidence and scope limitations**. The new community walkthrough is documentation; do not interpret it as additional API implementations or broader automatic authorization.
+
+---
+
 # Current checkpoint — 0.11.3 Meta MCP assisted onboarding
 
 - Added `meta_mcp_setup` as a read-only, installation-owned ChatGPT plugin tool. It exposes exact OAuth callbacks, nonsecret developer App IDs, per-provider configuration readiness, and a capability catalog without asserting any user Meta MCP connection, App Review approval or business login.
