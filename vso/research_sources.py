@@ -32,13 +32,13 @@ def search(engine,provider,query,limit=5):
         except ValueError:pass
         try:budget=engine.store.get('research-provider',provider)
         except ValueError:budget={}
-        if now<budget.get('retry_after',0) or now-budget.get('last_request',0)<2:raise ValueError('Research provider pacing/backoff is active; use cached results or wait')
+        if now<budget.get('retry_after',0) or now-budget.get('last_request',0)<(6 if provider=='gdelt' else 2):raise ValueError('Research provider pacing/backoff is active; use cached results or wait')
         engine.store.put('research-provider',provider,{'last_request':now})
         if provider=='wikipedia':url='https://en.wikipedia.org/w/api.php?'+urlencode({'action':'query','list':'search','srsearch':query,'srlimit':limit,'format':'json'})
         elif provider=='crossref':url='https://api.crossref.org/works?'+urlencode({'query':query,'rows':limit,'select':'DOI,title,URL,publisher,published'})
         elif provider=='hackernews':url='https://hn.algolia.com/api/v1/search_by_date?'+urlencode({'query':query,'tags':'story','hitsPerPage':limit})
         else:url='https://api.gdeltproject.org/api/v2/doc/doc?'+urlencode({'query':query,'mode':'artlist','format':'json','maxrecords':limit,'timespan':'7d','sort':'datedesc'})
-        status,headers,body=get(url,250000)
+        status,headers,body=get(url,250000,accept='application/json')
         if status==429:
             delay=next((v for k,v in headers.items() if k.lower()=='retry-after'),'300')
             delay=min(3600,max(60,int(delay))) if str(delay).isdigit() else 300

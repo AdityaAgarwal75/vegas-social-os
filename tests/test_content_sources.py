@@ -30,6 +30,7 @@ class ContentSourcesTests(unittest.TestCase):
   data={'query':{'search':[{'title':'Black hole','snippet':'<b>Read</b> primary evidence'}]}}
   with patch('vso.research_sources.get',return_value=(200,{},json.dumps(data).encode())) as get:
    first=research_sources.search(self.e,'wikipedia','black hole')
+   self.assertEqual(get.call_args.kwargs['accept'],'application/json')
    self.assertTrue(get.call_args.args[0].startswith('https://en.wikipedia.org/w/api.php?'))
    self.assertEqual(first['results'][0]['summary'],'Read primary evidence')
    self.assertIn('Untrusted',first['trust'])
