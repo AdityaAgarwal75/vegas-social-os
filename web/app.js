@@ -87,8 +87,8 @@ const agentPrompt=[
   'Never retrieve credentials, claim account access from developer-app read permissions, submit App Review or change webhooks without my explicit approval.',
   'App creation and use-case modification are currently announced as coming soon: never claim they ran unless actual callable tools are present.',
   'After the audit, guide me to save the provider App Secret ONLY in my private Vegas Social OS settings; use official OAuth to connect the exact Facebook Page/Instagram account.'
-].join('\\n');
-metaActions.append(btn('Copy agent setup prompt',async()=>{await navigator.clipboard.writeText(agentPrompt);notice('Meta MCP agent prompt copied. Paste it into a chat with your connected Meta MCP.');},'secondary','copy'));
+].join('\n');
+metaActions.append(btn('Copy agent setup prompt',async()=>{await navigator.clipboard.writeText(agentPrompt);notice('Meta MCP agent prompt copied. Paste it into a chat with your connected Meta MCP.');},'secondary','connect'));
 metaActions.append(btn('Configure Facebook OAuth',()=>{const target='#setup/facebook';if(location.hash!==target)location.hash=target;else navigate();},'secondary','settings'));
 metaPanel.append(E('p','In ChatGPT, connect https://mcp.facebook.com/devtools using OAuth and choose the correct developer apps. The Meta MCP grant lives in ChatGPT, not on the VPS; Vegas cannot verify it without the agent checking live Meta tools.','muted'),metaActions,E('p','What it can do now: list apps, inspect settings, verify App Review requirements, audit API health, and manage approved webhook subscriptions. It cannot yet create apps or grant all permissions; those lifecycle tools are announced as coming soon. Owner login, provider secrets and app review remain separate.','muted'));
 root.append(metaPanel);
