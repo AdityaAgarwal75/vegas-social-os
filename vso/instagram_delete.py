@@ -150,8 +150,12 @@ def execute(engine, deletion_id):
         response, _ = net.request(root + "/" + record["media_id"], method="DELETE", token=token)
         if response.get("success") is not True:
             raise ValueError("Meta did not affirm the deletion")
-        record.update(status="deleted", deleted_at=time.time(), provider_confirmed=True)
+        when = time.time()
+        record.update(status="deleted", deleted_at=when, provider_confirmed=True)
         engine.store.put("media-deletion", deletion_id, record)
+        publication = engine.store.get("publication", record["publication_id"])
+        publication.update(status="deleted", deleted_at=when, deletion_request_id=deletion_id)
+        engine.store.put("publication", record["publication_id"], publication)
         engine.store.log("instagram.delete.confirmed", deletion_id)
         return record
     except (ValueError, KeyError, TypeError):
