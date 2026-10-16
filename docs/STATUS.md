@@ -1,4 +1,11 @@
-# Current engineering checkpoint — 0.10.0 Vegas Studio
+# Current checkpoint — 0.11.0 Horizon layout rebuild
+
+- Replaced the stacked dashboard with the official Horizon default composition: six compact statistics, paired resource/production charts, production table alongside daily activity/media distribution, and specialist table alongside release queue/calendar. This is a native adaptation of the working MIT source, not an editable Figma frame extraction. The supplied Figma file has only promotional artwork; component search found no Horizon dashboard components.
+- All values use observed installation records. No financial demo data, fabricated traffic, fake growth or inferred completed outputs. Empty chart values stay zero. Resource samples show only measured CPU/memory values. Calendar dates open the existing schedule and support month navigation.
+- Owner approvals now show server error descriptions and hide the form after successful enrollment or approval, avoiding duplicate submissions that show generic invalid_request.
+- Validation and deployment of this release are pending. Previous 0.10.0 remains live until the reviewed release is approved and verified.
+
+# Previous engineering checkpoint — 0.10.0 Vegas Studio
 
 - Rebranded the product as Vegas Studio with an original SVG logo. Existing installation paths, OAuth identifiers, stored accounts and assets remain compatible.
 - Applied Horizon UI's official MIT-licensed free dashboard design language across the control room, templates, login/recovery, owner approvals and private browser. Self-hosted DM Sans uses the OFL. Pinned source, hashes and licenses are in `third_party/horizon-ui` and `web/fonts`.
