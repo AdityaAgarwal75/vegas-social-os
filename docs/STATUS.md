@@ -1,3 +1,11 @@
+# Facebook Login for Business configuration field — 16 October 2026
+
+- Meta's Facebook Login for Business Configuration ID is separate from both the Meta App ID and App Secret. The private Workspace settings form now exposes a `config_id` text field only for the Facebook provider; `vso/config.py` already accepted and encrypted the value.
+- Regression test verifies the field is present and that saving provider configuration returns only nonsecret public metadata. JavaScript syntax and all **154 Python tests** pass in an isolated AWS VPS checkout. Developer OAuth consent, App Review, remote Reel deletion and the owner's secret entry are still separate and unverified.
+- New users may use the official Meta developer Configuration ID returned by their own app; never bake any user's IDs or secrets into the community repository.
+
+---
+
 # Current checkpoint — 0.11.3 Meta MCP assisted onboarding
 
 - Added `meta_mcp_setup` as a read-only, installation-owned ChatGPT plugin tool. It exposes exact OAuth callbacks, nonsecret developer App IDs, per-provider configuration readiness, and a capability catalog without asserting any user Meta MCP connection, App Review approval or business login.
