@@ -5,6 +5,8 @@
 **Authentication:** OAuth in the user's **own** ChatGPT, Codex or IDE client, with per-app access selection.  
 **Role:** Developer-app audits and approved webhook administration; NOT a replacement for Instagram/Facebook Page OAuth, social posting, billing approval or app review.
 
+**For the complete click-by-click setup** (separate Instagram vs Facebook apps, Configuration ID vs App Secret, exact redirect URL, deletion scopes, YouTube thumbnails and troubleshooting), open [Complete social setup](COMPLETE-SOCIAL-SETUP.md). This page focuses specifically on what the *separate Meta developer MCP* can and cannot do.
+
 ## Quick start for a new Vegas Social OS user
 
 1. Deploy Vegas Social OS using the repository setup instructions. Its owner dashboard stores developer App IDs and App Secrets independently, encrypted at rest.
@@ -15,7 +17,7 @@
 6. Compare approved OAuth redirect URI(s) to `meta_mcp_setup`'s **installation-specific** Facebook and Instagram callback URLs. A mismatch is a **hard connection blocker**, not something that should be silently changed in the plugin.
 7. Use Meta Developer's app dashboard (or supported future Meta MCP tool, when truly available) to configure required use cases and official redirect URIs, and complete App Review if needed. **Ready for testing ≠ approved/advanced access ≠ OAuth consent granted**.
 8. Enter the App ID, App Secret and supported Graph API version ONLY in your private Vegas owner dashboard. Never paste the secret into ChatGPT, CLI output, GitHub, documentation or Meta MCP chat prompts.
-9. Complete official Facebook Login for Business or Instagram Login consent for the exact professional account or Page. Verify the platform's numeric account ID in `account_list` and `account_info`. For deletion, approvals and resource identity must be checked again by Vegas Social OS.
+9. Complete **both** official login flows as required by the task: Instagram Login for upload; Facebook Login for Business for Page-bound media deletion. Verify **every** numeric account ID in `account_list`: one Facebook sign-in can import several separate Pages even if the user-supplied connection label names just one. For deletion, the Page's live linked IG numeric ID, actual `instagram_manage_contents` grant, and the exact recorded publication must match before approval/execution. A Facebook Page record is not an Instagram publishing record.
 10. Report the differences between developer-app status, live Meta MCP permissions, provider OAuth scopes and actual Social OS account connectivity. Never infer one from another.
 
 ### Tools that are available today (as of October 2026)
@@ -49,6 +51,8 @@ The same independent Vegas Social OS package still serves private self-hosted in
 ### Developer implementation notes
 
 `vso/meta_mcp.py` exposes the read-only `meta_mcp_setup` guidance tool using ONLY independent installation configuration. It does **not** make a server-side call to the Meta MCP. Agents directly invoke their user-connected `devtools_*` MCP tools, verify app selection, and produce audited findings. Dashboard buttons are instructional and copy official URLs/callback-specific prompts.
+
+**Founder acceptance, 16 October 2026:** the official Meta MCP still reported the chosen app's requested `instagram_manage_contents` as Rejected/Not Live while a Meta app-role user's **actual Facebook OAuth account grant contained** that scope. Vegas Social OS successfully performed one explicitly approved, exact-identity, provider-confirmed test Reel deletion; this **does not** imply Advanced Access for the general public. See [deletion workflow](COMPLETE-SOCIAL-SETUP.md#5-safely-delete-a-previously-published-instagram-reel).
 
 App Review permission states have nuances: a permission visible under "Permissions and features" with "Ready for testing" can simultaneously have no live Advanced Access. Always check `devtools_app_review.privileges`, `requirements`, and the actual provider OAuth scopes. Never mark an app "fully configured" only because `devtools_app_list` succeeded.
 
