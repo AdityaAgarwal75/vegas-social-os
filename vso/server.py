@@ -190,7 +190,9 @@ class Handler(BaseHTTPRequestHandler):
         if path in ('/help', '/forgot-password'):
             from .ui import guide, forgot
             return self.page('Your setup guide' if path == '/help' else 'Reset your password', guide(self.base) if path == '/help' else forgot())
-        if path in ('/', '/dashboard', '/onboarding') and not self.session():
+        if path == '/about' or (path == '/' and not self.session()):
+            return self.send((Path(__file__).parent.parent/'web/landing.html').read_bytes(),content_type='text/html')
+        if path in ('/dashboard', '/onboarding') and not self.session():
             return self.redirect('/login')
         if path == "/password":
             if not self.session() and not self.password_recovery():return self.page("Owner session required",
