@@ -50,7 +50,7 @@ class Accounts:
             if app["config_id"]:
                 params["config_id"] = app["config_id"]
             else:
-                params["scope"] = "pages_show_list,pages_read_engagement,pages_manage_posts"
+                params["scope"] = "pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_contents"
             return {"redirect": f"https://www.facebook.com/{self.config.version(provider)}/dialog/oauth?" + urllib.parse.urlencode(params)}
         params = {"client_id": app["client_id"], "redirect_uri": callback,
                   "response_type": "code", "state": state,
@@ -150,30 +150,45 @@ class Accounts:
         tokens.update(upgraded)
         permissions, _ = net.request(root + "/me/permissions", token=tokens["access_token"])
         granted = [p["permission"] for p in permissions.get("data", []) if p.get("status") == "granted"]
-        required = {"pages_show_list", "pages_read_engagement", "pages_manage_posts"}
-        if not required.issubset(granted): raise ValueError("Facebook consent is missing: " + ", ".join(sorted(required - set(granted))))
-        pages, _ = net.request(root + "/me/accounts?fields=id,name,access_token,tasks&limit=100", token=tokens["access_token"])
+        # Published-media deletion uses Facebook Login for Business, not the
+        # existing Instagram Login publishing token. Both grants stay separate.
+        required = {"pages_show_list", "pages_read_engagement", "instagram_basic", "instagram_manage_contents"}
+        if not required.issubset(granted):
+            raise ValueError("Facebook consent is missing: " + ", ".join(sorted(required - set(granted))))
+        page_fields = "id,name,access_token,tasks,instagram_business_account{id,username}"
+        pages, _ = net.request(root + "/me/accounts?" + urllib.parse.urlencode({
+            "fields": page_fields, "limit": 100}), token=tokens["access_token"])
         candidates = pages.get("data", [])
         # Paging URLs contain credentials: follow only the opaque cursor on a fixed origin.
         while len(candidates) < 500:
             after = pages.get("paging", {}).get("cursors", {}).get("after")
             if not pages.get("paging", {}).get("next") or not after: break
             pages, _ = net.request(root + "/me/accounts?" + urllib.parse.urlencode({
-                "fields": "id,name,access_token,tasks", "limit": 100, "after": after}), token=tokens["access_token"])
+                "fields": page_fields, "limit": 100, "after": after}), token=tokens["access_token"])
             candidates.extend(pages.get("data", []))
         saved = []
         for page in candidates:
             if not page.get("access_token") or not {"CREATE_CONTENT", "MANAGE"}.intersection(page.get("tasks", [])): continue
+            linked_ig = page.get("instagram_business_account") or {}
+            # Never infer a linked account from its display name. Use Meta's
+            # returned Instagram professional account numeric ID.
+            linked_ig_id = str(linked_ig.get("id") or "")
+            if not linked_ig_id.isdecimal():
+                continue
             ident = self.store.digest("facebook:" + app["client_id"] + ":" + page["id"])[:32]
             self.store.secret(ident, {"access_token": page["access_token"],
                 "expires_at": time.time() + int(tokens.get("expires_in", 60 * 86400))})
-            account = {"id": ident, "provider": "facebook", "remote_id": page["id"], "name": page["name"],
+            account = {"id": ident, "provider": "facebook", "remote_id": str(page["id"]), "name": page["name"],
                        "label": data["label"], "status": "connected", "permissions": granted,
-                       "verified_at": time.time(), "verification": "Page identity, granted scopes and content task verified; publishing not yet tested"}
+                       "linked_instagram_id": linked_ig_id,
+                       "linked_instagram_username": str(linked_ig.get("username") or ""),
+                       "facebook_app_id": str(app["client_id"]),
+                       "verified_at": time.time(),
+                       "verification": "Page and linked Instagram ID verified via Facebook Graph. No deletion tested."}
             self.store.put("account", ident, account)
             self.store.log("account.connect", ident)
             saved.append(account)
-        if not saved: raise ValueError("No eligible Facebook Pages found. Grant Page access and the create-content task, then reconnect.")
+        if not saved: raise ValueError("No eligible Facebook Pages with a linked professional Instagram account were found; select the linked Page and grant the required business permissions.")
         return {"name": str(len(saved)) + " Facebook Page(s)", "accounts": saved}
 
 
