@@ -81,5 +81,5 @@ def guidance(engine):
             "Review and approve destructive social-provider writes",
         ],
         "future_automation_policy": "Only call app-creation, use-case or business-link tools if dynamically discovered on the connected Meta MCP client; require owner confirmation and verify outputs. Never promise them today.",
-        "manual_fallback": "Continue with provider console and encrypted dashboard setup when Meta MCP is absent, unavailable or not granted.",
+        "manual_fallback": "Continue with manual provider console and encrypted dashboard setup when Meta MCP is absent, unavailable or not granted.",
     }
