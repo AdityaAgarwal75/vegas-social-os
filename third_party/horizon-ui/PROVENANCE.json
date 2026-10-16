@@ -2,7 +2,7 @@
   "repository": "https://github.com/horizon-ui/horizon-ui-chakra",
   "commit": "27a99f9fb391e9da126e91cf109b3afd953fb58b",
   "license": "MIT",
-  "usage": "Source-derived CSS/HTML adaptation of the official free dashboard. No React/Chakra runtime required. Upstream source preserved for audit.",
+  "usage": "Native adaptation of the official default dashboard composition, light/dark visual system and auth. Figma file U8dJHdb2aCl7DJqipvwcF1 contains promotional images only; no editable dashboard components were available.",
   "files": {
     "LICENSE": "07fe65d8e50b8c706b382dde3f1e9a83b28e8017388ada0d7ef43e8b3f0738ae",
     "src/theme/styles.js": "6c562670e2a0642df579c3e1bf6febf56ab7cdcdbca31911fb3545eecbf2cf99",
@@ -13,6 +13,14 @@
     "src/components/sidebar/components/Brand.js": "a2494b492cc9b8fb456176bb3319aab87e1a4f0a9482bf505cb52e3fc8e74f9e",
     "src/components/card/MiniStatistics.js": "031c38b4f610bfca0ad5e586752588fc1f590a2e280df3aa2efee5c419cd2527",
     "src/views/auth/signIn/index.jsx": "983dc80b0d1706d7960c4f8f1c307ef831a2321ec454a01117256185c2d3eb17",
-    "src/layouts/auth/Default.js": "e6cd405cc2b8605759f33b2d7c5358fe3ca80c1155622e06e6505bc3321d4215"
+    "src/layouts/auth/Default.js": "e6cd405cc2b8605759f33b2d7c5358fe3ca80c1155622e06e6505bc3321d4215",
+    "src/views/admin/default/index.jsx": "e084b4bbabdaa20a0c1189450a295fa69a23b85f07c90cc67832d1a2a3e56742",
+    "src/views/admin/default/components/TotalSpent.js": "51a3de0b1803a85ec539d4fd00a0f7b688aa17ade2f53a109f9c16d871f3a270",
+    "src/views/admin/default/components/WeeklyRevenue.js": "b0f35bae2b3d2898a321a92c313c55a681e364c2e4011bf9493c2baad7396cd6",
+    "src/views/admin/default/components/CheckTable.js": "69cf0615559131bd52015eef678fdae3a98e7cad67227f109b14ac9c1b402776",
+    "src/views/admin/default/components/ComplexTable.js": "753c6abe943540cdb94d873549b463f8ee6c543075a7665f88411a9582e0020d",
+    "src/views/admin/default/components/DailyTraffic.js": "c18a70459eae985df6a5e3683290c3c48000dcfcdf2452c4148e9acc77193784",
+    "src/views/admin/default/components/PieCard.js": "c112790ac99ff978d27d83b217f73339467448cd23f306c50d14d9c07c8d9114",
+    "src/views/admin/default/components/Tasks.js": "cb0d9db58e18a8705ba055374d5ae5f8531953403914b0f350e11f383e277ae1"
   }
 }

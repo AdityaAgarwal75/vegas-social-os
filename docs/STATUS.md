@@ -1,4 +1,11 @@
-# Current engineering checkpoint — 0.10.0 Vegas Studio
+# Current checkpoint — 0.11.0 Horizon layout rebuild
+
+- Replaced the stacked dashboard with the official Horizon default composition: six compact statistics, paired resource/production charts, production table alongside daily activity/media distribution, and specialist table alongside release queue/calendar. This is a native adaptation of the working MIT source, not an editable Figma frame extraction. The supplied Figma file has only promotional artwork; component search found no Horizon dashboard components.
+- All values use observed installation records. No financial demo data, fabricated traffic, fake growth or inferred completed outputs. Empty chart values stay zero. Resource samples show only measured CPU/memory values. Calendar dates open the existing schedule and support month navigation.
+- Owner approvals now show server error descriptions and hide the form after successful enrollment or approval, avoiding duplicate submissions that show generic invalid_request.
+- Local checks pass: 145 Python tests, 5 Node tests, JavaScript/Python/shell syntax and authored-source diff checks. GitHub run 38867605778 passes Python 3.11/3.12, CloudFormation lint and responsive light/dark Chromium acceptance. Desktop, dark and mobile dashboard screenshots were inspected. Added regression checks cover six metrics, nested row geometry, calendar month navigation and owner approval feedback. Final commit acceptance and owner-approved deployment are pending; previous 0.10.0 remains live.
+
+# Previous engineering checkpoint — 0.10.0 Vegas Studio
 
 - Rebranded the product as Vegas Studio with an original SVG logo. Existing installation paths, OAuth identifiers, stored accounts and assets remain compatible.
 - Applied Horizon UI's official MIT-licensed free dashboard design language across the control room, templates, login/recovery, owner approvals and private browser. Self-hosted DM Sans uses the OFL. Pinned source, hashes and licenses are in `third_party/horizon-ui` and `web/fonts`.
