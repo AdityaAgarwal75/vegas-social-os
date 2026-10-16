@@ -1,6 +1,6 @@
-# Vegas Social OS
+# Vegas Studio
 
-![Vegas Social OS — ideas in chat, production under control](docs/assets/banner.svg)
+![Vegas Studio — ideas in chat, production under control](docs/assets/banner.svg)
 
 [Start here](docs/USER-GUIDE.md) · [Self-host](docs/SELF-HOSTING.md) · [Current status](docs/STATUS.md) · [Security](SECURITY.md)
 
@@ -124,3 +124,7 @@ Private state/media/profiles live in `/var/lib/vegas-social-os`, code in `/opt/v
 Read [architecture](docs/ARCHITECTURE.md), [Flow execution contract](docs/FLOW-EXECUTION-CONTRACT.md), [contributing](CONTRIBUTING.md) and [security](SECURITY.md). MIT licensed.
 
 Current engineering repairs, web connection acceptance and owner administration: [operations 0.7](docs/OPERATIONS-0.7.md), [dated audit](docs/audits/2026-10-14-engineering.md).
+
+## Dashboard design
+
+Vegas Studio uses a native adaptation of the free [Horizon UI](https://github.com/horizon-ui/horizon-ui-chakra) dashboard design, with an original Vegas Studio logo and self-hosted DM Sans. Source attribution and pinned design references are included in `third_party/horizon-ui`; font licensing is in `web/fonts/OFL.txt`. Light and dark themes apply to the dashboard and owner sign-in flows.

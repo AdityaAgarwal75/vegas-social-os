@@ -1,6 +1,6 @@
-# Your first Vegas Social OS workspace
+# Your first Vegas Studio workspace
 
-Vegas Social OS is independently hosted: every owner has their own server, password, browser profiles, media and plugin connection. It is not a shared public service or a multi-user team dashboard.
+Vegas Studio is independently hosted: every owner has their own server, password, browser profiles, media and plugin connection. It is not a shared public service or a multi-user team dashboard.
 
 ## 1. Get your installation
 
@@ -18,7 +18,7 @@ If a setup link expired, ask your agent for a fresh one. Do not repeatedly reope
 
 ## 3. Connect the ChatGPT plugin
 
-Use the **MCP endpoint shown in your setup guide/workspace settings**, ending in `/mcp`. Add it through your supported ChatGPT custom-plugin connection flow with OAuth. Sign into your Social OS installation and review the client, return address and requested permissions. Click **Authorize Vegas Social OS** once.
+Use the **MCP endpoint shown in your setup guide/workspace settings**, ending in `/mcp`. Add it through your supported ChatGPT custom-plugin connection flow with OAuth. Sign into your Social OS installation and review the client, return address and requested permissions. Click **Authorize Vegas Studio** once.
 
 Return to ChatGPT and ask it to run `guide`, `doctor` and `account_list`. Verify your installation and your accounts. A dashboard, a healthy `/health`, a generated ZIP or a consent redirect alone does not verify the host connection.
 

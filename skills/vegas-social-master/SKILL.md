@@ -1,9 +1,9 @@
 ---
 name: vegas-social-master
-description: Set up and operate agent-first Vegas Social OS for a community user from ChatGPT or Codex. Use when given the repository link for automated setup, dashboard/account onboarding, channel strategy, daily concepts, scripts, native ChatGPT images, Google Flow videos, review, approved YouTube/Instagram publishing and statistics.
+description: Set up and operate agent-first Vegas Studio for a community user from ChatGPT or Codex. Use when given the repository link for automated setup, dashboard/account onboarding, channel strategy, daily concepts, scripts, native ChatGPT images, Google Flow videos, review, approved YouTube/Instagram publishing and statistics.
 ---
 
-# Vegas Social OS
+# Vegas Studio
 
 Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily production, dashboard feedback and approval continuation. ChatGPT is the main creative workplace; the dashboard is the system control panel for VPS health, observed credits, specialist activity, named projects, calendars, sign-in and content review. Use review_queue for pending revisions and review_complete after saving a fresh same-channel plan. Read [operations 0.7](../../docs/OPERATIONS-0.7.md) for web OAuth, native fileParams, raw transfers, events, editing and the isolated owner administrator broker. Do not claim host continuation until the subscribed Work chat actually responds.
 
