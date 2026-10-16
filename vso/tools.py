@@ -173,6 +173,18 @@ def registry(engine):
         from .flow_service import image_poll
         return image_poll(engine, job_id)
     def connection_setup(): return engine.accounts.config.status()
+    def instagram_delete_prepare(account_id, media_id, request_id):
+        from .instagram_delete import prepare
+        return prepare(engine, account_id, media_id, request_id)
+    def instagram_delete_approve(deletion_id, account_id, media_id):
+        from .instagram_delete import approve
+        return approve(engine, deletion_id, account_id, media_id)
+    def instagram_delete_execute(deletion_id):
+        from .instagram_delete import execute
+        return execute(engine, deletion_id)
+    def instagram_delete_status(deletion_id):
+        from .instagram_delete import status
+        return status(engine, deletion_id)
     def post_prepare(account_id, asset_ids, title, caption, visibility, options, request_id, plan_id=""):
         from .publishing import prepare
         return prepare(engine, account_id, asset_ids, title, caption, visibility, options, request_id, plan_id=plan_id)
@@ -299,7 +311,7 @@ def registry(engine):
     methods = {f.__name__: f for f in (template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
-              flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
+              flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, instagram_delete_prepare, instagram_delete_approve, instagram_delete_execute, instagram_delete_status, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
               automation_status, automation_pause, brief_complete, research_fetch, research_save)}
     for name in ("doctor", "channel_save", "plan_save", "concept_select", "image_tasks", "asset_import", "image_attach",
                  "images_approve", "flow_login", "flow_inspect", "video_request", "video_poll", "video_assemble",
@@ -375,6 +387,10 @@ DESCRIPTIONS = {
     "flow_image_request": "Generate one expressly requested diagnostic/standalone Flow image with exact account/model/credit cap and stable request ID. Not a substitute for native campaign keyframes.",
     "flow_image_poll": "Retrieve the original existing image job and import its verified downloaded bytes. Never resubmits.",
     "connection_setup": "Read provider setup steps, scopes and exact callback URLs. Never returns secrets.",
+    "instagram_delete_prepare": "Freeze an exact previously published Instagram media ID and exact owning account for deletion review. Never deletes.",
+    "instagram_delete_approve": "Approve one exact Instagram media deletion by repeating account ID and media ID; requires social:manage.",
+    "instagram_delete_execute": "Safely resolve an approved deletion: currently returns manual_required because Meta Instagram Login published-media DELETE is not verified. Never claims remote deletion.",
+    "instagram_delete_status": "Read original Instagram deletion request status without a provider write.",
     "post_prepare": "Freeze an exact standalone photo/carousel/video/text release and optional cover/audience/scheduled time for review.",
     "post_execute": "Upload the exact approved composer release once. Never retries unknown outcomes.",
     "post_poll": "Check existing Meta containers/video processing; finish only the already approved release.",
