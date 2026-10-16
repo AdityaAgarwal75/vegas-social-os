@@ -141,6 +141,8 @@ Read [architecture](docs/ARCHITECTURE.md), [Flow execution contract](docs/FLOW-E
 
 Current engineering repairs, web connection acceptance and owner administration: [operations 0.7](docs/OPERATIONS-0.7.md), [dated audit](docs/audits/2026-10-14-engineering.md).
 
-## Dashboard design
+## Workspace design
 
-Vegas Studio uses a native adaptation of the free [Horizon UI](https://github.com/horizon-ui/horizon-ui-chakra) dashboard design, with an original Vegas Studio logo and self-hosted DM Sans. Source attribution and pinned design references are included in `third_party/horizon-ui`; font licensing is in `web/fonts/OFL.txt`. Light and dark themes apply to the dashboard and owner sign-in flows.
+The 0.12 workspace uses an original warm-grey, white and sage visual system inspired by the owner's dashboard reference. A labelled navigation rail separates production, publishing and operations. Images, scene clips and final exports have distinct project sections and a grouped media library. Posts & releases exposes the exact composer, review, frozen schedule, cancellation and recovery actions supported by the backend. Public landing, sign-in, recovery, consent, settings and owner administration share light/dark tokens and self-hosted DM Sans.
+
+Read [the frontend map, validation and rollback guide](docs/FRONTEND-DESIGN.md). Existing MIT Horizon reference sources remain attributed in `third_party/horizon-ui`; the current UI no longer loads the legacy Horizon stylesheet. Font licensing remains in `web/fonts/OFL.txt`.

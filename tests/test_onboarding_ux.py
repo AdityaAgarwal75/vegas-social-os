@@ -33,13 +33,13 @@ class OnboardingUXTests(unittest.TestCase):
             thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
             browser = urllib.request.build_opener(NoRedirect, urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
             try:
-                for route in ('/', '/dashboard', '/onboarding'):
+                for route in ('/dashboard', '/onboarding'):
                     with self.assertRaises(urllib.error.HTTPError) as response: browser.open(base + route)
                     self.assertEqual(response.exception.code, 303)
                     self.assertEqual(response.exception.headers['Location'], '/login')
                 with self.assertRaises(urllib.error.HTTPError) as response: browser.open(base+'/api/control')
                 self.assertEqual(response.exception.code,401)
-                for route in ('/login', '/help', '/forgot-password'):
+                for route in ('/', '/about', '/login', '/help', '/forgot-password'):
                     with browser.open(base + route) as response:
                         page = response.read().decode()
                         self.assertIn('lang="en"', page)
