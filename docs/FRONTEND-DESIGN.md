@@ -1,3 +1,15 @@
+# Reference correction — 16 October 2026
+
+The owner rejected the first 0.12 redesign because the palette changed but the layout did not follow their supplied reference. This correction treats the screenshot composition as the requirement: 30px outer frame, warm-grey canvas, 58px white icon rail, broad greeting/search header, four 88px summaries, and a four-column panel grid with a two-column resource panel. The second row repeats the 2–1–1 structure with a featured project, release queue and specialist activity. No financial figures, fake followers or simulated agent activity are copied from the reference.
+
+The broad labelled sidebar and stacked overview have been replaced. All existing project/media/review/release/settings routes retain their business controls inside the new shared shell. The active media route now has exactly one active navigation item. The balance gauge means known balances / configured Flow profiles, not credit utilization or a success rate. Its caption makes this explicit. The homepage shows a single featured project with its own actual asset; full image/clip/export collections remain on dedicated project pages.
+
+At 1200px, the major horizontal coordinates and panel dimensions follow the supplied 1200×900 screenshot. The rail has additional icons because this product exposes more routes. At tablet size, panels use an explicit two-column grid; narrow mobile stacks them and exposes a labelled navigation drawer. Both themes, keyboard focus, reduced motion, account forms and release approvals remain supported. Versioned workspace CSS/JS references distinguish this layout from the prior cached asset URLs.
+
+Browser evidence uses disposable state with external requests blocked. It does not establish a fresh provider login or a successful live publication. The 153 Python tests, 5 Node tests and all four existing Chromium suites pass. Browser regression assertions check rail width, single active route and the six-panel 2–1–1 composition in addition to the existing complete workflow checks. Deployment and remote source verification are recorded in STATUS.md after they occur.
+
+---
+
 # Vegas Studio workspace — 0.12
 
 A social production workspace in the warm-grey / white / sage direction of the owner's supplied reference. The interface prioritizes a readable workflow over decorative animation. DM Sans remains self-hosted. Cards use a 16/20px radius scale, pill buttons and 10/12px input radii. Dark mode uses the same hierarchy in forest-tinted charcoal. Native HTML, CSS Grid and the existing dependency-free JavaScript preserve the server's installation footprint.

@@ -20,3 +20,184 @@ html[data-theme=dark]{color-scheme:dark;--bg:#171d1a;--surface:#232b26;--surface
 @media(max-width:767px){.landing-nav{height:80px;padding:0 22px}.landing-nav nav{display:none}.landing-actions{gap:8px}.landing-actions .primary{font-size:10px;padding:10px 13px}.landing-actions .icon-button{height:34px;width:34px}.landing-main{padding:0 22px}.landing-hero{grid-template-columns:1fr;gap:45px;padding:40px 0 50px;min-height:0}.landing-copy h1{font-size:57px;letter-spacing:-3px}.landing-copy>p:not(.eyebrow){font-size:14px;max-width:330px}.landing-copy .eyebrow{font-size:8px}.landing-visual{transform:none;padding:16px}.landing-platforms{display:grid;grid-template-columns:1fr 1fr;gap:20px}.landing-platforms p{grid-column:1/-1;max-width:none}.landing-workspace{grid-template-columns:1fr;padding:65px 0;gap:30px}.landing-main h2{font-size:35px;letter-spacing:-1.4px}.landing-process{grid-template-columns:1fr;gap:20px;padding:55px 0}.landing-close{padding:30px;align-items:start;flex-direction:column;gap:25px}.landing-footer{padding:15px 22px;gap:15px}.landing-footer>div{gap:16px}.studio-preview{aspect-ratio:1.2}}
 @media(max-width:380px){.landing-copy h1{font-size:49px;letter-spacing:-2.5px}.landing-actions .icon-button{display:none}}
 .project-back{margin-right:20px}.release-content details>a{display:block;margin-top:8px}.config-list details[open]{scroll-margin-top:25px}
+
+/* Reference-led workspace composition: narrow floating rail and a 2–1–1 grid.
+   Layout deliberately follows the owner's supplied dashboard screenshot. */
+body.control-panel{background:#fff;padding:30px;color:var(--ink)}
+html[data-theme=dark] body.control-panel{background:#101512}
+body.control-panel .app-shell{position:relative;max-width:1540px;min-height:calc(100dvh - 60px);margin:0 auto;padding:0 42px 48px;background:#ebeae5;border-radius:15px}
+html[data-theme=dark] body.control-panel .app-shell{background:var(--bg)}
+body.control-panel main{margin-left:88px;min-height:0}
+body.control-panel .workspace-mark{position:absolute;left:47px;top:83px;display:block;width:46px;height:46px}
+body.control-panel .workspace-mark img{width:46px;height:46px;border-radius:50%}
+body.control-panel #sidebar{position:absolute;inset:186px auto auto 42px;width:58px;min-height:574px;padding:7px 6px 8px;border-radius:36px;overflow:visible;background:var(--surface);z-index:50;box-shadow:none}
+body.control-panel #sidebar .brand{display:none}
+body.control-panel #main-nav{display:flex;flex-direction:column;gap:3px}
+body.control-panel #main-nav .nav-label{display:none}
+body.control-panel #main-nav a{position:relative;display:grid;place-items:center;min-height:37px;width:46px;height:37px;padding:0;border-radius:50%;color:var(--ink)}
+body.control-panel #main-nav a .icon{width:20px;height:20px;stroke-width:1.35}
+body.control-panel #main-nav a>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+body.control-panel #main-nav a.active{background:#202125;color:white;height:44px;margin-bottom:2px}
+body.control-panel #main-nav a.active .icon{stroke-width:2}
+body.control-panel #main-nav a:hover:not(.active){background:var(--surface-alt)}
+body.control-panel #main-nav a:after{content:attr(data-label);position:absolute;left:57px;top:50%;transform:translateY(-50%) translateX(-4px);pointer-events:none;opacity:0;white-space:nowrap;background:var(--ink);color:var(--surface);font-size:12px;padding:7px 12px;border-radius:8px;transition:opacity .15s,transform .15s;box-shadow:0 4px 14px #0001}
+body.control-panel #main-nav a:hover:after,body.control-panel #main-nav a:focus-visible:after{opacity:1;transform:translateY(-50%)}
+body.control-panel .sidebar-foot{padding:14px 0 0;margin-top:auto}
+body.control-panel .server-chip,body.control-panel .settings-link,body.control-panel .workspace-chip>div,body.control-panel .workspace-chip>.avatar,body.control-panel .version{display:none}
+body.control-panel .workspace-chip{border:0;padding:0;margin:0;display:flex;justify-content:center}
+body.control-panel .workspace-chip .icon-button{display:grid;width:38px;height:36px;margin:0;font-size:24px}
+body.control-panel .topbar{padding:76px 0 0;min-height:158px;gap:20px;align-items:center;margin-bottom:28px}
+body.control-panel .breadcrumb{display:none}
+body.control-panel h1{font-size:25px;font-weight:450;letter-spacing:-.8px;line-height:1.25}
+body.control-panel #header-description{font-size:14px;margin:6px 0 0;color:var(--ink);line-height:1.5}
+body.control-panel .page-identity{min-width:0}
+body.control-panel .topbar-tools{gap:12px;margin-left:auto}
+body.control-panel .topbar-actions{gap:10px}
+body.control-panel .search-field{width:clamp(200px,28vw,380px);height:52px;padding:5px 7px 5px 19px;gap:12px;color:var(--ink);position:relative}
+body.control-panel .search-field #search-icon{order:3;background:#202125;color:#fff;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;flex-shrink:0}
+body.control-panel .search-field #search-icon .icon{width:19px;height:19px}
+body.control-panel .search-field input{font-size:12px;line-height:1.5}
+body.control-panel .search-field kbd{display:none}
+body.control-panel .topbar .icon-button{border:0;width:52px;height:52px;background:var(--surface)}
+body.control-panel .topbar .icon-button .icon{width:22px;height:22px}
+body.control-panel .activity-link{position:relative}
+body.control-panel .activity-link .status-dot{position:absolute;right:15px;top:15px;background:#db6967;width:5px;height:5px}
+body.control-panel #refresh{display:none}
+body.control-panel .owner-link{display:none}
+body.control-panel .page-content{padding:0;max-width:none}
+body.control-panel .page-heading{margin:0 0 22px;min-height:0;justify-content:flex-end}
+body.control-panel .page-heading>p{display:none}
+body.control-panel .page-heading:has(#page-actions:empty){display:none}
+body.control-panel[data-page=home] .page-heading{display:none}
+body.control-panel .metrics{gap:15px;margin-bottom:17px}
+body.control-panel .metric{min-height:88px;padding:18px 21px;justify-content:space-between;border-radius:17px;gap:12px}
+body.control-panel .metric-copy{display:grid;grid-template-columns:auto auto;column-gap:7px;align-items:baseline}
+body.control-panel .metric-label{grid-column:1/-1;font-size:13px;margin:0 0 3px;font-weight:400;white-space:nowrap}
+body.control-panel .metric strong{font-size:24px;letter-spacing:-.9px;font-weight:600;line-height:1.1}
+body.control-panel .metric small{display:none}
+body.control-panel .metric-mark{height:44px;width:44px;background:#eaf1ed;color:#607c70}
+body.control-panel .metric:nth-child(1) .metric-mark{border-radius:0;background:none}
+body.control-panel .metric:nth-child(1) .metric-mark .icon{width:43px;height:43px;stroke-width:2.3}
+body.control-panel .metric:nth-child(3) .metric-mark{background:#f2ecd9;color:#a58f65}
+body.control-panel .metric:last-child{background:linear-gradient(120deg,#90aa9b,#476856);color:white}
+body.control-panel .metric:last-child .metric-mark{background:none;color:#dbe7de}
+body.control-panel .metric:last-child .metric-label{color:#f2f6f3}
+body.control-panel .reference-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:230px 230px;gap:18px 15px;margin:0}
+body.control-panel .reference-grid>.panel{height:100%;min-width:0;padding:19px 20px;border-radius:17px;overflow:hidden;box-shadow:none}
+body.control-panel .overview-resources{grid-column:span 2}
+body.control-panel .overview-projects{grid-column:span 2}
+body.control-panel .section-top{margin-bottom:16px;gap:10px}
+body.control-panel .section-top h2{font-size:16px;font-weight:600;letter-spacing:-.4px}
+body.control-panel .section-top p{font-size:10px;margin-top:3px}
+body.control-panel .section-top .text-link{font-size:10px;white-space:nowrap}
+body.control-panel .overview-resources .section-top p{display:none}
+body.control-panel .overview-resources .resource-top{gap:10px;margin:0 0 7px}
+body.control-panel .overview-resources .resource-reading{background:var(--surface);padding:4px 10px 8px;box-shadow:0 6px 14px #233b2806;border-radius:4px}
+body.control-panel .overview-resources .resource-reading>span{font-size:10px}
+body.control-panel .overview-resources .resource-reading strong{font-size:21px;line-height:1.15;margin:3px 0}
+body.control-panel .overview-resources .resource-reading small{font-size:8px;white-space:nowrap}
+body.control-panel .overview-resources .chart{height:86px}
+body.control-panel .overview-resources .chart-note{font-size:8px;margin-top:6px}
+body.control-panel .chart-grid{opacity:.35;stroke-dasharray:none}
+body.control-panel .chart-line{stroke-width:1.5;stroke-linejoin:round}
+body.control-panel .chart-area{opacity:.35}
+body.control-panel .overview-credits .section-top{margin-bottom:7px}
+body.control-panel .overview-credits .section-top .text-link{font-size:0}
+body.control-panel .overview-credits .section-top .text-link:after{content:'↗';font-size:17px}
+body.control-panel .balance-value strong{display:block;color:var(--brand-text);font-size:29px;letter-spacing:-1px;line-height:1.2;font-weight:600}
+body.control-panel .balance-value>span{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+body.control-panel .credit-gauge{display:block;width:100%;height:89px;margin-top:9px;overflow:visible}
+body.control-panel .credit-gauge path{fill:none;stroke-width:25}
+body.control-panel .gauge-track{stroke:var(--brand-soft)}
+body.control-panel .gauge-fill{stroke:#85a494}
+body.control-panel .credit-gauge text{font-size:27px;font-weight:600;fill:var(--ink)}
+body.control-panel .gauge-caption{font-size:9px;color:var(--muted);margin:7px 0 0;text-align:center}
+body.control-panel .overview-profile{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+body.control-panel .profile-portrait{height:64px;width:64px;display:grid;place-items:center;border-radius:50%;background:#eee8d9;color:#587063;font-size:24px;font-weight:500;letter-spacing:-1px;margin:0 0 13px}
+body.control-panel .overview-profile h2{font-size:17px;margin:0;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.control-panel .profile-owner{font-size:11px;color:var(--muted);margin:2px 0 17px}
+body.control-panel .profile-stats{display:flex;justify-content:space-between;width:100%;gap:8px}
+body.control-panel .profile-stats span{display:block;font-size:9px;color:var(--muted)}
+body.control-panel .profile-stats strong{font-size:21px;font-weight:550;line-height:1.3}
+body.control-panel .profile-manage{font-size:9px;color:var(--muted);margin-top:9px}
+body.control-panel .overview-projects .section-top{margin-bottom:9px}
+body.control-panel .overview-projects .project-list-mini{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+body.control-panel .overview-projects .project-card{display:grid;grid-template-columns:95px minmax(0,1fr);gap:12px;border-radius:10px;background:var(--surface-alt);height:148px;align-items:center;padding:7px}
+body.control-panel .overview-projects .project-cover{height:134px;border-radius:7px}
+body.control-panel .overview-projects .project-card-body{padding:2px 5px 2px 0;min-width:0}
+body.control-panel .overview-projects .project-card h3{font-size:13px;line-height:1.4;margin-bottom:8px}
+body.control-panel .overview-projects .project-card p{font-size:9px;line-height:1.5;margin-bottom:12px}
+body.control-panel .overview-projects .project-card-footer{font-size:8px;display:block;padding-top:9px}
+body.control-panel .overview-projects .project-card-footer span{display:block}
+body.control-panel .overview-projects .project-cover .pill{font-size:7px;padding:3px 6px;bottom:5px;left:5px;max-width:calc(100% - 10px);overflow:hidden;text-overflow:ellipsis}
+body.control-panel .overview-projects .empty-state{display:grid;grid-template-columns:1fr auto;column-gap:15px;text-align:left;min-height:0;align-items:start;padding:15px 0}
+body.control-panel .overview-projects .empty-state>.icon{display:none}
+body.control-panel .overview-projects .empty-state h2{grid-column:1;font-size:19px;margin:6px 0}
+body.control-panel .overview-projects .empty-state p{grid-column:1;max-width:30ch;font-size:11px;margin:0}
+body.control-panel .overview-projects .empty-state .primary{grid-column:2;grid-row:1/3;align-self:center}
+body.control-panel .overview-queue .section-top p{display:none}
+body.control-panel .overview-queue .section-top>.text-link{font-size:0}
+body.control-panel .overview-queue .section-top>.text-link:after{content:'↗';font-size:17px}
+body.control-panel .overview-queue .list-row{padding:9px 0;border:0;gap:9px;align-items:start;border-left:3px solid #6d8b79;padding-left:9px;margin:0 0 10px}
+body.control-panel .overview-queue .queue-date{display:none}
+body.control-panel .overview-queue .row-copy{overflow:hidden}
+body.control-panel .overview-queue .row-copy>a{font-size:11px;display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+body.control-panel .overview-queue .row-copy small{font-size:9px;margin-top:2px}
+body.control-panel .overview-queue .row-copy .pill{float:right;font-size:7px;padding:2px 5px;margin-top:-12px}
+body.control-panel .overview-queue .empty-state{min-height:0;padding:9px 0;text-align:left}
+body.control-panel .overview-queue .empty-state>.icon{display:none}
+body.control-panel .overview-queue .empty-state h2{font-size:16px;line-height:1.4;margin:5px 0 10px}
+body.control-panel .overview-queue .empty-state p{font-size:10px;margin:0 0 12px}
+body.control-panel .overview-queue .empty-state a{font-size:10px}
+body.control-panel .overview-team{text-align:center;display:flex;flex-direction:column;align-items:center}
+body.control-panel .overview-team .section-top{align-self:stretch;text-align:left;margin-bottom:13px}
+body.control-panel .overview-team .section-top p,body.control-panel .overview-team .section-top .text-link{display:none}
+body.control-panel .team-orbit{display:flex;justify-content:center;padding:2px 0;margin:0 0 12px;isolation:isolate}
+body.control-panel .orbit-avatar{width:34px;height:34px;background:#e6eee8;color:#53705e;border:3px solid var(--surface);border-radius:50%;display:grid;place-items:center;font-size:9px;margin-left:-5px;position:relative}
+body.control-panel .orbit-avatar:nth-child(2){background:#f0e9d8;color:#9e8760}
+body.control-panel .orbit-avatar:nth-child(3){background:#dce6e7;color:#547779}
+body.control-panel .orbit-avatar:nth-child(4){background:#ede6df;color:#977b61}
+body.control-panel .orbit-avatar.running:after{content:'';height:7px;width:7px;border-radius:50%;background:#739d80;position:absolute;bottom:0;right:0;border:2px solid var(--surface)}
+body.control-panel .overview-team h3{font-size:17px;margin:0 0 5px;line-height:1.3}
+body.control-panel .team-description{font-size:10px;line-height:1.6;max-width:26ch;color:var(--muted);margin:0 0 15px}
+body.control-panel .overview-team .primary{min-height:32px;border-radius:6px;font-size:9px;padding:7px 13px;margin-top:auto;background:linear-gradient(#93ac9d,#486958);color:#fff}
+body.control-panel .overview-role-status{display:none}
+body.control-panel .overview-recent{margin-top:18px;padding:20px;border-radius:17px}
+body.control-panel .overview-recent .section-top p{display:none}
+body.control-panel .overview-recent .section-top{margin-bottom:5px}
+body.control-panel .overview-recent .activity-row{display:inline-flex;vertical-align:top;width:33.333%;padding:9px 14px 5px 0;border:0;align-items:center}
+body.control-panel .overview-recent .activity-row:nth-of-type(n+5){display:none}
+body.control-panel .overview-recent .activity-row b{font-size:10px;line-height:1.5}
+body.control-panel .overview-recent .activity-row small{font-size:8px}
+body.control-panel .overview-recent .activity-row .pill{font-size:7px;margin-top:3px}
+body.control-panel .overview-recent .empty-state{min-height:0;padding:8px 0;text-align:left}
+body.control-panel .overview-recent .empty-state .icon{display:none}
+body.control-panel .overview-recent .empty-state h2{font-size:12px;display:inline;margin:0 12px 0 0}
+body.control-panel .overview-recent .empty-state p{font-size:10px;display:inline;margin:0}
+body.control-panel footer{font-size:8px;border:0;padding-top:17px;margin-top:0}
+@media(min-width:1500px){body.control-panel .app-shell{padding-right:52px;padding-left:52px}body.control-panel .workspace-mark{left:57px}body.control-panel #sidebar{left:52px}body.control-panel .reference-grid{grid-template-rows:250px 250px}body.control-panel .reference-grid>.panel{padding:23px}body.control-panel .overview-projects .project-card{height:156px;grid-template-columns:110px minmax(0,1fr)}body.control-panel .overview-projects .project-cover{height:142px}body.control-panel .credit-gauge{height:100px}body.control-panel .overview-team .team-orbit{margin-top:8px}body.control-panel .overview-profile .profile-owner{margin-bottom:23px}}
+@media(max-width:1200px){body.control-panel .search-field{width:250px}body.control-panel #header-description{font-size:12px}body.control-panel .metric{padding:17px}body.control-panel .metric-label{font-size:11px}body.control-panel .metric-mark{width:36px;height:36px}body.control-panel .metric strong{font-size:23px}body.control-panel .reference-grid>.panel{padding:18px}body.control-panel .overview-projects .project-card{grid-template-columns:70px minmax(0,1fr);gap:8px}body.control-panel .overview-projects .project-card h3{font-size:11px}body.control-panel .section-top .text-link{font-size:9px}body.control-panel .overview-team h3{font-size:16px}}
+@media(max-width:1050px){body.control-panel{padding:20px}body.control-panel .app-shell{padding:0 26px 30px}body.control-panel main{margin-left:78px}body.control-panel #sidebar{left:26px;top:166px}body.control-panel .workspace-mark{left:32px;top:69px}body.control-panel .topbar{padding-top:58px;min-height:138px}body.control-panel h1{font-size:23px}body.control-panel #header-description{font-size:11px;max-width:34ch}body.control-panel .search-field{width:200px;height:46px}body.control-panel .topbar .icon-button{width:44px;height:44px}body.control-panel .search-field #search-icon{width:36px;height:36px}body.control-panel .metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}body.control-panel .metric{padding:15px 12px;min-height:84px}body.control-panel .metric-label{font-size:10px}body.control-panel .metric-mark{width:28px;height:28px}body.control-panel .metric:nth-child(1) .metric-mark .icon{width:28px;height:28px}body.control-panel .reference-grid{gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:230px 230px 240px;grid-template-areas:'resources resources' 'credits profile' 'projects projects' 'queue team'}body.control-panel .overview-resources{grid-area:resources}body.control-panel .overview-credits{grid-area:credits}body.control-panel .overview-profile{grid-area:profile}body.control-panel .overview-projects{grid-area:projects}body.control-panel .overview-queue{grid-area:queue;min-height:230px}body.control-panel .overview-team{grid-area:team;min-height:230px}body.control-panel .overview-projects .project-card{grid-template-columns:90px minmax(0,1fr)}body.control-panel .overview-projects .project-card h3{font-size:13px}body.control-panel .overview-recent .activity-row{width:50%}}
+@media(max-width:767px){body.control-panel{padding:12px}body.control-panel .app-shell{border-radius:15px;min-height:calc(100dvh - 24px);padding:0 20px 20px}body.control-panel main{margin:0}body.control-panel .workspace-mark{display:none}body.control-panel #sidebar{position:fixed;inset:0 auto 0 0;width:240px;min-height:0;border-radius:0 24px 24px 0;padding:25px 14px;overflow:auto;transform:translateX(-100%)}body.control-panel.nav-open #sidebar{transform:translateX(0)}body.control-panel #sidebar .brand{display:flex;padding:6px 12px 20px;font-size:16px}body.control-panel #main-nav{gap:4px}body.control-panel #main-nav a{display:flex;justify-content:start;gap:12px;width:100%;min-height:40px;height:40px;padding:0 13px;border-radius:12px;font-size:12px}body.control-panel #main-nav a>span{position:static;width:auto;height:auto;overflow:visible;clip-path:none}body.control-panel #main-nav a>.nav-count{margin-left:auto;font-size:10px}body.control-panel #main-nav a:after{display:none}body.control-panel #main-nav a.active{height:40px;margin:0}body.control-panel .workspace-chip .icon-button{width:100%;justify-content:start;padding-left:14px}body.control-panel .topbar{display:flex;padding:28px 0 0;min-height:0;gap:12px;flex-wrap:wrap;margin-bottom:24px}body.control-panel #mobile-nav{display:grid;width:35px;height:35px}body.control-panel .page-identity{flex:1;min-width:0}body.control-panel h1{font-size:23px}body.control-panel #header-description{font-size:11px;max-width:none;margin-top:4px;line-height:1.65}body.control-panel .topbar-tools{display:contents}body.control-panel .topbar-actions{gap:8px;margin:0}body.control-panel .activity-link{display:none}body.control-panel .topbar .icon-button{width:35px;height:35px}body.control-panel .topbar-tools .search-field{display:flex;order:5;width:100%;height:46px;margin-top:5px;padding-left:16px}body.control-panel .search-field input{font-size:12px}body.control-panel .search-field #search-icon{width:35px;height:35px}body.control-panel .page-heading{margin-bottom:18px;justify-content:start}body.control-panel .metrics{grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}body.control-panel .metric{min-height:90px;padding:17px 15px;border-radius:15px}body.control-panel .metric-label{font-size:11px}body.control-panel .metric strong{font-size:26px}body.control-panel .metric-mark{width:31px;height:31px}body.control-panel .reference-grid{gap:14px;grid-template-rows:230px 230px auto auto}body.control-panel .overview-projects{min-height:230px}body.control-panel .reference-grid>.panel{padding:18px;border-radius:16px}body.control-panel .overview-projects .project-card{height:148px;grid-template-columns:75px minmax(0,1fr);gap:8px}body.control-panel .overview-projects .project-cover{height:134px}body.control-panel .overview-profile h2{font-size:16px}body.control-panel .overview-recent .activity-row{width:100%}body.control-panel .overview-recent .activity-row:nth-of-type(n+4){display:none}body.control-panel footer{padding-top:20px;gap:10px;font-size:8px}body.control-panel footer>div{gap:13px}body.control-panel .project-grid,body.control-panel .media-grid{gap:14px}body.control-panel .section-top h2{font-size:16px}}
+@media(max-width:520px){body.control-panel .app-shell{padding:0 14px 18px}body.control-panel .topbar{gap:9px}body.control-panel h1{font-size:21px}body.control-panel #header-description{font-size:10px}body.control-panel .metric{padding:15px 13px;gap:8px;min-height:85px}body.control-panel .metric-label{font-size:10px}body.control-panel .metric strong{font-size:23px}body.control-panel .metric-mark{width:27px;height:27px}body.control-panel .metric-mark .icon{width:16px;height:16px}body.control-panel .metric:nth-child(1) .metric-mark .icon{width:28px;height:28px}body.control-panel .reference-grid{grid-template-columns:1fr;grid-template-rows:auto;grid-template-areas:'resources' 'credits' 'profile' 'projects' 'queue' 'team'}body.control-panel .overview-resources{min-height:240px}body.control-panel .overview-credits{min-height:240px}body.control-panel .credit-gauge{height:112px}body.control-panel .overview-profile{min-height:235px}body.control-panel .overview-projects .project-list-mini{grid-template-columns:1fr}body.control-panel .overview-projects .project-card{grid-template-columns:95px minmax(0,1fr);height:142px}body.control-panel .overview-projects .project-cover{height:128px}body.control-panel .overview-projects .project-card h3{font-size:14px}body.control-panel .overview-projects .project-card-footer{display:flex;gap:5px;flex-wrap:wrap}body.control-panel .overview-projects .empty-state{display:block;padding:12px 0}body.control-panel .overview-projects .empty-state .primary{margin-top:16px}body.control-panel .overview-queue,body.control-panel .overview-team{min-height:210px}body.control-panel .team-orbit{margin-top:4px}body.control-panel .team-description{max-width:30ch}body.control-panel .reference-grid>.panel{height:auto}body.control-panel .overview-role-status{display:none}body.control-panel .overview-resources .resource-reading{padding:3px 3px 8px}body.control-panel .overview-resources .resource-reading strong{font-size:19px}body.control-panel .overview-resources .resource-reading small{font-size:7px}body.control-panel .overview-resources .section-top>.text-link{font-size:8px}body.control-panel .overview-recent .empty-state h2,body.control-panel .overview-recent .empty-state p{display:block}body.control-panel .overview-recent .empty-state p{margin-top:5px}body.control-panel .overview-team .primary{margin-top:10px}}
+
+body.control-panel .topbar{padding-top:50px}
+body.control-panel .metric-label{font-size:13px}
+body.control-panel .overview-credits .section-top p{display:none}
+body.control-panel .credit-gauge{height:83px}
+body.control-panel .gauge-caption{font-size:9px;margin-top:3px}
+body.control-panel .overview-projects .project-list-mini{grid-template-columns:1fr}
+body.control-panel .overview-projects .project-card{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;background:none;padding:0;height:154px;border-radius:0}
+body.control-panel .overview-projects .project-cover{grid-column:2;grid-row:1;height:154px;border-radius:8px}
+body.control-panel .overview-projects .project-card-body{grid-column:1;grid-row:1;padding:0 0 0 4px}
+body.control-panel .overview-projects .project-card h3{font-size:17px;line-height:1.3}
+body.control-panel .overview-projects .project-card p{font-size:11px;margin-bottom:13px}
+body.control-panel .overview-projects .project-card-footer{font-size:9px;line-height:1.5;display:block}
+body.control-panel .overview-projects .project-card:hover{transform:none}
+body.control-panel .overview-team .primary{background:#4b6c59}
+body.control-panel .metrics .metric:first-child .metric-mark{opacity:.8}
+@media(max-width:1050px){body.control-panel .topbar{padding-top:38px}body.control-panel .metric-label{font-size:10px}body.control-panel .overview-projects .project-card h3{font-size:17px}}
+@media(max-width:767px){body.control-panel .topbar{padding-top:28px}body.control-panel .metric-label{font-size:11px}body.control-panel .overview-projects .project-card{gap:12px}body.control-panel .overview-projects .project-card h3{font-size:16px}body.control-panel .overview-projects .project-card p{font-size:10px}}
+@media(max-width:520px){body.control-panel .metric-label{font-size:10px}body.control-panel .credit-gauge{height:110px}body.control-panel .overview-projects .project-card{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:13px}body.control-panel .overview-projects .project-card h3{font-size:14px}body.control-panel .overview-projects .project-card-footer{font-size:8px}body.control-panel .overview-projects .project-cover{height:146px}}
+
+body.control-panel .overview-projects .project-card{border:0}

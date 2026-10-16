@@ -1,3 +1,12 @@
+# Current checkpoint — reference dashboard correction
+
+- The owner rejected the previous 0.12 visual match. Replaced its wide labelled sidebar and stacked/two-column overview with the supplied reference's narrow icon rail, greeting/search header, four compact summary tiles and six-panel 2–1–1 composition. Added workspace/profile and explicitly labelled observed-balance panels; featured project, queue and actual specialist activity occupy the second row.
+- Shared shell applies to existing routes; original account, project/media, storyboard and publishing behavior remains. Fixed two simultaneous active navigation items on the Media route. No state/schema migration, credential modification, provider request or generation is part of the redesign.
+- Validation: all 153 Python tests, 5 Node tests, JavaScript/shell syntax checks and all four existing Chromium suites pass locally. Desktop/light/dark and narrow-mobile renders inspected; regression coverage verifies the reference layout geometry and existing complete workflow behavior against disposable state. GitHub CI and live deployment are pending at this source checkpoint.
+- CSS/JS workspace URLs carry an explicit reference-layout revision. See [layout and verification notes](FRONTEND-DESIGN.md).
+
+---
+
 # Current checkpoint — 0.12.0 workspace redesign
 
 - Rebuilt the frontend in the owner's warm-grey / white / sage direction, with matching dark mode, labelled production/publishing/operations navigation, new overview hierarchy and consistent owner access/administration pages. Added a public product page at signed-out `/` and `/about`; `/dashboard` and `/onboarding` still require an owner session.

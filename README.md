@@ -143,6 +143,6 @@ Current engineering repairs, web connection acceptance and owner administration:
 
 ## Workspace design
 
-The 0.12 workspace uses an original warm-grey, white and sage visual system inspired by the owner's dashboard reference. A labelled navigation rail separates production, publishing and operations. Images, scene clips and final exports have distinct project sections and a grouped media library. Posts & releases exposes the exact composer, review, frozen schedule, cancellation and recovery actions supported by the backend. Public landing, sign-in, recovery, consent, settings and owner administration share light/dark tokens and self-hosted DM Sans.
+The 0.12 workspace uses an original warm-grey, white and sage visual system inspired by the owner's dashboard reference. A narrow icon rail and a reference-led 2–1–1 dashboard grid organize production, publishing and operations. Images, scene clips and final exports have distinct project sections and a grouped media library. Posts & releases exposes the exact composer, review, frozen schedule, cancellation and recovery actions supported by the backend. Public landing, sign-in, recovery, consent, settings and owner administration share light/dark tokens and self-hosted DM Sans.
 
 Read [the frontend map, validation and rollback guide](docs/FRONTEND-DESIGN.md). Existing MIT Horizon reference sources remain attributed in `third_party/horizon-ui`; the current UI no longer loads the legacy Horizon stylesheet. Font licensing remains in `web/fonts/OFL.txt`.
