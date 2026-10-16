@@ -19,6 +19,12 @@ The owner requires Vegas Studio to work in **ChatGPT on the web**, using a suppo
 
 [Official connection guide](https://developers.openai.com/plugins/deploy/connect-chatgpt) and [plugin package guide](https://developers.openai.com/plugins/build/plugins) describe the host registration path. [Desktop-only documentation](https://developers.openai.com/plugins/deploy/desktop-only) identifies the local executor flag. Setting it false expresses package eligibility; it does not override workspace policy or prove an OAuth/tool call has succeeded in the user's web account.
 
+## Diagnosing a stale ChatGPT tool list
+
+A published plugin release is **not** the same thing as the host's cached MCP tool schema. During the owner's October 2026 acceptance test, the Vegas MCP server responded to authenticated `tools/list` with **126** tools but the old ChatGPT app binding exposed **107**, omitting newly introduced `instagram_delete_prepare`, `instagram_delete_approve`, `instagram_delete_execute`, and `instagram_delete_status`. Publishing a new plugin version and restarting/reconnecting the VPS were **not sufficient by themselves**. After the connected app's tool discovery refreshed, the four actions became callable.
+
+Troubleshoot in this order: verify the exact intended plugin/MCP URL; verify the actual authenticated server `tools/list`; compare action names with the host's exposed list; refresh the correct existing app/plugin release **and then its host-side tool discovery**; reconnect or start a new Work/chat session if needed. Do not claim successful availability until the host actually exposes and can call a harmless read tool. Do not duplicate installations or widen OAuth scope to treat a metadata cache issue.
+
 ## Acceptance and limitations
 
 Required acceptance is a real web Work chat calling authenticated harmless tools, reading an account, saving a draft and transferring an actual host-native image's bytes to the VPS. Remote MCP readiness, package validation and a browser-rendered dashboard are separate evidence. If native image bytes cannot be transferred in a particular web host, pause that stage rather than requiring desktop or substituting a paid API silently.
