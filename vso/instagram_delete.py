@@ -69,13 +69,14 @@ def prepare(engine, account_id, media_id, request_id):
 
 def approve(engine, deletion_id, account_id, media_id):
     """Approval must repeat BOTH frozen identifiers to prevent account confusion."""
+    # Do not open the Store's nested IMMEDIATE transaction while one is active.
+    _source(engine, account_id, media_id)
     with engine.store.db() as db:
         record = engine._load(db, "media-deletion", deletion_id)
         if record["status"] != "review":
             raise ValueError("Only an unapproved deletion request can be approved")
         if record["account_id"] != account_id or record["media_id"] != media_id:
             raise ValueError("Approval must match exact Instagram account AND media ID")
-        _source(engine, account_id, media_id)
         record.update(status="approved", approved_at=time.time())
         engine.store.write(db, "media-deletion", deletion_id, record)
     engine.store.log("instagram.delete.approve", deletion_id)
