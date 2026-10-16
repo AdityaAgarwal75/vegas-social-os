@@ -116,6 +116,9 @@ def registry(engine):
     def review_complete(request_id, replacement_plan_id):
         from .review import complete
         return complete(engine, request_id, replacement_plan_id)
+    def meta_mcp_setup():
+        from .meta_mcp import guidance
+        return guidance(engine)
     def account_start(provider, label): return engine.accounts.start(provider, label)
     def account_list(): return s.all("account")
     def account_disconnect(account_id):
@@ -308,7 +311,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, meta_mcp_setup, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, instagram_delete_prepare, instagram_delete_approve, instagram_delete_execute, instagram_delete_status, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -415,6 +418,7 @@ DESCRIPTIONS = {
     "schedule_daily": "Configure daily brief queue time in the installation owner's IANA timezone. Does not start a ChatGPT session or generate images unattended.",
     "morning_queue": "Create/read today's due briefs idempotently. A ChatGPT agent must consume them to create actual concepts and native images.",
     "doctor": "Check setup and host-native image constraints; does not verify live generation.",
+    "meta_mcp_setup": "Explain exact connected Meta developer app prerequisites, app-scoped DevTools MCP capabilities and limitations. Reads local nonsecret configuration; cannot itself access a user's Meta MCP OAuth grant.",
     "account_start": "Create a private one-use 10-minute setup link for YouTube, Instagram, Flow or Drive. User signs in directly with the provider.",
     "account_list": "List installation-owned accounts without credentials.",
     "account_info": "Read current provider account profile and statistics.",
