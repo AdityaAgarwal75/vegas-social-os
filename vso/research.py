@@ -8,7 +8,7 @@ from html.parser import HTMLParser
 from urllib.parse import urlsplit, urljoin
 from urllib.robotparser import RobotFileParser
 
-USER_AGENT = 'VegasSocialOS/0.4 (+public research; no login)'
+USER_AGENT = 'VegasSocialOS/0.13 (+public research; no login)'
 
 
 def public_address(host):

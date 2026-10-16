@@ -60,6 +60,8 @@ def start(engine):
             except Exception:
                 engine.store.put('runtime', 'scheduler', {'last_tick': time.time(), 'state': 'error', 'error': 'Check account connections and scheduled releases'})
             stop.wait(30)
+    from .learning import start as start_learning
+    start_learning(engine,stop)
     thread = threading.Thread(target=loop, name='vso-scheduler', daemon=True)
     thread.start()
     return stop

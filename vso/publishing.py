@@ -75,6 +75,8 @@ def prepare(engine, account_id, asset_ids, title, caption, visibility, options, 
     except ValueError as e:
         if str(e) != 'publication not found': raise
     body.update(id=ident, status='review', created_at=time.time(), remote_id=None)
+    from .learning import freeze
+    body['creative_record_id']=freeze(engine,body)['id']
     engine.store.put('publication', ident, body)
     return body
 
@@ -87,6 +89,11 @@ def media_url(engine, ident):
 
 
 def save(engine, p):
+    if p.get('status')=='published':
+        from .learning import freeze
+        p.setdefault('published_at',time.time())
+        p.setdefault('published_at_source','local_provider_confirmation')
+        p.setdefault('creative_record_id',freeze(engine,p)['id'])
     engine.store.put('publication', p['id'], p)
     return p
 

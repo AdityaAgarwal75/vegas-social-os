@@ -17,5 +17,7 @@ def capture(engine,account_id,request_id):
     engine.store.put('analytics',ident,record);return record
 
 def summary(engine,channel_id):
+    from .learning import context
+    learning=context(engine,channel_id)
     channel=engine.store.get('channel',channel_id)
-    return {'channel':channel,'productions':[p for p in engine.store.all('plan') if p['channel_id']==channel_id],'publications':[p for p in engine.store.all('publication') if p['account_id'] in channel['account_ids']],'account_snapshots':sorted([s for s in engine.store.all('analytics') if s['account_id'] in channel['account_ids']],key=lambda s:s['observed_at']),'interpretation':'Snapshots are observations, not causal performance predictions; use them with source-backed research for the next concept.'}
+    return {'learning':learning,'channel':channel,'productions':[p for p in engine.store.all('plan') if p['channel_id']==channel_id],'publications':[p for p in engine.store.all('publication') if p['account_id'] in channel['account_ids']],'account_snapshots':sorted([s for s in engine.store.all('analytics') if s['account_id'] in channel['account_ids']],key=lambda s:s['observed_at']),'interpretation':'Snapshots are observations, not causal performance predictions; use them with source-backed research for the next concept.'}

@@ -9,31 +9,31 @@ from datetime import date, timedelta
 # Formats route to existing Flow/native image/FFmpeg services, not third-party code.
 PIPELINES = {
     "short_reel": ("research", "creative_brief", "hook_selection", "script",
-                   "storyboard", "native_image_review", "flow_video", "edit", "quality_review", "publish_approval"),
+                   "storyboard", "native_image_review", "flow_video", "edit", "quality_review", "creative_memory", "publish_approval"),
     "carousel": ("research", "creative_brief", "slide_outline", "native_image_review",
                  "caption_review", "publish_approval"),
     "story": ("research", "creative_brief", "story_sequence", "sticker_plan",
               "native_image_review", "publish_approval"),
     "documentary": ("research", "source_validation", "script", "shot_list",
-                    "stock_rights_review", "asset_review", "edit", "quality_review", "publish_approval"),
+                    "stock_rights_review", "asset_review", "edit", "quality_review", "creative_memory", "publish_approval"),
     "cinematic": ("creative_brief", "style_reference", "shot_list", "native_image_review",
-                  "flow_video", "sound_design", "edit", "quality_review", "publish_approval"),
+                  "flow_video", "sound_design", "edit", "quality_review", "creative_memory", "publish_approval"),
     "animated_explainer": ("research", "fact_check", "script", "storyboard",
-                           "animation_assets", "voiceover", "edit", "quality_review", "publish_approval"),
+                           "animation_assets", "voiceover", "edit", "quality_review", "creative_memory", "publish_approval"),
     "avatar_spokesperson": ("creative_brief", "script", "identity_permission",
-                           "voice_permission", "avatar_assets", "lip_sync_review", "quality_review", "publish_approval"),
+                           "voice_permission", "avatar_assets", "lip_sync_review", "quality_review", "creative_memory", "publish_approval"),
     "talking_head": ("creative_brief", "hook_selection", "script",
-                     "teleprompter", "subtitles", "edit", "quality_review", "publish_approval"),
+                     "teleprompter", "subtitles", "edit", "quality_review", "creative_memory", "publish_approval"),
     "podcast_clips": ("source_permission", "transcript", "highlight_selection",
-                      "clip_review", "subtitles", "quality_review", "publish_approval"),
+                      "clip_review", "subtitles", "quality_review", "creative_memory", "publish_approval"),
     "screen_demo": ("product_validation", "capture_permission", "screencast",
-                    "redaction_review", "subtitles", "quality_review", "publish_approval"),
+                    "redaction_review", "subtitles", "quality_review", "creative_memory", "publish_approval"),
     "localization": ("source_permission", "transcript", "translation_review",
                      "voice_permission", "dub", "subtitle_review", "publish_approval"),
     "character_animation": ("identity_reference", "continuity", "script",
-                            "storyboard", "native_image_review", "flow_video", "edit", "quality_review", "publish_approval"),
+                            "storyboard", "native_image_review", "flow_video", "edit", "quality_review", "creative_memory", "publish_approval"),
     "stock_montage": ("research", "stock_rights_review", "footage_select",
-                      "edit", "sound_design", "quality_review", "publish_approval"),
+                      "edit", "sound_design", "quality_review", "creative_memory", "publish_approval"),
 }
 FORMATS = {"reel": "short_reel", "short": "short_reel", "story": "story", "carousel": "carousel",
            "video": "cinematic", "documentary": "documentary", "podcast": "podcast_clips",
@@ -74,6 +74,7 @@ def safe_urls(values):
 def catalog():
     return {
         "pipelines": {name: list(stages) for name, stages in PIPELINES.items()},
+        "post_release": ["freeze_exact_creative", "observe_public_performance", "review_evidence", "save_next_experiment"],
         "hook_families": [{"key": k, "guidance": d} for k, d in HOOK_FAMILIES],
         "features": ["editorial brief and content pillars", "brand voice and audience memory",
                      "source-provenance gate", "hook analysis", "speech pacing", "caption first-line audit",
@@ -140,13 +141,14 @@ def start(engine, channel_id, topic, platform, pipeline, objective, budget_credi
     research=[r for r in prior if r.get("channel_id")==channel_id]
     try:strategy=engine.store.get("strategy",channel_id)
     except ValueError:strategy={}
-    body={"id":ident,"channel_id":channel_id,"topic":topic,"platform":platform,
+    from .learning import context
+    body={"learning_context":context(engine,channel_id),"id":ident,"channel_id":channel_id,"topic":topic,"platform":platform,
           "pipeline":pipeline,"objective":objective,"budget_credits":budget_credits,
           "references":references,"strategy":strategy,"channel_brief":{"name":channel["name"],"niche":channel.get("niche")},
           "research":[{"title":r.get("title"),"sources":r.get("sources",[])} for r in research[-12:]],
           "stages":[{"name":name,"status":"pending"} for name in PIPELINES[pipeline]],
           "status":"awaiting_host_draft","variants":None,"chosen":None,"created_at":time.time(),
-          "host_instruction":"Use current ChatGPT-hosted reasoning and authorized public research to propose two genuinely different ideas; provide factual sources, scripts, captions, image and video scene prompts; never pretend generated media exist; hand off to native host images and existing Flow only after review. Do not spend or publish."}
+          "host_instruction":"Read the saved learning_context and pinned craft via content_context. Use complete per-shot recipes and preserve exact prompts with content_memory_save before release. Plan one next experiment and do not diagnose hooks from view counts alone. Use current ChatGPT-hosted reasoning and authorized public research to propose two genuinely different ideas; provide factual sources, scripts, captions, image and video scene prompts; never pretend generated media exist; hand off to native host images and existing Flow only after review. Do not spend or publish."}
     with engine.store.db() as db:
         row=db.execute("SELECT body FROM records WHERE kind='creative-brief' AND id=?",(ident,)).fetchone()
         if row:
