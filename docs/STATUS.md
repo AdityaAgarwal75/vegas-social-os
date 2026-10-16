@@ -1,3 +1,14 @@
+# Current checkpoint — 0.11.3 Meta MCP assisted onboarding
+
+- Added `meta_mcp_setup` as a read-only, installation-owned ChatGPT plugin tool. It exposes exact OAuth callbacks, nonsecret developer App IDs, per-provider configuration readiness, and a capability catalog without asserting any user Meta MCP connection, App Review approval or business login.
+- Added a first-party **Workspace settings → Meta developer setup** panel with the official remote MCP endpoint, a copyable agent audit prompt containing only public callback URLs and App IDs, and direct Facebook OAuth configuration guidance. Every independent installation gets the same instructions.
+- Added `docs/META-MCP-ONBOARDING.md`, README entry, and agent rules for supported Meta MCP operations (developer-app inspection, permissions/review checks, compliance, API usage, webhook reading/writing with owner confirmation). App creation, use-case editing and business linking are **coming soon** and cannot be promised or called unless actual connected tools appear.
+- Meta MCP is an **optional user/agent OAuth connector**, not a VPS backend dependency or replacement for Facebook/Instagram OAuth. Owner-only app secrets remain encrypted locally; manual Meta developer setup remains usable for users without beta access.
+- Isolated AWS VPS checkout: JavaScript syntax check, Python compile check, 3 new Meta MCP safety/onboarding tests and **153 Python unit tests total** pass. Live Meta DevTools access on maintainer's app shows developer Read/Manage access is functional; `instagram_manage_contents` remains rejected/not live for the selected app, so Instagram deletion is not claimed working.
+- The new onboarding UI was statically checked and regression-tested, not yet independently approved by an authenticated browser visual walkthrough. No developer app was created, no provider permissions granted, no webhook changed, and no social media post deleted during this update.
+
+---
+
 # Current checkpoint — 0.11.0 Horizon layout rebuild
 
 - Replaced the stacked dashboard with the official Horizon default composition: six compact statistics, paired resource/production charts, production table alongside daily activity/media distribution, and specialist table alongside release queue/calendar. This is a native adaptation of the working MIT source, not an editable Figma frame extraction. The supplied Figma file has only promotional artwork; component search found no Horizon dashboard components.
