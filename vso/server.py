@@ -54,12 +54,12 @@ class Handler(BaseHTTPRequestHandler):
         import sys
         sys.stderr.write(json.dumps({"event":"http","method":self.command,"path":urllib.parse.urlsplit(self.path).path,"status":str(args[1]) if len(args)>1 else "unknown"})+"\n")
 
-    def send(self, data, status=200, content_type="application/json", headers=None):
+    def send(self, data, status=200, content_type="application/json", headers=None, cache_control="no-store"):
         body = json.dumps(data).encode() if content_type == "application/json" else data.encode() if isinstance(data, str) else data
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", cache_control)
         # Allow origin-only Referer, not sensitive paths. no-referrer produces Origin: null
         # for normal HTML form submits, which fails the exact-Origin CSRF guard.
         self.send_header("Referrer-Policy", "origin")
@@ -216,6 +216,12 @@ class Handler(BaseHTTPRequestHandler):
             if not self.session():return self.page('Owner sign-in required','<p>Open your private owner dashboard sign-in link first.</p>',401)
             file='admin.js' if path=='/admin.js' else 'admin.html'
             return self.send((Path(__file__).parent.parent/'web'/file).read_bytes(),content_type='application/javascript' if file.endswith('.js') else 'text/html')
+        if path.startswith('/template-preview/'):
+            from .templates import ROWS
+            filename=path.removeprefix('/template-preview/')
+            allowed={r[3]+'.png' for r in ROWS}
+            if filename not in allowed:return self.send({'error':'Preview not found'},404)
+            return self.send((Path(__file__).parent.parent/'web/template-previews'/filename).read_bytes(),content_type='image/png',cache_control='public, max-age=3600')
         if path in ("/", "/onboarding", "/dashboard", "/app.js", "/sha256.js", "/style.css", "/flow-login.js", "/oauth-consent.js", "/control.css", "/theme.js"):
             file = {"/": "index.html", "/onboarding": "index.html", "/dashboard": "index.html", "/app.js": "app.js", "/sha256.js":"sha256.js", "/style.css": "style.css", "/flow-login.js": "flow-login.js", "/oauth-consent.js": "oauth-consent.js", "/control.css":"control.css", "/theme.js":"theme.js"}[path]
             mime = "application/javascript" if file.endswith(".js") else "text/css" if file.endswith(".css") else "text/html"

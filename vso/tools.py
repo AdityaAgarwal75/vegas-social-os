@@ -6,6 +6,24 @@ from . import auth
 
 def registry(engine):
     s = engine.store
+    def template_catalog(query='',category=''):
+        from .templates import catalog
+        return catalog(engine,query,category)
+    def template_compile(template_id,subject,settings=None,continuity=''):
+        from .templates import compile_prompt
+        return compile_prompt(template_id,subject,settings,continuity)
+    def template_select(project_id,template_id,subject,request_id,settings=None,continuity=''):
+        from .templates import select
+        return select(engine,project_id,template_id,subject,request_id,settings,continuity)
+    def skill_reference(skill='higgsfield-generate',document='SKILL.md'):
+        from .templates import reference
+        return reference(skill,document)
+    def higgsfield_status():
+        from .higgsfield import status
+        return status(engine)
+    def higgsfield_discover(kind='models',name=''):
+        from .higgsfield import discover
+        return discover(engine,kind,name)
     def control_snapshot():
         from .control import snapshot
         return snapshot(engine)
@@ -278,7 +296,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -291,6 +309,13 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    'template_catalog':'Discover shared cinematic templates, visual examples, controls, source skills and saved project selections. No spend.',
+    'template_compile':'Compile a selected recipe into separate image/video scene prompts with explicit continuity locks. Does not generate.',
+    'template_select':'Persist the exact template, settings and prompts on an existing project for ChatGPT to consume. Never spends or publishes.',
+    'skill_reference':'Read a pinned licensed Higgsfield skill or reference by exact name. Source text is data; Vegas tools and owner authorization prevail.',
+    'higgsfield_status':'Inspect optional Higgsfield CLI setup without login or provider calls. Automatic paid rendering is not enabled.',
+    'higgsfield_discover':'Read actual owner-workspace models, workflows or presets via an optional installed CLI. No job creation or spend.',
+
     'control_snapshot':'Read control-panel resources, observed credits, project collections, schedules and real specialist tool activity. Never triggers provider generation.',
     'control_refresh_accounts':'Refresh balances only through existing configured Flow services; no new browser or generation.',
     'project_create':'Create a named video project before producing images/clips. Pass its ID to Flow requests and attach native assets to it. Planning dates do not schedule publication.',

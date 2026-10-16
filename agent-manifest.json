@@ -1,6 +1,6 @@
 {
   "name": "vegas-social-os",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "entrypoint": "BOOTSTRAP.md",
   "agent_setup_script": "scripts/bootstrap-ubuntu.sh",
   "runtime": {
@@ -130,5 +130,14 @@
     "gateway_user": "vegas-social",
     "scope": "vps:admin",
     "dangerous_operation_approval": "private owner TOTP, exact request, 120 seconds"
+  },
+  "creative_templates": {
+    "catalog_tool": "template_catalog",
+    "compile_tool": "template_compile",
+    "select_tool": "template_select",
+    "reference_tool": "skill_reference",
+    "dashboard": "/dashboard#templates",
+    "default_video_provider": "flow",
+    "higgsfield": "optional read-only discovery; paid rendering requires operator handoff"
   }
 }
