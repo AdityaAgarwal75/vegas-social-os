@@ -1,7 +1,7 @@
 # Current engineering checkpoint — 0.9.0 cinematic templates
 
 - Shared template catalog/compilation/project selection, visual dashboard library, pinned MIT Higgsfield skill references and optional read-only CLI discovery are implemented. Six tools expose the same direction to ChatGPT. Native keyframes and Flow remain the default execution path.
-- 145 Python tests and 5 Node tests pass, with Python/JavaScript/shell syntax and diff checks. Native preview generation and source/license hash checks pass. Local Chromium download succeeded but sandboxed launch is unavailable in this executor; browser acceptance is configured in CI and remains pending. No paid Higgsfield rendering adapter is claimed; provider login/live catalog, rendering and media recovery remain acceptance gates.
+- 145 Python tests and 5 Node tests pass, with Python/JavaScript/shell syntax, template-source hash and packaging checks. GitHub Actions run 38860309742 passes Python 3.11/3.12, CloudFormation lint and real Chromium acceptance: template cards/previews, search/filter, prompt preview, persistent project selections, references and responsive light/dark at 360/768/1440/1920, plus existing control-room/login/recovery/OAuth checks. No provider generation or publishing was performed. No paid Higgsfield rendering adapter is claimed; provider login/live catalog, rendering and media recovery remain acceptance gates.
 - Live deployment is pending exact owner-admin approval through the newer broker. The previous VPS-control connector returns internal errors. Existing 0.8 remains live until the reviewed update is approved and health-checked.
 
 # Previous checkpoint — 0.8.0 control panel candidate

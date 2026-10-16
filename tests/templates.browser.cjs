@@ -15,6 +15,8 @@ const python=process.env.VSO_QA_PYTHON||'python';
  await page.goto(base+'/pair?ticket='+ticket);await page.locator('#page-root').waitFor();
  await page.evaluate(()=>location.hash='templates');await page.locator('.template-card').first().waitFor();
  assert.equal(await page.locator('.template-card').count(),16);
+ const previewResponse=await page.request.get(base+'/template-preview/product.png');assert.equal(previewResponse.headers()['cache-control'],'public, max-age=3600');
+ const privateResponse=await page.request.get(base+'/api/state');assert.equal(privateResponse.headers()['cache-control'],'no-store');
  await page.evaluate(()=>document.querySelectorAll('.template-cover img').forEach(i=>i.loading='eager'));
  await page.waitForFunction(()=>[...document.querySelectorAll('.template-cover img')].every(i=>i.complete&&i.naturalWidth>0));
  await page.getByRole('button',{name:'Product',exact:true}).click();assert.equal(await page.locator('.template-card').count(),4);
