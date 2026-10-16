@@ -74,6 +74,7 @@ class InstagramDeletionTests(unittest.TestCase):
         })
         self.assertEqual(a["status"], "approved")
         with patch.object(self.engine.accounts, "token", return_value="fake-page-token"), \
+             patch.object(self.engine.accounts.config, "version", return_value="v25.0"), \
              patch("vso.instagram_delete.net.request") as send:
             send.side_effect = [
                 ({"instagram_business_account": {"id":"17841425239410984", "username":"untamedplot"}}, {}),
