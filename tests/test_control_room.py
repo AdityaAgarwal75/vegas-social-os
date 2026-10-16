@@ -46,18 +46,19 @@ class ControlRoomTests(unittest.TestCase):
         r=self.e.accounts.start('facebook','Pages'); ticket=urllib.parse.parse_qs(urllib.parse.urlsplit(r['url']).query)['ticket'][0]
         url=self.e.accounts.authorize(ticket)['redirect']; q=urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
         self.assertEqual(q['redirect_uri'],['https://own.example/callback/facebook'])
-        self.assertIn('pages_manage_posts',q['scope'][0])
+        self.assertIn('instagram_manage_contents',q['scope'][0])
         with self.assertRaises(ValueError): self.e.accounts.callback('instagram',q['state'][0],'code')
     def test_facebook_discovers_pages_and_never_returns_tokens(self):
         r=self.e.accounts.start('facebook','Pages'); ticket=urllib.parse.parse_qs(urllib.parse.urlsplit(r['url']).query)['ticket'][0]
         q=urllib.parse.parse_qs(urllib.parse.urlsplit(self.e.accounts.authorize(ticket)['redirect']).query)
         responses=[({'access_token':'user-short'},{}),({'access_token':'user-long','expires_in':10000},{}),
-            ({'data':[{'permission':p,'status':'granted'} for p in ['pages_show_list','pages_read_engagement','pages_manage_posts']]},{}),
-            ({'data':[{'id':'111','name':'Page one','access_token':'page-secret','tasks':['CREATE_CONTENT']},
+            ({'data':[{'permission':p,'status':'granted'} for p in ['pages_show_list','pages_read_engagement','instagram_basic','instagram_manage_contents']]},{}),
+            ({'data':[{'id':'111','name':'Page one','access_token':'page-secret','tasks':['CREATE_CONTENT'],'instagram_business_account':{'id':'17841425239410984','username':'untamedplot'}},
                       {'id':'222','name':'Read only','access_token':'other-secret','tasks':['ANALYZE']}]},{})]
         with patch('vso.accounts.net.request',side_effect=responses): result=self.e.accounts.callback('facebook',q['state'][0],'code')
         self.assertEqual(len(result['accounts']),1); self.assertNotIn('page-secret',json.dumps(result))
         self.assertEqual(result['accounts'][0]['remote_id'],'111')
+        self.assertEqual(result['accounts'][0]['linked_instagram_id'],'17841425239410984')
     def test_missing_facebook_scope_does_not_connect(self):
         with patch('vso.accounts.net.request',side_effect=[({'access_token':'a'},{}),({'access_token':'b'},{}),({'data':[]},{})]):
             with self.assertRaisesRegex(ValueError,'missing'):self.e.accounts.facebook_callback({'label':'Page'},self.e.accounts.config.get('facebook'),{})

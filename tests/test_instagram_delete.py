@@ -20,6 +20,13 @@ class InstagramDeletionTests(unittest.TestCase):
             "id": self.account, "provider": "instagram", "name": "untamedplot",
             "remote_id": "17841425239410984", "status": "connected",
         })
+        self.store.put("account", "facebook-page", {
+            "id": "facebook-page", "provider": "facebook", "remote_id": "1234567890123456",
+            "name": "Utamed Plot", "status": "connected",
+            "linked_instagram_id": "17841425239410984",
+            "linked_instagram_username": "untamedplot",
+            "permissions": ["instagram_manage_contents", "instagram_basic", "pages_show_list"],
+        })
         self.store.put("publication", "published-test-reel", {
             "id": "published-test-reel", "kind": "composer", "provider": "instagram",
             "account_id": self.account, "status": "published", "remote_id": self.media_id,
@@ -66,19 +73,45 @@ class InstagramDeletionTests(unittest.TestCase):
             "media_id": self.media_id,
         })
         self.assertEqual(a["status"], "approved")
-        with patch("vso.instagram_delete.net.request") as send:
-            result = tools.call(self.engine, "instagram_delete_execute", {
-                "deletion_id": r["id"],
-            })
-            self.assertEqual(result["status"], "manual_required")
-            send.assert_not_called()
+        with patch.object(self.engine.accounts, "token", return_value="fake-page-token"), \
+             patch.object(self.engine.accounts.config, "version", return_value="v25.0"), \
+             patch("vso.instagram_delete.net.request") as send:
+            send.side_effect = [
+                ({"instagram_business_account": {"id":"17841425239410984", "username":"untamedplot"}}, {}),
+                ({"id":self.media_id, "username":"untamedplot", "media_product_type":"REELS"}, {}),
+                ({"success":True}, {}),
+            ]
+            result = tools.call(self.engine, "instagram_delete_execute", {"deletion_id":r["id"]})
+            self.assertEqual(result["status"], "deleted")
+            self.assertTrue(result["provider_confirmed"])
+            self.assertEqual(send.call_count, 3)
+            self.assertEqual(send.call_args.kwargs["method"], "DELETE")
+            self.assertTrue(send.call_args.args[0].endswith("/" + self.media_id))
         self.assertEqual(
-            tools.call(self.engine, "instagram_delete_status", {
-                "deletion_id": r["id"],
-            })["status"], "manual_required",
+            tools.call(self.engine, "instagram_delete_status", {"deletion_id":r["id"]})["status"],
+            "deleted",
         )
+        self.assertEqual(self.store.get("publication", "published-test-reel")["status"], "deleted")
         with self.assertRaises(ValueError):
             tools.call(self.engine, "instagram_delete_execute", {"deletion_id": r["id"]})
+
+    def test_other_instagram_media_cannot_be_deleted(self):
+        r = self.request()
+        tools.call(self.engine, "instagram_delete_approve", {
+            "deletion_id": r["id"], "account_id": self.account, "media_id": self.media_id,
+        })
+        with patch.object(self.engine.accounts, "token", return_value="fake-page-token"), \
+             patch.object(self.engine.accounts.config, "version", return_value="v25.0"), \
+             patch("vso.instagram_delete.net.request") as send:
+            send.side_effect = [
+                ({"instagram_business_account": {"id":"17841425239410984", "username":"untamedplot"}}, {}),
+                ({"id":self.media_id, "username":"someone_else", "media_product_type":"REELS"}, {}),
+            ]
+            result = tools.call(self.engine, "instagram_delete_execute", {"deletion_id": r["id"]})
+            self.assertEqual(result["status"], "unknown")
+            self.assertEqual(send.call_count, 2)
+            self.assertTrue(all(call.kwargs.get("method", "GET") != "DELETE" for call in send.call_args_list))
+        self.assertEqual(self.store.get("publication", "published-test-reel")["status"], "published")
 
     def test_wrong_account_identity_blocks_execute(self):
         r = self.request()
