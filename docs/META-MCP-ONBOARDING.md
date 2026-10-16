@@ -32,7 +32,7 @@
 | `devtools_webhook_manage`, `devtools_webhook_test` | **Writes**, only with Manage permission and explicit approval for exact callback/topic/fields/payload |
 | `devtools_skill_invocation` | Advisory workflow metadata; not permission granting |
 
-Six **announced, not currently exposed** lifecycle tools: `devtools_app_create`, `devtools_app_use_cases`, `devtools_app_use_cases_manage`, `devtools_business_list`, `devtools_business_create`, `devtools_app_business_manage`. They can only be used when the connected Meta MCP actually advertises them. Never fabricate endpoints or claim to have created a Meta app.
+Six **coming soon, not currently exposed** lifecycle tools: `devtools_app_create`, `devtools_app_use_cases`, `devtools_app_use_cases_manage`, `devtools_business_list`, `devtools_business_create`, `devtools_app_business_manage`. They can only be used when the connected Meta MCP actually advertises them. Never fabricate endpoints or claim to have created a Meta app.
 
 **Not supported by current Meta MCP:** reading the App Secret, completing Meta user login, entering private developer-app credentials into Vegas, modifying OAuth redirects directly, automatically obtaining permission approval, conducting App Review submission, managing Instagram content, deleting Reels, or reauthorizing a Facebook Page. These belong to other interfaces and require the owner's consent.
 
