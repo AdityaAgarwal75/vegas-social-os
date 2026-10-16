@@ -1,3 +1,14 @@
+# Current checkpoint — 0.12.0 workspace redesign
+
+- Rebuilt the frontend in the owner's warm-grey / white / sage direction, with matching dark mode, labelled production/publishing/operations navigation, new overview hierarchy and consistent owner access/administration pages. Added a public product page at signed-out `/` and `/about`; `/dashboard` and `/onboarding` still require an owner session.
+- Project overview now separates images, scene clips, final exports and audio; Media library is a distinct kind-filtered, project-grouped surface. Original media bytes and membership rules are retained. Image previews, scripts, storyboard revisions, template settings, jobs and release history remain accessible.
+- Posts & releases now exposes the backend's reviewed composer: ordered media, captions, covers, explicit YouTube audience/tags/visibility, frozen scheduling time, approval/schedule/cancel, original-upload polling/reconciliation/resume and thumbnail-only retry. Supported Instagram deletion requires review of the exact account and typed media ID. No provider write occurs just from loading the UI.
+- Calendar supports month navigation, selected-day filtering and separate scheduled/editorial views. Connections are grouped by provider and show actual linked identities and available grants. Optional template-catalog failure is isolated; focused controls and playback survive background polling.
+- Verification: 153 Python unit tests, 5 Node tests and Python/JavaScript/shell checks pass. Isolated Chromium acceptance passes 15 workspace routes at 360/768/1440/1920 in both themes, template selection and persistence, login/recovery/OAuth/PKCE/mobile navigation, and the new grouped-media/composer/scheduling/ordering/failure-isolation/public-landing suite. Desktop/dark/login/project/publishing/landing screenshots were visually inspected. Tests use disposable data and block external provider traffic; they do not establish live generation, publishing or new account consent.
+- Design map, source provenance and rollback procedure: [FRONTEND-DESIGN.md](FRONTEND-DESIGN.md). Repository synchronization and production deployment evidence will be recorded after the pinned release is applied and verified.
+
+---
+
 # Current documentation checkpoint — 16 October 2026 social onboarding and founder trials
 
 - New **[complete social setup runbook](COMPLETE-SOCIAL-SETUP.md)** covers developer app and private App Secret setup; Login Configuration ID vs registered Valid OAuth Redirect URIs; Instagram Login versus Facebook Login for Business, their separate permission families and user consents; YouTube and Drive scopes; cover/thumbnail behavior; safe multi-Page import and exact Page→Instagram matching; review-gated provider-confirmed Instagram Reel deletion; actionable troubleshooting.
