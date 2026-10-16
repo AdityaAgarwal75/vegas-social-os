@@ -3,7 +3,7 @@
 - Rebranded the product as Vegas Studio with an original SVG logo. Existing installation paths, OAuth identifiers, stored accounts and assets remain compatible.
 - Applied Horizon UI's official MIT-licensed free dashboard design language across the control room, templates, login/recovery, owner approvals and private browser. Self-hosted DM Sans uses the OFL. Pinned source, hashes and licenses are in `third_party/horizon-ui` and `web/fonts`.
 - This is a native HTML/CSS adaptation of the official Horizon source and preview, not a claim of pixel-perfect extraction of the inaccessible Figma Community frames. Dashboard numbers come from saved installation data; demo financial analytics are not included.
-- Local verification: 145 Python tests, 5 Node tests, Python/JavaScript/shell syntax and diff checks pass. Responsive Chromium acceptance and release deployment receipts will be recorded after CI and owner-approved deployment. No paid generation or publishing performed.
+- Local verification: 145 Python tests, 5 Node tests, Python/JavaScript/shell syntax and diff checks pass. GitHub Actions run 38863073222 passes Python 3.11/3.12, CloudFormation lint and real Chromium acceptance: fourteen dashboard routes, template search/selection/references, login/recovery/OAuth and responsive light/dark at 360/768/1440/1920. Desktop, mobile, dark, template and login screenshots were reviewed. The private plugin is saved at 0.10.0 with its MCP connection and owner metadata preserved; deployment receipt remains pending private approval. No paid generation or publishing performed.
 - VPS remains on 0.8.0 until the broker's private owner approval permits the combined 0.9/0.10 release deployment.
 
 # Previous checkpoint — 0.9.0 cinematic templates
