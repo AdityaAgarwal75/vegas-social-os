@@ -36,6 +36,12 @@ If AWS Core is connected to your own AWS account, send:
 
 Your agent uses the [AWS setup recipe](docs/AWS-ONBOARDING.md), scoped AWS tools and SSM. It derives a stable HTTPS address and returns the dashboard plus private onboarding link after checks. AWS Core connection alone does not prove all required permissions are available. Account login/2FA, provider approval, billable-resource authorization and plugin installation consent remain personal steps. There is no maintainer VPS or shared account pool in this path.
 
+## Meta developer MCP assisted onboarding (recommended)
+
+Vegas Social OS provides a read-only `meta_mcp_setup` tool and a **Workspace settings → Meta developer setup** panel. New users are guided to connect the official Meta Social Technologies MCP at `https://mcp.facebook.com/devtools` in their own ChatGPT/IDE client. That integration helps the agent inspect app roles and App Review grants, detect OAuth callback mismatches, check compliance, and manage explicitly approved webhooks. See **[Meta MCP setup and exact capabilities](docs/META-MCP-ONBOARDING.md)**. Users without beta access can follow the manual Meta Developer setup path.
+
+Meta MCP's developer-app **Manage** access does NOT grant Instagram/Facebook Page OAuth privileges or approval to delete Reels. The app-creation and use-case tools advertised in Meta's documentation are **coming soon** and cannot be required or claimed as operational until the connected Meta MCP actually exposes them.
+
 ## Google accounts and social connections
 
 The dashboard opens a private screen mirror of Chrome on **your VPS**. Your agent creates profiles; you sign into them one by one and open Flow. Sessions persist on that server. No Google API key or pasted cookie is required for Flow. Connecting Flow does not grant YouTube upload access.
