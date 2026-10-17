@@ -1,6 +1,7 @@
 // Original Google Flow browser worker. Node 22+ built-ins; no cookie extraction.
 import {spawn, execFileSync} from 'node:child_process';
 import {existsSync, mkdirSync, openSync, readFileSync, writeFileSync} from 'node:fs';
+import {availableParallelism, loadavg} from 'node:os';
 import {join, resolve} from 'node:path';
 import {createServer} from 'node:net';
 import {fileURLToPath} from 'node:url';
@@ -65,6 +66,22 @@ async function freePort() {
   return await new Promise(resolve => {const s=createServer(); s.listen(0, '127.0.0.1', () => {const p=s.address().port; s.close(() => resolve(p));});});
 }
 
+// Fail before creating another heavy Chrome profile on a resource-starved VPS.
+// This is an admission guard, not an automatic browser/session killer.
+export function checkBrowserCapacity(availableKiB, oneMinuteLoad, cpuCount) {
+  if (!Number.isFinite(availableKiB) || availableKiB < 1536 * 1024)
+    throw new Error('Insufficient free VPS memory for another Flow Chrome; close an idle profile first');
+  if (!Number.isFinite(oneMinuteLoad) || oneMinuteLoad > Math.max(1, cpuCount) * 4)
+    throw new Error('VPS load too high for another Chrome; wait for idle resources');
+}
+
+function checkHostBeforeChrome() {
+  if (process.platform !== 'linux' || process.env.VSO_REMOTE_BROWSER !== '1') return;
+  const meminfo = readFileSync('/proc/meminfo', 'utf8');
+  const matched = meminfo.match(/^MemAvailable:\\s+(\\d+) kB/m);
+  checkBrowserCapacity(matched ? Number(matched[1]) : NaN, loadavg()[0], availableParallelism());
+}
+
 async function launch(root) {
   const config = join(root, 'browser.json');
   if (existsSync(config)) {
@@ -80,6 +97,7 @@ async function launch(root) {
       return saved;
     }
   }
+  checkHostBeforeChrome();
   const port = await freePort();
   let environment=process.env;
   if(process.env.VSO_REMOTE_BROWSER==='1') {
