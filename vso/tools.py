@@ -54,6 +54,12 @@ def registry(engine):
     def analytics_summary(channel_id):
         from .analytics import summary
         return summary(engine,channel_id)
+    def instagram_media_list(account_id,limit=100):
+        from .instagram_analytics import media_list
+        return media_list(engine,account_id,limit)
+    def instagram_media_insights(account_id,media_id):
+        from .instagram_analytics import media_insights
+        return media_insights(engine,account_id,media_id)
     def channel_settings_save(channel_id,settings):
         from .production import channel_settings
         return channel_settings(engine,channel_id,settings)
@@ -324,7 +330,7 @@ def registry(engine):
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (flow_batch_submit,flow_production_submit,flow_engine_status,flow_batch_status,flow_batch_cancel,template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, meta_mcp_setup, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (flow_batch_submit,flow_production_submit,flow_engine_status,flow_batch_status,flow_batch_cancel,template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,instagram_media_list,instagram_media_insights,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, meta_mcp_setup, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, instagram_delete_prepare, instagram_delete_approve, instagram_delete_execute, instagram_delete_status, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -377,6 +383,8 @@ DESCRIPTIONS = {
 
     'analytics_capture':'Persist only account statistics exposed by the already authorized provider read scopes. No paid API or retention/revenue claim.',
     'analytics_summary':'Read channel production/release history and observed account metrics for subsequent content planning; no provider call.',
+    'instagram_media_list':'Read and rank the owner\'s Instagram Reels by observed views through the verified linked Facebook Page. No posting or scraping.',
+    'instagram_media_insights':'Get view and available engagement/watch-time metrics for one owner-verified Instagram Reel; missing data is unknown, not zero.',
     'channel_settings_save':'Save the channel audience, rules, continuity references, allowed Flow accounts, rolling credit ceiling and production/posting preferences.',
     'production_status':'Read the authoritative storyboard, clips, revisions, editing jobs and releases for one production.',
     'video_edit':'Start one durable local FFmpeg edit of exact completed scene clips, with normalization, fade-to-black, optional authorized music and subtitles. Does not publish or render with a provider.',
