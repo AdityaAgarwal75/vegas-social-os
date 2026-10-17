@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Reviewed, owner-authorized in-place upgrade. No provider services are restarted.
 set -euo pipefail
+# The owner broker uses umask 0077. Public source/tests must be readable by the service user.
+umask 022
 [[ $(id -u) -eq 0 ]] || { echo 'Run through the authorized owner administrator'; exit 1; }
 revision=${1:?Pass the reviewed full commit SHA}
 public_origin=${2:?Pass the installation HTTPS origin}
@@ -19,6 +21,10 @@ if [[ ! -d $stage ]]; then
   git clone --quiet --no-checkout https://github.com/AdityaAgarwal75/vegas-social-os.git "$stage"
   git -C "$stage" checkout --quiet --detach "$revision"
 fi
+# Repair a partial stage from an earlier private-umask attempt. Do not follow
+# runtime/venv symlinks or change private state/browser/credential permissions.
+find -P "$stage" -type d -exec chmod 0755 {} +
+find -P "$stage" -type f -exec chmod a+r {} +
 [[ $(git -C "$stage" rev-parse HEAD) == "$revision" ]] || exit 1
 [[ -z $(git -C "$stage" status --porcelain --untracked-files=no) ]] || exit 1
 # Reuse installed locked dependencies; no live package upgrade needed for this release.
