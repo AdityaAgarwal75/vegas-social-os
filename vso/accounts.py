@@ -50,7 +50,7 @@ class Accounts:
             if app["config_id"]:
                 params["config_id"] = app["config_id"]
             else:
-                params["scope"] = "pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_contents"
+                params["scope"] = "pages_show_list,pages_read_engagement,instagram_basic,instagram_manage_contents,instagram_manage_insights"
             return {"redirect": f"https://www.facebook.com/{self.config.version(provider)}/dialog/oauth?" + urllib.parse.urlencode(params)}
         params = {"client_id": app["client_id"], "redirect_uri": callback,
                   "response_type": "code", "state": state,
