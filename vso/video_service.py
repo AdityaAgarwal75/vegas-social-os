@@ -5,6 +5,9 @@ import time
 from pathlib import Path
 from . import flow_service,flow_models
 
+class NotSubmitted(ValueError):
+    """Provider generation was never called; safe terminal admission failure."""
+
 def settings(model,duration,resolution,aspect_ratio,max_credits):
     flow_models.validate(model,duration,resolution,aspect_ratio)
     if type(max_credits) is not int or not 0<=max_credits<=1000:raise ValueError('Credit ceiling must be 0–1000')
@@ -46,7 +49,7 @@ def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',r
     if last_frame_id:scene['last_frame']=upload(last_frame_id)
     if refs:scene['reference_images']=[upload(i) for i in refs]
     status=flow_service.request(config,'status',{'detailed':False})
-    if any(j.get('status') in ('queued','running') for j in status.get('jobs',[])):raise ValueError('Existing service is busy; no clip submitted')
+    if any(j.get('status') in ('queued','running') for j in status.get('jobs',[])):raise NotSubmitted('Existing service is busy; no clip submitted')
     # Every intentional take needs its own output directory, even if prompt,
     # model and settings are identical to an earlier completed request.
     if not submission_id:
@@ -55,7 +58,7 @@ def submit(engine,account_id,prompt,options,first_frame_id='',last_frame_id='',r
     result=flow_service.request(config,'generate',{'project':'SocialOS-video-'+engine.store.digest(submission_id)[:24],'scenes':[scene]})
     ids=[j['id'] for j in result.get('jobs',[])]
     if len(ids)!=1:raise ValueError('Expected one durable backend video job')
-    return {'backend_job_ids':ids,'project':result.get('output_dir')}
+    return {'backend_job_ids':ids,'project':result.get('output_dir'),'expected':options}
 
 def poll(engine,account_id,worker):
     _,config=flow_service.binding(engine,account_id)
@@ -69,6 +72,17 @@ def poll(engine,account_id,worker):
     if len(files)!=1:raise ValueError('No single exact MP4 download; recover without regenerating')
     raw=flow_service.request(config,'media',query={'path':files[0]},binary=True)
     asset=engine.asset_import(base64.b64encode(raw).decode(),'video/mp4')
+    from .media import probe
+    evidence=probe(engine.asset_path(asset['id']),'video/mp4')
+    if float(evidence.get('duration') or 0)<=0:raise ValueError('Downloaded clip has no valid duration; recover original output')
+    expected=worker.get('expected',{})
+    stream=next(s for s in evidence['streams'] if s.get('codec_type')=='video')
+    if expected.get('duration') and abs(float(evidence['duration'])-expected['duration'])>max(1,expected['duration']*0.15):raise ValueError('Original output duration differs from the requested clip; review without regeneration')
+    if expected.get('aspect_ratio'):
+        w,h=map(int,expected['aspect_ratio'].split(':'))
+        if abs(stream['width']/stream['height']-w/h)>0.07:raise ValueError('Original output aspect differs from the request; review without regeneration')
+    asset.update(technical_verification=evidence,verified_at=time.time())
+    engine.store.put('asset',asset['id'],asset)
     return {'completed':True,'status':'completed','asset_id':asset['id'],'quoted_credits':j.get('credits')}
 
 def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_credits,request_id,first_frame_id='',last_frame_id='',reference_asset_ids=None,project_id=''):
@@ -91,11 +105,12 @@ def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_
             if any(old[k]!=v for k,v in body.items()) or (project_id and old.get('project_id')!=project_id):raise ValueError('Request ID belongs to a different clip or project')
             return {k:v for k,v in old.items() if k!='worker'}
         if a['status']!='workspace_ready':raise ValueError('Verify this Flow workspace before generation')
-        for row in db.execute("SELECT body FROM records WHERE kind IN ('job','image-job','video-job')"):
-            if json.loads(row[0])['status'] in ('submitting','processing','unknown'):raise ValueError('Finish or reconcile active browser work first')
+        from .flow_controller import assert_idle
+        assert_idle(db,a if 'id' in a else {**a,'id':account_id})
         job={**body,'project_id':project_id,'id':ident,'input_sha256':engine.store.digest(json.dumps(body,sort_keys=True)),'flow_project_url':a.get('project_url'),'status':'submitting','created_at':time.time(),'asset_ids':[]}
         engine.store.write(db,'video-job',ident,job)
     try:job.update(status='processing',worker=submit(engine,account_id,prompt,opts,first_frame_id,last_frame_id,reference_asset_ids,submission_id=ident))
+    except NotSubmitted as e:job.update(status='blocked',error=str(e))
     except ValueError as e:job.update(status='unknown',error=str(e))
     engine.store.put('video-job',ident,job)
     return {k:v for k,v in job.items() if k!='worker'}
@@ -126,7 +141,7 @@ def reconcile(engine,job_id):
     try:
         _,original=locate(engine,job)
     except ValueError as error:return {**{k:v for k,v in job.items() if k!='worker'},'reconciliation':str(error),'safe_to_resubmit':False}
-    job.update(worker={'backend_job_ids':[original['id']]},backend_project=original.get('project'),status='processing');engine.store.put(kind,job_id,job)
+    job.update(worker={**job.get('worker',{}),'backend_job_ids':[original['id']]},backend_project=original.get('project'),status='processing');engine.store.put(kind,job_id,job)
     return check(engine,job_id) if kind=='video-job' else engine.video_poll(job_id)
 
 

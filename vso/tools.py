@@ -131,7 +131,7 @@ def registry(engine):
     def account_info(account_id): return engine.accounts.info(account_id)
     def guide():
         from pathlib import Path
-        return {"instructions": (Path(__file__).parent.parent / "skills/vegas-social-master/SKILL.md").read_text()}
+        return {"instructions": (Path(__file__).parent.parent / "skills/vegas-social-master/SKILL.md").read_text(), "flow_engine": (Path(__file__).parent.parent / "docs/FLOW-CONTROLLER.md").read_text()}
     def cloud_sync():
         from .cloud import sync
         return sync(engine)
@@ -308,10 +308,23 @@ def registry(engine):
         return engagement_triage(comments)
     def studio_queue():
         return s.all("creative-brief")
+    def flow_batch_submit(project_id,scenes,account_ids,max_credits,request_id):
+        from .flow_controller import submit
+        return submit(engine,project_id,scenes,account_ids,max_credits,request_id)
+    def flow_production_submit(plan_id,account_ids,options,max_credits,request_id):
+        from .flow_controller import production_submit
+        return production_submit(engine,plan_id,account_ids,options,max_credits,request_id)
+    def flow_engine_status():
+        from .flow_controller import status
+        return status(engine)
+    def flow_batch_status(batch_id):return s.get('flow-batch',batch_id)
+    def flow_batch_cancel(batch_id):
+        from .flow_controller import cancel
+        return cancel(engine,batch_id)
     def workflow_audit():
         from .audit import status
         return status(engine)
-    methods = {f.__name__: f for f in (template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, meta_mcp_setup, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
+    methods = {f.__name__: f for f in (flow_batch_submit,flow_production_submit,flow_engine_status,flow_batch_status,flow_batch_cancel,template_catalog,template_compile,template_select,skill_reference,higgsfield_status,higgsfield_discover,control_snapshot,control_refresh_accounts,project_create,project_rename,project_attach_asset,project_list,project_detail,activity_report,studio_external_catalog,studio_copycheck,studio_caption_review,studio_carousel_outline,studio_story_sequence,studio_engagement_triage,studio_catalog,studio_quality,studio_brief,studio_draft,studio_select,studio_outliers,studio_repurpose,studio_profile_audit,studio_queue,analytics_capture,analytics_summary,channel_settings_save,production_status,video_edit,edit_status,admin_inventory,admin_metrics,admin_request,admin_execute,admin_request_status,admin_job_status,admin_job_cancel,event_status,media_ingest,media_ingest_status,media_transfer_prepare,media_transfer_status,media_preview,media_probe,get_profile,storyboard_regenerate, review_queue, review_complete, meta_mcp_setup, account_start, account_list, account_disconnect, channel_list, continuity_frame, flow_model_catalog, flow_models_refresh, flow_video_request, flow_video_poll,flow_job_reconcile,flow_job_cancel, strategy_save, content_request, content_plan_save, content_plan_approve, content_queue, reel_review, workflow_audit,
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, instagram_delete_prepare, instagram_delete_approve, instagram_delete_execute, instagram_delete_status, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
@@ -324,6 +337,12 @@ def registry(engine):
 
 
 DESCRIPTIONS = {
+    'flow_batch_submit':'Queue 1–12 explicitly authorized video scenes with exact references/settings, permitted accounts and total credit ceiling. VPS selects accounts, uploads, polls and downloads without host calls. Never resubmits unknown jobs.',
+    'flow_production_submit':'Queue every scene of an already approved storyboard once under authorized account and credit caps. VPS retrieves verified clips and starts local assembly for review; never publishes.',
+    'flow_engine_status':'Read durable controller heartbeat, account health, queued batches and waiting reasons. No provider writes.',
+    'flow_batch_status':'Read the exact existing scene batch, assigned accounts, original job IDs, outputs and failures.',
+    'flow_batch_cancel':'Cancel only undispatched scenes. Already submitted provider work is retained and reconciled, never falsely reported cancelled.',
+
     'template_catalog':'Discover shared cinematic templates, visual examples, controls, source skills and saved project selections. No spend.',
     'template_compile':'Compile a selected recipe into separate image/video scene prompts with explicit continuity locks. Does not generate.',
     'template_select':'Persist the exact template, settings and prompts on an existing project for ChatGPT to consume. Never spends or publishes.',
@@ -445,7 +464,7 @@ DESCRIPTIONS = {
 
 def schema(fn):
     properties, required = {}, []
-    types = {"retained_seconds":"integer", "size": "integer", "duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "variants":"array", "observations":"array", "references":"array", "fields":"object", "budget_credits":"integer", "variant_index":"integer", "target_clips":"integer", "points":"array", "frames":"array", "comments":"array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "arguments": "object", "settings":"object", "subtitles":"array", "width":"integer", "height":"integer", "fps":"integer", "fade_seconds":"number", "music_volume":"number", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
+    types = {"retained_seconds":"integer", "size": "integer", "scenes":"array", "duration": "integer", "target_seconds": "integer", "words_per_minute": "integer", "pillars": "array", "items": "array", "variants":"array", "observations":"array", "references":"array", "fields":"object", "budget_credits":"integer", "variant_index":"integer", "target_clips":"integer", "points":"array", "frames":"array", "comments":"array", "reference_asset_ids": "array", "scene": "integer", "concept": "integer", "hour": "integer", "max_credits": "integer", "concepts": "array", "account_ids": "array", "channel_ids": "array", "arguments": "object", "settings":"object", "subtitles":"array", "width":"integer", "height":"integer", "fps":"integer", "fade_seconds":"number", "music_volume":"number", "capabilities": "object", "receipt": "object", "options": "object", "asset_ids": "array", "sources": "array"}
     for name, p in inspect.signature(fn).parameters.items():
         item = {"type": types.get(name, "string")}
         if name == "file":item={"type":"object","properties":{k:{"type":"string"} for k in ("download_url","file_id","file_name","mime_type")},"required":["download_url","file_id"],"additionalProperties":False}
@@ -458,7 +477,7 @@ def schema(fn):
                 "required": ["title", "hook", "script", "scenes"], "additionalProperties": False}
         if name in ("account_ids", "channel_ids", "asset_ids", "sources", "pillars", "reference_asset_ids", "references", "points", "frames", "comments"): item["items"] = {"type": "string"}
         if name == "subtitles":item["items"]={"type":"object","properties":{"start":{"type":"number"},"end":{"type":"number"},"text":{"type":"string"}},"required":["start","end","text"],"additionalProperties":False}
-        if name in ("items", "variants", "observations"): item["items"] = {"type":"object", "additionalProperties":True}
+        if name in ("items", "variants", "observations", "scenes"): item["items"] = {"type":"object", "additionalProperties":True}
         if name in ("arguments", "capabilities", "receipt", "options", "settings", "fields"): item["additionalProperties"] = True
         properties[name] = item
         if p.default is inspect.Parameter.empty: required.append(name)

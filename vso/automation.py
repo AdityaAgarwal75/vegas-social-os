@@ -34,21 +34,28 @@ def complete(engine, brief_id, plan_id):
 
 def tick(engine):
     from .events import tick as event_tick
-    event_tick(engine)
-    briefs = schedule.tick(engine)
+    failures=[]
+    try:event_tick(engine)
+    except Exception:failures.append('events')
+    try:briefs=schedule.tick(engine)
+    except Exception:briefs=[];failures.append('briefs')
     for post in engine.store.all('publication'):
         if post.get('kind') != 'composer': continue
-        if post['status'] == 'scheduled' and post['scheduled_at'] <= time.time():
-            # Long outages must not release a stale campaign without review.
-            with engine.store.db() as db:
-                current = engine._load(db, 'publication', post['id'])
-                if current['status'] != 'scheduled': continue
-                current['status'] = 'missed' if time.time() - current['scheduled_at'] > 3600 else 'approved'
-                engine.store.write(db, 'publication', post['id'], current)
-            if current['status'] == 'approved': publishing.execute(engine, post['id'])
-        elif post['status'] in ('processing', 'children_processing', 'provider_processing'):
-            publishing.poll(engine, post['id'])
-    engine.store.put('runtime', 'scheduler', {'last_tick': time.time(), 'state': 'running'})
+        try:
+            if post['status'] == 'scheduled' and post['scheduled_at'] <= time.time():
+                # Long outages must not release a stale campaign without review.
+                with engine.store.db() as db:
+                    current = engine._load(db, 'publication', post['id'])
+                    if current['status'] != 'scheduled': continue
+                    current['status'] = 'missed' if time.time() - current['scheduled_at'] > 3600 else 'approved'
+                    engine.store.write(db, 'publication', post['id'], current)
+                if current['status'] == 'approved': publishing.execute(engine, post['id'])
+            elif post['status'] in ('processing', 'children_processing', 'provider_processing'):
+                publishing.poll(engine, post['id'])
+        except Exception:
+            failures.append(post['id'])
+            engine.store.put('runtime','publication-check:'+post['id'],{'last_check':time.time(),'state':'error','detail':'Original publication needs reconciliation; no new upload was attempted'})
+    engine.store.put('runtime', 'scheduler', {'last_tick': time.time(), 'state': 'degraded' if failures else 'running','failed_components':failures})
     return briefs
 
 

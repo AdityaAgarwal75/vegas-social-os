@@ -41,7 +41,7 @@ def binding(engine, account_id):
 
 
 def request(config, method, payload=None, *, raw=None, query=None, binary=False):
-    if method not in ('status','generate','wait','upload','media'): raise ValueError('Unsupported local Flow operation')
+    if method not in ('status','generate','wait','upload','media','cancel'): raise ValueError('Unsupported local Flow operation')
     path = ('/media' if method=='media' else '/api/'+method)
     url = 'http://127.0.0.1:' + str(config['port']) + path
     if query: url += '?' + urllib.parse.urlencode(query)
@@ -98,6 +98,7 @@ def inspect(engine, account_id):
              credits=f.get('credits_remaining'),composer=f.get('composer'),verified_at=time.time(),
              project_url=f.get('url'),verification='Read from your existing local Flow service; no browser session copied',
              shared_desktop=bool(config.get('desktop_ws_port')))
+    if ready and not blocked:a.pop('generation_blocked_at',None)
     a.pop('connection_error',None);engine.store.put('account',account_id,a)
     return {'workspace_ready':ready and not blocked,'blocked':blocked,'credits':a['credits'],'composer':a['composer'],
             'project_url':a['project_url'],'signed_in':bool(f.get('signedIn'))}
@@ -148,9 +149,8 @@ def image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, 
         except ValueError as e:
             if str(e)!='image-job not found':raise
         if a['status']!='workspace_ready':raise ValueError('Verify this signed-in Flow project before generation')
-        for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','job','video-job')"):
-            other=json.loads(row[0])
-            if other['status'] in ('submitting','processing','unknown'):raise ValueError('A browser operation is active or unresolved; finish it before another generation')
+        from .flow_controller import assert_idle
+        assert_idle(db,a)
         job={**body,'project_id':project_id,'id':ident,'status':'submitting','created_at':time.time(),'project':'SocialOS-'+ident[:16],'asset_ids':[]}
         engine.store.write(db,'image-job',ident,job)
     try:

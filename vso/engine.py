@@ -252,13 +252,12 @@ class Engine:
                 raise ValueError("Inspect a signed-in Flow workspace before generation")
             if p["status"] not in ("ready", "generating") or not 0 <= scene < len(p["concepts"][p["selected"]]["scenes"]):
                 raise ValueError("Approve keyframes and select a valid scene first")
+            from .flow_controller import assert_idle
+            assert_idle(db,a)
             for row in db.execute("SELECT body FROM records WHERE kind='job'"):
-                other = json.loads(row[0])
-                if other["status"] in ("submitting", "processing", "unknown") or (other["plan_id"] == plan_id and other["scene"] == scene):
-                    raise ValueError("Account is busy or scene already has a job; poll/reconcile it")
-            for row in db.execute("SELECT body FROM records WHERE kind IN ('image-job','video-job')"):
-                if json.loads(row[0])['status'] in ('submitting','processing','unknown'):
-                    raise ValueError('Finish or reconcile active browser work before production')
+                other=json.loads(row[0])
+                if other.get('plan_id')==plan_id and other.get('scene')==scene:
+                    raise ValueError('Scene already has a job; poll/reconcile it')
             if p["reserved"] + max_credits > p["budget"]:
                 raise ValueError("Production credit budget exceeded")
             from .production import enforce
@@ -276,7 +275,8 @@ class Engine:
                                first_frame=str(self.asset_path(p["images"][str(scene)])), first_frame_id=p["images"][str(scene)], options=options, request_id=ident)
             job.update(status="processing", worker=result)
         except ValueError as e:
-            job.update(status="unknown", error=str(e))
+            from .video_service import NotSubmitted
+            job.update(status="blocked" if isinstance(e,NotSubmitted) else "unknown", error=str(e))
         self.store.put("job", ident, job)
         return self.public_job(job)
 
