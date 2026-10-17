@@ -20,7 +20,7 @@ PROVIDERS = {
                   "For people outside app roles, obtain the required Advanced Access/App Review and any required business verification. Business verification alone does not approve permissions."]},
     "facebook": {"prefix": "FACEBOOK", "callbacks": ["facebook"],
         "console": "https://developers.facebook.com/apps/",
-        "permissions": ["pages_show_list", "pages_read_engagement", "instagram_basic", "instagram_manage_contents"],
+        "permissions": ["pages_show_list", "pages_read_engagement", "instagram_basic", "instagram_manage_contents", "instagram_manage_insights"],
         "steps": ["Connect Facebook Pages you can create content for; personal timelines are not publishing destinations.",
                   "Create your Meta app and configure Facebook Login for Business, its approved use case and redirect URI. Set a configuration ID if your app requires it.",
                   "Request only the required Instagram management and Page identity permissions. The connector discovers verified linked Instagram IDs only after your browser consent.",
