@@ -107,6 +107,8 @@ def request(engine,account_id,prompt,model,duration,resolution,aspect_ratio,max_
         if a['status']!='workspace_ready':raise ValueError('Verify this Flow workspace before generation')
         from .flow_controller import assert_idle
         assert_idle(db,a if 'id' in a else {**a,'id':account_id})
+        from .flow_controller import assert_daily_budget
+        assert_daily_budget(db,account_id,opts['max_credits'])
         job={**body,'project_id':project_id,'id':ident,'input_sha256':engine.store.digest(json.dumps(body,sort_keys=True)),'flow_project_url':a.get('project_url'),'status':'submitting','created_at':time.time(),'asset_ids':[]}
         engine.store.write(db,'video-job',ident,job)
     try:job.update(status='processing',worker=submit(engine,account_id,prompt,opts,first_frame_id,last_frame_id,reference_asset_ids,submission_id=ident))
