@@ -10,12 +10,56 @@ import re
 import shutil
 import threading
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from . import flow_service, video_service
 
 ACTIVE = {'submitting', 'processing', 'unknown'}
 KINDS = ('job', 'video-job', 'image-job')
 TERMINAL = {'completed', 'failed', 'stopped', 'blocked', 'cancelled'}
+
+
+def daily_policy_limit():
+    """Owner's conservative per-account daily *spend ceiling*, not a provider credit claim."""
+    raw = os.getenv('VSO_FLOW_DAILY_CREDIT_LIMIT', '50')
+    try: limit = int(raw)
+    except (TypeError, ValueError): raise ValueError('Invalid daily Flow credit policy') from None
+    if not 0 <= limit <= 1000: raise ValueError('Daily credit policy must be 0–1000')
+    return limit
+
+
+def daily_reserved(db, account_id, now=None):
+    """Reserve the full quoted maximum for every submitted/uncertain job this day.
+
+    Never interpret provider cash/bonus/free credit balances as a verified daily
+    grant. A failed/unknown submission remains conservatively counted; provider
+    reconciliation is required before adjusting credit records.
+    """
+    now = time.time() if now is None else now
+    zone = ZoneInfo(os.getenv('VSO_FLOW_DAILY_TIMEZONE', 'Asia/Kolkata'))
+    today = datetime.fromtimestamp(now, zone).date()
+    total = 0
+    for row in db.execute("SELECT body FROM records WHERE kind IN ('job','video-job','image-job')"):
+        job = json.loads(row[0])
+        if job.get('account_id') != account_id or job.get('status') == 'cancelled':
+            continue
+        timestamp = job.get('created_at', 0)
+        if not isinstance(timestamp, (int, float)) or datetime.fromtimestamp(timestamp, zone).date() != today:
+            continue
+        quoted = job.get('max_credits', 0)
+        if type(quoted) is int and quoted > 0: total += quoted
+    return total
+
+
+def assert_daily_budget(db, account_id, max_credits):
+    if type(max_credits) is not int or max_credits < 0:
+        raise ValueError('Invalid credit reservation')
+    limit = daily_policy_limit()
+    reserved = daily_reserved(db, account_id)
+    if reserved + max_credits > limit:
+        raise ValueError('Daily Flow per-account credit ceiling reached; do not spend additional credits')
+    return limit - reserved - max_credits
 
 
 def account_key(account):
@@ -121,7 +165,7 @@ def resources_ok(engine):
     if shutil.disk_usage(engine.store.root).free < 512 * 1024**2: return 'Less than 512 MiB disk free'
     try:
         available = next(int(line.split()[1]) for line in Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemAvailable:'))
-        if available < 512 * 1024: return 'Less than 512 MiB memory available'
+        if available < 1024 * 1024: return 'Less than 1 GiB memory available for Flow generation'
         if os.getloadavg()[0] > (os.cpu_count() or 1) * 2.5: return 'Host load is above the submission limit'
     except (OSError, StopIteration): return 'Host resource observations unavailable'
     return ''
@@ -184,6 +228,7 @@ def _choose(engine, batch, scene):
             validate_observed(engine, ident, scene)
             with engine.store.db() as db:
                 assert_idle(db, a)
+                assert_daily_budget(db, ident, scene['max_credits'])
                 if batch['inputs']['plan_id']:
                     from .production import enforce
                     plan = engine._load(db, 'plan', batch['inputs']['plan_id'])
@@ -191,8 +236,9 @@ def _choose(engine, batch, scene):
         except ValueError: continue
         # Fair normal routing, never used as a retry after a provider refusal.
         last = max((j.get('created_at', 0) for kind in KINDS for j in engine.store.all(kind) if j.get('account_id') == ident), default=0)
-        eligible.append((last, ident))
-    return min(eligible)[1] if eligible else None
+        # Use smaller observed balances first; do not infer free-versus-paid provenance.
+        eligible.append((a['credits'] > daily_policy_limit(), last, ident))
+    return min(eligible)[2] if eligible else None
 
 
 def _advance(engine, batch):
@@ -257,6 +303,22 @@ def tick(engine):
             _note(engine, 'account', account['id'], status='service_unavailable', connection_error='Background Flow inspection failed')
         _note(engine, 'account', account['id'], health_checked_at=time.time())
         break
+    # Keep each owned idle Chrome limited to a Flow project tab (and any active
+    # accounts.google.com sign-in/verification tab). Never touch a busy account.
+    from . import flow_browser_guard
+    inspected = 0
+    for account in sorted(engine.store.all('account'), key=lambda a: a.get('tab_guard_checked_at', 0)):
+        if inspected >= 2: break
+        if account.get('provider') != 'flow' or account.get('service_alias'): continue
+        if time.time() - account.get('tab_guard_checked_at', 0) < 25: continue
+        try:
+            with engine.store.db() as db: assert_idle(db, account)
+            result = flow_browser_guard.cleanup(engine.store.root, account['id'])
+        except (OSError, ValueError, KeyError):
+            continue
+        _note(engine, 'account', account['id'],
+              tab_guard_checked_at=time.time(), last_closed_extra_tabs=result['closed'])
+        inspected += 1
     reason = resources_ok(engine)
     active = sum(j.get('status') in ('submitting', 'processing') for kind in KINDS for j in engine.store.all(kind))
     limit = max(1, min(5, int(os.getenv('VSO_FLOW_MAX_ACTIVE', '1'))))
