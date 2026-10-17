@@ -6,7 +6,7 @@ import uuid
 _REPORT_LOCK=threading.Lock()
 
 ROLES=[('strategist','Strategy','Audience, research and content planning','ST'),('writer','Scripts & hooks','Reel scripts, story arcs and repurposing','WR'),('caption','Captions & copy','Captions, carousels and writing review','CP'),('producer','Production','Scene media, Flow generation and editing','PR'),('publisher','Publishing','Reviewed releases and scheduling','PB'),('operator','Operations','Workspace, connections and infrastructure','OP')]
-SKIP={'template_catalog','higgsfield_status','doctor','guide','get_profile','onboarding_status','account_list','channel_list','plan_list','job_list','publication_list','flow_model_catalog','workflow_audit','connection_setup','control_snapshot','project_list','project_detail','activity_report','event_status','automation_status','review_queue','studio_catalog','studio_queue','analytics_summary','admin_metrics','admin_inventory','project_attach_asset'}
+SKIP={'flow_engine_status','flow_batch_status','template_catalog','higgsfield_status','doctor','guide','get_profile','onboarding_status','account_list','channel_list','plan_list','job_list','publication_list','flow_model_catalog','workflow_audit','connection_setup','control_snapshot','project_list','project_detail','activity_report','event_status','automation_status','review_queue','studio_catalog','studio_queue','analytics_summary','admin_metrics','admin_inventory','project_attach_asset'}
 
 def role_for(name):
     if name in SKIP:return None

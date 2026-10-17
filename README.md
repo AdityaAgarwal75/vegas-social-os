@@ -22,6 +22,10 @@ Your installation includes branded login, Show/Hide password, forgotten-password
 
 **Release status:** a tested self-hosting candidate, not a guarantee of fully unattended production. Provider registration, personal login and real generation/publishing acceptance remain owner-specific.
 
+## Vegas Flow Engine (0.13)
+
+Submit an authorized scene batch once. The VPS selects eligible accounts, transfers references, polls original jobs, imports technically checked clips and assembles approved productions for review. Durable recovery, per-account locks, background health and resource limits replace host-owned polling. See [controller tools, recovery and verification boundaries](docs/FLOW-CONTROLLER.md). Live rendering acceptance remains separate from installation.
+
 ## The product
 
 ChatGPT is your main workstation. Its private plugin connects to your own installation. You discuss strategy and scenes in chat; ChatGPT uses native images and the VPS's Flow browser/execution engine. The dashboard is your control panel: host resources, observed Flow balances, connected identities, actual specialist activity, named video projects and publishing schedules. Images, scene clips and final exports stay under each production. Light and dark themes work on desktop and mobile. Account onboarding and storyboard/release review are built in. Manual generation forms are excluded from normal navigation.

@@ -1,3 +1,16 @@
+# Current engineering checkpoint — 0.13.0 Vegas Flow Engine (17 October 2026)
+
+- Added an installation-owned singleton controller and persistent scene batches. One plugin request freezes prompts, real asset references, allowed accounts and total/per-scene caps. The VPS chooses a healthy eligible account, uploads, submits once, polls original jobs, downloads exact outputs and starts existing local assembly for approved plans. The gateway starts the worker independently of the host conversation.
+- Replaced cross-account admission blocking with transactionally enforced account/service-alias locks. Duplicate records for one browser remain serialized. Ambiguous/expired jobs retain their IDs, conservative reservations and account quarantine. Twenty-minute stale jobs continue original-output recovery without resubmission; other eligible accounts can receive independent scenes. Security/rate-limit refusals require explicit account reinspection after remediation.
+- Added resource-aware dispatch, bounded poll backoff, idle imported-account health checks, queued-only cancellation, typed batch/status tools and a System dashboard panel. Videos must decode with ffprobe/FFmpeg before a completed receipt; new worker receipts also check duration and aspect. Creative review remains separate.
+- Scheduled event/brief/publishing failures are isolated from each other and the Flow worker. Native ChatGPT creative work still requires a supported connected host; publishing still requires exact approval.
+- Regression coverage includes concurrent idempotency, same-browser aliases, crash-before/after-child receipts, caps, unknown quarantine, no account rotation retries, polling backoff, resource-paused recovery, cancellation, approved-plan assembly and scheduler failure isolation. Final verification results and deployment state are recorded below once checks complete.
+- Local verification: **170 Python tests and 5 Node tests pass**, including a synthetic loopback HTTP provider with a real MP4 download and FFmpeg decode. Python/JavaScript/shell syntax and diff checks pass. Local Chromium acceptance could not run: the browser binary is absent and the browser download returned invalid/truncated archives. The existing four CI browser suites include a new engine-panel regression; CI evidence is recorded separately when available. Synthetic transport is not live Google rendering.
+- **Deployment pending.** Existing VPS admin broker requires exact-operation owner authenticator approval for root source deployment. No new provider render has been submitted and no credits authorized by this engineering request. Existing Sheru processing record is retained. Source tests are not proof of successful Google rendering.
+- Tools/recovery/deployment: [FLOW-CONTROLLER.md](FLOW-CONTROLLER.md). No new paid service, credentials or browser profiles are required.
+
+---
+
 # Current checkpoint — reference dashboard correction
 
 - The owner rejected the previous 0.12 visual match. Replaced its wide labelled sidebar and stacked/two-column overview with the supplied reference's narrow icon rail, greeting/search header, four compact summary tiles and six-panel 2–1–1 composition. Added workspace/profile and explicitly labelled observed-balance panels; featured project, queue and actual specialist activity occupy the second row.

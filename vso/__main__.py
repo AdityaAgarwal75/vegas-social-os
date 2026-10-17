@@ -70,10 +70,13 @@ def main():
         print("Vegas Studio listening at " + base + "; data stays outside the repository", file=sys.stderr)
         from .automation import start
         stop = start(engine)
+        from .flow_controller import start as start_flow_controller
+        flow_stop = start_flow_controller(engine)
         try: server.serve_forever()
         except KeyboardInterrupt: pass
         finally:
             stop.set()
+            flow_stop.set()
             server.server_close()
 
 

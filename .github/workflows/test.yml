@@ -66,3 +66,4 @@ jobs:
             /tmp/vso-templates-*.png
             /tmp/vso-publishing-qa.png
             /tmp/vso-landing-qa.png
+            /tmp/vso-flow-engine-qa.png
