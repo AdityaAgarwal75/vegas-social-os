@@ -151,6 +151,8 @@ def image_request(engine, account_id, prompt, model, aspect_ratio, max_credits, 
         if a['status']!='workspace_ready':raise ValueError('Verify this signed-in Flow project before generation')
         from .flow_controller import assert_idle
         assert_idle(db,a)
+        from .flow_controller import assert_daily_budget
+        assert_daily_budget(db,account_id,max_credits)
         job={**body,'project_id':project_id,'id':ident,'status':'submitting','created_at':time.time(),'project':'SocialOS-'+ident[:16],'asset_ids':[]}
         engine.store.write(db,'image-job',ident,job)
     try:
