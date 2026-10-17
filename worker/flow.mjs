@@ -88,7 +88,10 @@ async function launch(root) {
   }
   const log = openSync(join(root, 'chrome.log'), 'a', 0o600);
   const child = spawn(chromePath(), [`--user-data-dir=${join(root, 'profile')}`, '--remote-debugging-address=127.0.0.1',
-    `--remote-debugging-port=${port}`, '--no-first-run', 'https://labs.google/fx/tools/flow'],
+    `--remote-debugging-port=${port}`, '--no-first-run', '--no-default-browser-check',
+    '--disable-extensions', '--disable-component-extensions-with-background-pages',
+    '--disable-background-networking', '--disable-session-crashed-bubble',
+    'https://labs.google/fx/tools/flow'],
     {detached:true, stdio:['ignore', log, log],env:environment});
   child.on('error', () => {}); child.unref();
   const configBody = {port, pid:child.pid};
