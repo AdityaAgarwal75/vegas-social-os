@@ -17,7 +17,8 @@
       "AllowedValues": [
         "t3.medium",
         "t3.large",
-        "m7i-flex.large"
+        "m7i-flex.large",
+        "c7i-flex.large"
       ],
       "Description": "4 GiB for one active browser, 8 GiB recommended for several saved accounts. Not a concurrency guarantee."
     },
@@ -247,7 +248,7 @@
         ],
         "UserData": {
           "Fn::Base64": {
-            "Fn::Sub": "#!/bin/bash\nset -Eeuo pipefail\numask 077\nexport DEBIAN_FRONTEND=noninteractive\napt-get update -qq\napt-get install -y -qq git curl\n# No account secrets or setup tickets are written to cloud-init/console logs.\ninstall -d /opt/vso-source\ngit -C /opt/vso-source init -q\ngit -C /opt/vso-source remote add origin https://github.com/AdityaAgarwal75/vegas-social-os.git\ngit -C /opt/vso-source fetch --depth 1 origin ${SourceCommit}\ngit -C /opt/vso-source checkout --detach FETCH_HEAD\nDOMAIN='${CustomDomain}'\nif [ -z \"$DOMAIN\" ]; then\n DOMAIN=\"social.$(printf '%s' '${PublicAddress}' | tr . -).sslip.io\"\nfi\nbash /opt/vso-source/scripts/bootstrap-ubuntu.sh --domain \"$DOMAIN\"\n# Session Manager Agent is included in Canonical AWS images; fail if not present.\nif systemctl list-unit-files amazon-ssm-agent.service --no-legend | grep -q amazon; then\n systemctl enable --now amazon-ssm-agent\nelse\n systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service\nfi\ninstall -d /var/lib/vegas-social-os\nprintf 'ready\\n' > /var/lib/vegas-social-os/bootstrap-complete\nchown vegas-social:vegas-social /var/lib/vegas-social-os/bootstrap-complete\n"
+            "Fn::Sub": "#!/bin/bash\nset -Eeuo pipefail\numask 022\nexport DEBIAN_FRONTEND=noninteractive\napt-get update -qq\napt-get install -y -qq git curl\n# No account secrets or setup tickets are written to cloud-init/console logs.\ninstall -d /opt/vso-source\ngit -C /opt/vso-source init -q\ngit -C /opt/vso-source remote add origin https://github.com/AdityaAgarwal75/vegas-social-os.git\ngit -C /opt/vso-source fetch --depth 1 origin ${SourceCommit}\ngit -C /opt/vso-source checkout --detach FETCH_HEAD\nDOMAIN='${CustomDomain}'\nif [ -z \"$DOMAIN\" ]; then\n DOMAIN=\"social.$(printf '%s' '${PublicAddress}' | tr . -).sslip.io\"\nfi\nbash /opt/vso-source/scripts/bootstrap-ubuntu.sh --domain \"$DOMAIN\"\n# Session Manager Agent is included in Canonical AWS images; fail if not present.\nif systemctl list-unit-files amazon-ssm-agent.service --no-legend | grep -q amazon; then\n systemctl enable --now amazon-ssm-agent\nelse\n systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service\nfi\ninstall -d /var/lib/vegas-social-os\nprintf 'ready\\n' > /var/lib/vegas-social-os/bootstrap-complete\nchown vegas-social:vegas-social /var/lib/vegas-social-os/bootstrap-complete\n"
           }
         },
         "Tags": [

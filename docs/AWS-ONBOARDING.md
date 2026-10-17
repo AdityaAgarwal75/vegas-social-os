@@ -38,3 +38,9 @@ Bootstrap is pinned to a reviewed commit. For a failed install, inspect the same
 The root volume has `DeleteOnTermination=false` to preserve private accounts/media. **Deleting a stack or terminating the instance leaves a billable root volume**; it is not a backup, and removing the Elastic IP breaks callbacks. Before any deletion/replacement, back up and test restore; get separate destructive authorization. Offboarding includes explicit encrypted-volume cleanup and Elastic IP release only when the owner confirms data is no longer needed. Changing AMI/root disk in CloudFormation may replace an instance: do not use infrastructure replacement as an application update.
 
 Fresh-account AWS creation has not been executed as part of the founder's existing-server update. Treat this template as validated source until a new AWS installation completes the checks above.
+
+## Free Tier account launch restriction
+
+A successful EC2 DryRun checks permission but does not establish account-plan eligibility. On 17 October 2026 the founder account rejected t3.medium at actual launch. Discover `free-tier-eligible=true` instance types and check their memory/architecture; c7i-flex.large was eligible with 4096 MiB and x86_64 in Mumbai. The template supports it without T3 CPU credit settings. Never silently choose a different RAM size or upgrade the account plan.
+
+Cloud-init uses umask 022 for public package repository keys and source files. The installer separately switches to 077 before creating private application state and configuration.

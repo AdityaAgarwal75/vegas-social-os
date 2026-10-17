@@ -1,3 +1,12 @@
+# Fresh AWS onboarding checkpoint — 17 October 2026
+
+- Owner requested deletion first. Previous founder instance was terminated, its root disk used DeleteOnTermination, and its public IP and start/stop schedules were removed after a separately verified private Orbit Drive backup. Existing accounts, projects and credentials were not migrated.
+- Fresh Ubuntu 24.04 x86_64 install from pinned source `250591acf64706af7f1e617adf46edc185e242d2` completed through CloudFormation and cloud-init on a 4 GiB c7i-flex.large with encrypted 30 GiB gp3. EC2 rejected t3.medium under the account's Free Tier plan despite a successful permission DryRun; the template now also accepts the eligible c7i-flex.large. The failed attempt rolled back.
+- Cloud-init uses umask 022 for public prerequisites; the application installer retains private-state umask 077. Internal and HTTPS health report 0.13.0, the private API returns 401, and gateway/admin/Caddy are active. Disposable service-user Chrome and the complete Flow engine started and were inspected, then their processes/profile were removed. No provider login, paid rendering or publishing was performed. The inspection's signed_in hint on the public Flow landing page is not proof of Google authentication; workspace_ready remained false.
+- Template lint, AWS ValidateTemplate, 170 Python tests, 5 Node tests and installer shell syntax pass. Owner pairing, new account login, real authenticated host MCP calls and actual paid production remain separate acceptance steps.
+
+---
+
 # Current engineering checkpoint — 0.13.0 Vegas Flow Engine (17 October 2026)
 
 - Added an installation-owned singleton controller and persistent scene batches. One plugin request freezes prompts, real asset references, allowed accounts and total/per-scene caps. The VPS chooses a healthy eligible account, uploads, submits once, polls original jobs, downloads exact outputs and starts existing local assembly for approved plans. The gateway starts the worker independently of the host conversation.
