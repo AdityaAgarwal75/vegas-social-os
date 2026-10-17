@@ -254,6 +254,8 @@ class Engine:
                 raise ValueError("Approve keyframes and select a valid scene first")
             from .flow_controller import assert_idle
             assert_idle(db,a)
+            from .flow_controller import assert_daily_budget
+            assert_daily_budget(db,account_id,max_credits)
             for row in db.execute("SELECT body FROM records WHERE kind='job'"):
                 other=json.loads(row[0])
                 if other.get('plan_id')==plan_id and other.get('scene')==scene:
