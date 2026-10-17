@@ -43,3 +43,43 @@ Never delete locks/jobs to force a new paid submission. Use `flow_job_reconcile`
 Deploy a reviewed pinned commit with `scripts/deploy-flow-controller.sh COMMIT_SHA HTTPS_ORIGIN`; it stages an isolated release, reuses the existing interpreter, runs offline tests as the service user, switches only the Social OS source symlink, and rolls back if health/controller checks fail. The installer for new instances also starts the controller through the normal serve command. Profiles, vault, private environment, media and provider services are retained. The deployment script needs the existing owner's exact-operation administrator authorization.
 
 Offline tests use fake provider receipts and synthetic media; they do not establish fresh live Google rendering or artistic quality. Real acceptance requires a bounded owner-authorized render and playable downloaded output. Report source checks, deployed runtime, host discovery and generation separately.
+
+
+## Four-account daily credit and low-RAM operating policy
+
+The owner may configure `VSO_FLOW_DAILY_CREDIT_LIMIT=50` (default 50) and
+`VSO_FLOW_DAILY_TIMEZONE=Asia/Kolkata` (default Asia/Kolkata). All three
+generation entry points (approved production, standalone video and standalone
+image) reserve their maximum quoted credits against each account's daily limit.
+Unknown/unreconciled jobs remain conservatively reserved. A new local calendar
+day resets *this spending cap only*; it **does not** imply Google's provider
+balance resets or that 50 free credits have actually been granted. Google Flow
+credits and reset/expiry rules must be read from each live account. The agent
+must never infer a free-credit component from a large combined balance, or
+generate content without approved prompts, assets and an explicit credit cap.
+
+The durable batch controller prefers eligible accounts with low observed
+remaining balances (within the daily ceiling), then least-recently used. This
+is a best-effort use of the owner's permitted allowance, not an automatic
+daily spending instruction, a guarantee that credits are free, or permission
+to circumvent provider restrictions. Any provider verification/refusal stops
+submission. Unused quota is not a reason to create filler content.
+
+The owned-browser guard checks **idle** native profiles at most two per
+controller tick. It retains one Google Flow tab (preferring an existing
+project), temporarily retains Google sign-in/2FA tabs, and closes unrelated
+pages, Chrome welcome/extension tabs and duplicate Flow tabs. It does not
+touch non-Vegas Chrome sessions, provider work in flight, profiles, passwords,
+cookies or browser extensions on other computers. New Vegas-launched Chrome
+sessions disable unnecessary extensions and background features.
+
+`resources_ok` pauses new Flow submissions under 1 GiB available RAM, high
+CPU load or low disk; existing job reconciliation continues. Set
+`VSO_FLOW_MAX_ACTIVE=1` on small VPS installations. A single tab per Chrome
+profile still consumes substantial memory, so **four simultaneously running
+Chrome profiles on a 4-GiB VPS may still overwhelm the host**. Run accounts
+sequentially and close idle browsers before starting additional ones. A future
+browser lifecycle manager must preserve profiles, reconcile original job IDs,
+and retire old attach-only engines before reopening changed CDP ports; killing
+Chrome behind a live worker will cause a reconnection refusal.
+
