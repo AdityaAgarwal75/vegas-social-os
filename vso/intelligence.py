@@ -209,11 +209,27 @@ def _discover(engine, ident, query, limit):
             vid = str(e.get("id") or "")
             if not re.fullmatch(r"[A-Za-z0-9_-]{11}", vid):
                 continue
+            duration = e.get("duration")
+            if not isinstance(duration, (int, float)) or not 0 < duration <= 180:
+                continue
             views = e.get("view_count")
+            uploaded = str(e.get("upload_date") or "")
+            age_days = None
+            if re.fullmatch(r"[0-9]{8}", uploaded):
+                from datetime import datetime, timezone
+                try:
+                    age_days = max(1, (datetime.now(timezone.utc).date() -
+                                       datetime.strptime(uploaded, "%Y%m%d").date()).days)
+                except ValueError:
+                    pass
             rows.append({"url": "https://www.youtube.com/watch?v=" + vid,
                          "title": str(e.get("title") or "")[:180],
                          "creator": str(e.get("channel") or e.get("uploader") or "")[:120],
+                         "duration_seconds": round(duration, 1),
+                         "upload_date": uploaded or None,
                          "views": views if type(views) is int else None,
+                         "views_per_day": round(views / age_days, 1)
+                             if type(views) is int and age_days else None,
                          "views_verified": False,
                          "candidate_only": True})
         _update(engine, ident, status="completed", stage="candidates_ready",
