@@ -227,6 +227,21 @@ def registry(engine):
     def brief_complete(brief_id, plan_id):
         from .automation import complete
         return complete(engine, brief_id, plan_id)
+    def intelligence_analyze(url,request_id):
+        from .intelligence import analyze
+        return analyze(engine,url,request_id)
+    def intelligence_discover(query,request_id,limit=10):
+        from .intelligence import discover
+        return discover(engine,query,request_id,limit)
+    def intelligence_analyze_owned_reel(account_id,media_id,request_id):
+        from .intelligence_owned import analyze_owned
+        return analyze_owned(engine,account_id,media_id,request_id)
+    def intelligence_instagram_performance(account_id,limit=100):
+        from .intelligence_owned import performance
+        return performance(engine,account_id,limit)
+    def intelligence_status(job_id):
+        from .intelligence import status
+        return status(engine,job_id)
     def research_fetch(url):
         from .research import fetch
         return fetch(engine, url)
@@ -334,7 +349,7 @@ def registry(engine):
               plan_list, job_list, publication_list, account_info, guide, cloud_sync, schedule_daily, morning_queue,
               setup_plan, onboarding_status, profile_save, setup_receipt_save, asset_archive_drive, drive_archive_reconcile,
               flow_account_add, flow_services_sync, flow_image_request, flow_image_poll, connection_setup, instagram_delete_prepare, instagram_delete_approve, instagram_delete_execute, instagram_delete_status, post_prepare, post_execute, post_poll, post_schedule, post_reconcile, post_resume, post_cancel, post_retry_thumbnail,
-              automation_status, automation_pause, brief_complete, research_fetch, research_save)}
+              automation_status, automation_pause, brief_complete, research_fetch, research_save, intelligence_analyze, intelligence_discover, intelligence_status, intelligence_analyze_owned_reel, intelligence_instagram_performance)}
     for name in ("doctor", "channel_save", "plan_save", "concept_select", "image_tasks", "asset_import", "image_attach",
                  "images_approve", "flow_login", "flow_inspect", "video_request", "video_poll", "video_assemble",
                  "video_attach", "publish_prepare", "publish_approve", "publish_execute", "publish_poll"):
@@ -371,6 +386,11 @@ DESCRIPTIONS = {
     "studio_brief": "Create an idempotent, evidence-aware cross-platform production brief, cap allowed credits, and queue host drafting without generation or publishing.",
     "studio_draft": "Store two host-written concepts with exact image/video scene instructions and honest research provenance for owner review.",
     "studio_select": "Record a creative selection; does not approve native image handoff, paid Flow calls or posting.",
+    "intelligence_analyze_owned_reel": "Analyze an owner-verified Instagram Reel through the official linked Facebook Page Meta media URL; no cookies or third-party scraping, no posting.",
+    "intelligence_instagram_performance": "Fetch observed Reel views from a verified owner Instagram Page and rank against the actual sampled account median, with honest evidence limitations.",
+    "intelligence_analyze": "Queue a bounded, public YouTube/Instagram video reference (<=180 seconds) for private frame extraction. No cookies, posting, account work or Flow credits. Works only if the provider permits download.",
+    "intelligence_discover": "Queue public YouTube niche candidate discovery (yt-dlp search). Results are not verified viral outliers and require follow-up metrics.",
+    "intelligence_status": "Read the exact research job, scene-cut timestamps and contact-sheet asset ID, or honest provider error. A visual host review is still required.",
     "studio_outliers": "Rank user-supplied observed competitor posts by relative views, explicitly unverified; no scraping, no fabricated metrics.",
     "studio_repurpose": "Divide a supplied, rights-cleared transcript into rough segments for subsequent host review; no timestamps inferred.",
     "studio_profile_audit": "Audit provided Instagram or creator profile field completeness with no account access and no reach claims.",
