@@ -9,6 +9,24 @@ Read [ChatGPT workstation](references/chatgpt-workstation.md) for setup, daily p
 
 Treat every installation as its owner's independent system. Never assume maintainer accounts, credentials, infrastructure or references exist. Call `doctor`, `account_list` and `guide` first. State actual capability and verification level. This is an alpha, not an official Google/Meta/OpenAI product.
 
+## Reference video intelligence (optional, bounded)
+
+For requests to study viral YouTube Shorts or Instagram Reels, read
+[video intelligence](../../docs/VIDEO-INTELLIGENCE.md) before claiming
+research. Start with `intelligence_discover` for YouTube candidates and
+`intelligence_analyze` for an explicitly supplied, permitted link; poll
+`intelligence_status`. Use `media_preview` on the returned contact sheet
+and *actually inspect* visible images. Scene cut times are technical
+estimates, not model understanding. Never claim video inspection when the
+source download failed, never try to bypass bot checks with stored browser
+cookies, and never call relevance-ranked search results verified viral
+outliers. For the owner's Instagram account prefer the official linked-Page
+`instagram_media_list` / `instagram_media_insights` where installed and
+eligible. Use `studio_outliers` with measured views and creator baselines.
+Extract transferable structural lessons, but create distinctly original
+visuals, dialogue, character designs and footage. Do not trigger Flow spend
+or publishing from a research result.
+
 ## Cinematic templates and bundled Higgsfield craft
 
 Read [template workflow](references/templates.md) for cinematic direction, camera/lens/lighting choices, Higgsfield capabilities, or any dashboard-selected look. Call `template_catalog` before creating scene prompts. Read its saved `selections` for the current project; carry the chosen recipe/settings and continuity into the two concepts. Never ignore the owner's selected look. Use `template_compile` for an individual scene, then pass its `scene` into `plan_save` (or use its image/video prompts in `studio_draft`). Template selection is creative direction, never image approval, spend consent or a publishing instruction.
