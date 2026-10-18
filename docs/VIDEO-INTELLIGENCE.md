@@ -83,6 +83,20 @@ character designs and shots. Every claim about a reference needs evidence.
    historic median. Evaluate retention and shares only when actually
    returned by the provider. Maintain a log of hypotheses and results.
 
+## Actual initial test evidence (18 October 2026)
+
+- Five local unit tests passed, including extraction of a synthetic
+  FFmpeg clip into an actual JPEG contact sheet.
+- Anonymous VPS YouTube search returned candidate IDs, reported views and
+  durations. Long films appeared in initial results, so the extractor
+  now filters durations over 180 seconds.
+- A live YouTube Shorts metadata request returned **“Sign in to confirm
+  you're not a bot.”** End-to-end public link downloading and visual
+  review are **not verified**. No browser cookies were imported.
+- Instagram link downloading, official Instagram Insights from a live
+  service instance, and posting automation have not been tested by this
+  module. The module has not been deployed into production.
+
 ## Release gates
 
 MVP: video link validation, short-form provider metadata, local contact
