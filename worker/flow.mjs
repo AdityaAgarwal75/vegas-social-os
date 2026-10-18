@@ -78,7 +78,7 @@ export function checkBrowserCapacity(availableKiB, oneMinuteLoad, cpuCount) {
 function checkHostBeforeChrome() {
   if (process.platform !== 'linux' || process.env.VSO_REMOTE_BROWSER !== '1') return;
   const meminfo = readFileSync('/proc/meminfo', 'utf8');
-  const matched = meminfo.match(/^MemAvailable:\\s+(\\d+) kB/m);
+  const matched = meminfo.match(/^MemAvailable:\s+(\d+) kB/m);
   checkBrowserCapacity(matched ? Number(matched[1]) : NaN, loadavg()[0], availableParallelism());
 }
 
