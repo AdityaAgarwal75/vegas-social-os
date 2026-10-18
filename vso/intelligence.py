@@ -14,7 +14,6 @@ import threading
 import time
 from urllib.parse import urlsplit
 
-from . import media
 
 _ALLOWED = {"youtube.com", "www.youtube.com", "m.youtube.com",
             "youtu.be", "www.youtu.be", "instagram.com", "www.instagram.com"}
@@ -151,6 +150,10 @@ def _analyze(engine, ident, url):
         _update(engine, ident, status="failed", stage="failed",
                 error=str(exc)[:220])
     finally:
+        # Reference files are temporary: do not accumulate copyrighted
+        # source footage or failed partial downloads on owner VPS disks.
+        shutil.rmtree(engine.store.root / "intelligence" / ident,
+                      ignore_errors=True)
         _ACTIVE.release()
 
 
