@@ -14,6 +14,16 @@ cookies. It is **not enabled by default** on existing installations.
   YouTube/Instagram Reel URL of known duration <=180s. Metadata, private
   downloaded media (<=100 MiB), one 4x4 contact sheet sampled every
   3 seconds and estimated FFmpeg scene-cut timestamps are produced locally.
+- `intelligence_instagram_performance(account_id, limit=100)`: rank
+  **owned** Instagram Reels by Meta-observed views relative to the
+  median of sampled Reels. Requires a linked Facebook Page with
+  `instagram_manage_insights` and a live Page-to-Instagram match.
+- `intelligence_analyze_owned_reel(account_id, media_id, request_id)`:
+  download the owner's exact verified Instagram Reel using its
+  temporary Meta Graph `media_url` (no browser cookies), after
+  provider owner-scoped confirmation. The CDN must be a supported
+  public `*.cdninstagram.com` or `*.fbcdn.net` host. Temporary video
+  bytes are deleted when frame extraction completes or fails.
 - `intelligence_status(job_id)`: poll an existing job. On success,
   `contact_sheet_asset_id` can be given to `media_preview` for a private
   preview. The agent must **actually view the sheet** and, if necessary,
@@ -93,9 +103,17 @@ character designs and shots. Every claim about a reference needs evidence.
 - A live YouTube Shorts metadata request returned **“Sign in to confirm
   you're not a bot.”** End-to-end public link downloading and visual
   review are **not verified**. No browser cookies were imported.
-- Instagram link downloading, official Instagram Insights from a live
-  service instance, and posting automation have not been tested by this
-  module. The module has not been deployed into production.
+- On the user's live owner-authorized Meta connection (18 October):
+  read 16 existing Untamed Plot Reels, verified median views of 5,102,
+  leading Reel 158,733 views, plus official reach/saved/shares/watch-time
+  on two leading Reels. Confirmed that the owner Reel has a `media_url`
+  on the official Meta Graph API, and its CDN supports HTTP 206,
+  `video/mp4` and real MP4 file bytes.
+- The separate owner-authorized video-ingest adapter must still pass a
+  full MP4 download and FFmpeg extraction in an isolated acceptance test.
+  Instagram competitor discovery, transcription and YouTube anonymous
+  downloads are not proven by this Meta owner-scoped functionality.
+- The module has not been deployed into production.
 
 ## Release gates
 
